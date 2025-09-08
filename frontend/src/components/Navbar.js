@@ -70,6 +70,16 @@ function Navbar() {
               >
                 업체 정보
               </Link>
+              <Link
+                to="/data-storage"
+                className={`px-3 py-2 rounded-md text-sm font-medium ${
+                  isActive('/data-storage') 
+                    ? 'bg-blue-700 text-white' 
+                    : 'text-blue-100 hover:bg-blue-500 hover:text-white'
+                }`}
+              >
+                💾 데이터 관리
+              </Link>
             </div>
           </div>
         </div>

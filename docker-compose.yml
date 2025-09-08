@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   # 건설 관리 시스템 웹 애플리케이션
   construction-app:
@@ -6,7 +8,7 @@ services:
     ports:
       - "3000:80"  # 호스트의 3000 포트를 컨테이너의 80 포트와 연결
     volumes:
-      - backend_data:/app/data  # 백엔드 데이터 지속성을 위한 볼륨
+      - app-data:/usr/share/nginx/html/data  # 데이터 지속성을 위한 볼륨
     restart: unless-stopped  # 컨테이너 자동 재시작
     environment:
       - NODE_ENV=production
@@ -16,7 +18,7 @@ services:
       - "traefik.http.services.construction-app.loadbalancer.server.port=80"
 
 volumes:
-  backend_data:
+  app-data:
     driver: local
 
 networks:

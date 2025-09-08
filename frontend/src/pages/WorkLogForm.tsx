@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
+import api from '../services/api';
 
 interface WorkLogData {
   project_id: number;
@@ -96,12 +97,24 @@ export default function WorkLogForm() {
     }]);
   };
 
-  const onSubmit = (data: WorkLogData) => {
-    console.log('Work Log Data:', data);
-    console.log('Work Items:', workItems);
-    console.log('Labor:', laborEntries);
-    console.log('Equipment:', equipmentEntries);
-    console.log('Materials:', materialEntries);
+  const onSubmit = async (data: WorkLogData) => {
+    const fullWorkLogData = {
+      ...data,
+      work_items: workItems,
+      labor_entries: laborEntries,
+      equipment_entries: equipmentEntries,
+      material_entries: materialEntries,
+    };
+
+    try {
+      const response = await api.post('/work_logs/', fullWorkLogData);
+      console.log('Work Log saved successfully:', response.data);
+      alert('작업일지가 성공적으로 저장되었습니다.');
+      // Optionally, reset form or redirect
+    } catch (error) {
+      console.error('Error saving work log:', error);
+      alert('작업일지 저장 중 오류가 발생했습니다.');
+    }
   };
 
   return (

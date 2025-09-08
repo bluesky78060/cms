@@ -19,4 +19,7 @@ class WorkLog(Base):
     
     # Relationships
     project = relationship("Project", back_populates="work_logs")
-    work_items = relationship("WorkItem", back_populates="work_log")
+    work_items = relationship("WorkItem", back_populates="work_log", cascade="all, delete-orphan")
+    labor_entries = relationship("LaborEntry", secondary="work_items", primaryjoin="WorkLog.work_id == WorkItem.work_id", secondaryjoin="WorkItem.item_id == LaborEntry.item_id", viewonly=True)
+    equipment_entries = relationship("EquipmentEntry", secondary="work_items", primaryjoin="WorkLog.work_id == WorkItem.work_id", secondaryjoin="WorkItem.item_id == EquipmentEntry.item_id", viewonly=True)
+    material_entries = relationship("MaterialEntry", secondary="work_items", primaryjoin="WorkLog.work_id == WorkItem.work_id", secondaryjoin="WorkItem.item_id == MaterialEntry.item_id", viewonly=True)

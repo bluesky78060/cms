@@ -14,7 +14,9 @@
       "Bash(curl:*)",
       "Bash(mkdir:*)",
       "Read(//Users/leechanhee/construction-management-system/**)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(zip:*)",
+      "WebSearch"
     ],
     "deny": [],
     "ask": []

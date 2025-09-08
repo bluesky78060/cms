@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # 건설 관리 시스템 웹 애플리케이션
   construction-app:

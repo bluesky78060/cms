@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(touch:*)",
+      "Bash(npm start)",
+      "Bash(npm install:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(npx:*)",
+      "Bash(sed:*)",
+      "Read(//Users/leechanhee/Dropbox/Mac/Downloads/**)",
+      "Bash(grep:*)",
+      "Bash(curl:*)",
+      "Bash(mkdir:*)",
+      "Read(//Users/leechanhee/construction-management-system/**)",
+      "Bash(find:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -9,6 +9,7 @@ import Clients from './components/Clients';
 import WorkItems from './components/WorkItems';
 import CompanyInfo from './components/CompanyInfo';
 import DataStorage from './components/DataStorage';
+import Estimates from './components/Estimates';
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
               <Route path="/clients" element={<Clients />} />
               <Route path="/work-items" element={<WorkItems />} />
               <Route path="/company-info" element={<CompanyInfo />} />
+              <Route path="/estimates" element={<Estimates />} />
               <Route path="/data-storage" element={<DataStorage />} />
             </Routes>
           </main>

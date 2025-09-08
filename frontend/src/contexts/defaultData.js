@@ -123,3 +123,74 @@ export const DEFAULT_INVOICES = [
     notes: '공사 진행 상황 양호'
   }
 ];
+
+export const DEFAULT_ESTIMATES = [
+  {
+    id: 1,
+    clientId: 1,
+    clientName: '김철수',
+    projectName: '신축 주택',
+    date: '2024-09-01',
+    validUntil: '2024-10-01',
+    status: 'draft', // draft, sent, approved, rejected, expired
+    items: [
+      {
+        category: '기초공사',
+        description: '기초 굴착 및 철근 배근',
+        quantity: 20,
+        unit: 'M²',
+        unitPrice: 150000,
+        totalPrice: 3000000,
+        notes: '기초 깊이 1.2m로 시공'
+      },
+      {
+        category: '골조공사',
+        description: '1층 슬라브 타설',
+        quantity: 50,
+        unit: 'M²',
+        unitPrice: 200000,
+        totalPrice: 10000000,
+        notes: '콘크리트 강도 24MPa 사용'
+      }
+    ],
+    subtotal: 13000000,
+    tax: 1300000,
+    total: 14300000,
+    notes: '견적 유효기간 내 승인 필요',
+    terms: '착수금 30%, 중도금 40%, 잔금 30%'
+  },
+  {
+    id: 2,
+    clientId: 2,
+    clientName: '박영희',
+    projectName: '아파트 리모델링',
+    date: '2024-09-02',
+    validUntil: '2024-10-02',
+    status: 'sent',
+    items: [
+      {
+        category: '철거공사',
+        description: '기존 벽체 철거',
+        quantity: 15,
+        unit: 'M²',
+        unitPrice: 80000,
+        totalPrice: 1200000,
+        notes: '폐기물 처리 포함'
+      },
+      {
+        category: '마감공사',
+        description: '바닥재 시공',
+        quantity: 30,
+        unit: 'M²',
+        unitPrice: 120000,
+        totalPrice: 3600000,
+        notes: '친환경 마감재 사용'
+      }
+    ],
+    subtotal: 4800000,
+    tax: 480000,
+    total: 5280000,
+    notes: '리모델링 전문 시공',
+    terms: '착수금 50%, 잔금 50%'
+  }
+];

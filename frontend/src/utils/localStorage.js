@@ -4,7 +4,8 @@ const STORAGE_KEYS = {
   COMPANY_INFO: 'construction_company_info',
   CLIENTS: 'construction_clients',
   WORK_ITEMS: 'construction_work_items',
-  INVOICES: 'construction_invoices'
+  INVOICES: 'construction_invoices',
+  ESTIMATES: 'construction_estimates'
 };
 
 // localStorage에서 데이터 가져오기

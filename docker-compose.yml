@@ -6,7 +6,7 @@ services:
     ports:
       - "3000:80"  # 호스트의 3000 포트를 컨테이너의 80 포트와 연결
     volumes:
-      - app-data:/usr/share/nginx/html/data  # 데이터 지속성을 위한 볼륨
+      - backend_data:/app/data  # 백엔드 데이터 지속성을 위한 볼륨
     restart: unless-stopped  # 컨테이너 자동 재시작
     environment:
       - NODE_ENV=production
@@ -16,7 +16,7 @@ services:
       - "traefik.http.services.construction-app.loadbalancer.server.port=80"
 
 volumes:
-  app-data:
+  backend_data:
     driver: local
 
 networks:

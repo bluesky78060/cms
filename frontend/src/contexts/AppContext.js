@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { getStorageData, setStorageData } from '../utils/localStorage';
-import { DEFAULT_COMPANY_INFO, DEFAULT_CLIENTS, DEFAULT_WORK_ITEMS, DEFAULT_INVOICES } from './defaultData';
+import { DEFAULT_COMPANY_INFO, DEFAULT_CLIENTS, DEFAULT_WORK_ITEMS, DEFAULT_INVOICES, DEFAULT_ESTIMATES } from './defaultData';
 
 // Context 생성
 const AppContext = createContext();
@@ -32,6 +32,10 @@ export const AppProvider = ({ children }) => {
   const [invoices, setInvoicesState] = useState(
     getStorageData('INVOICES', DEFAULT_INVOICES)
   );
+  
+  const [estimates, setEstimatesState] = useState(
+    getStorageData('ESTIMATES', DEFAULT_ESTIMATES)
+  );
 
   // localStorage에 자동 저장하는 래퍼 함수들
   const setCompanyInfo = (newCompanyInfo) => {
@@ -54,12 +58,18 @@ export const AppProvider = ({ children }) => {
     setStorageData('INVOICES', newInvoices);
   };
 
+  const setEstimates = (newEstimates) => {
+    setEstimatesState(newEstimates);
+    setStorageData('ESTIMATES', newEstimates);
+  };
+
   // 데이터 초기화 함수
   const resetAllData = () => {
     setCompanyInfo(DEFAULT_COMPANY_INFO);
     setClients(DEFAULT_CLIENTS);
     setWorkItems(DEFAULT_WORK_ITEMS);
     setInvoices(DEFAULT_INVOICES);
+    setEstimates(DEFAULT_ESTIMATES);
   };
 
   // 클라이언트 관련 함수들
@@ -139,6 +149,65 @@ export const AppProvider = ({ children }) => {
     setInvoices(updatedInvoices);
   };
 
+  // 견적서 관련 함수들
+  const addEstimate = (estimate) => {
+    const newEstimate = {
+      ...estimate,
+      id: Math.max(0, ...estimates.map(e => e.id)) + 1,
+    };
+    const updatedEstimates = [...estimates, newEstimate];
+    setEstimates(updatedEstimates);
+  };
+
+  const updateEstimate = (id, updatedEstimate) => {
+    const updatedEstimates = estimates.map(estimate =>
+      estimate.id === id ? { ...estimate, ...updatedEstimate } : estimate
+    );
+    setEstimates(updatedEstimates);
+  };
+
+  const deleteEstimate = (id) => {
+    const updatedEstimates = estimates.filter(estimate => estimate.id !== id);
+    setEstimates(updatedEstimates);
+  };
+
+  // 견적서 → 청구서 변환
+  const convertEstimateToInvoice = (estimateId) => {
+    const estimate = estimates.find(e => e.id === estimateId);
+    if (estimate) {
+      const newInvoice = {
+        id: Math.max(0, ...invoices.map(i => i.id)) + 1,
+        clientId: estimate.clientId,
+        clientName: estimate.clientName,
+        projectName: estimate.projectName,
+        date: new Date().toISOString().split('T')[0],
+        dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        items: estimate.items.map(item => ({
+          description: item.category || item.description,
+          detailedWork: item.description,
+          quantity: item.quantity,
+          unit: item.unit,
+          unitPrice: item.unitPrice,
+          totalPrice: item.totalPrice,
+          notes: item.notes
+        })),
+        subtotal: estimate.subtotal,
+        tax: estimate.tax,
+        total: estimate.total,
+        notes: `견적서 #${estimate.id}에서 변환됨`
+      };
+      
+      const updatedInvoices = [...invoices, newInvoice];
+      setInvoices(updatedInvoices);
+      
+      // 견적서 상태를 'approved'로 변경
+      updateEstimate(estimateId, { status: 'approved' });
+      
+      return newInvoice.id;
+    }
+    return null;
+  };
+
   // Context value
   const contextValue = {
     // 상태
@@ -146,12 +215,14 @@ export const AppProvider = ({ children }) => {
     clients,
     workItems,
     invoices,
+    estimates,
     
     // 상태 업데이트 함수
     setCompanyInfo,
     setClients,
     setWorkItems,
     setInvoices,
+    setEstimates,
     
     // 유틸리티 함수
     resetAllData,
@@ -169,7 +240,13 @@ export const AppProvider = ({ children }) => {
     // 청구서 관련 함수
     addInvoice,
     updateInvoice,
-    deleteInvoice
+    deleteInvoice,
+    
+    // 견적서 관련 함수
+    addEstimate,
+    updateEstimate,
+    deleteEstimate,
+    convertEstimateToInvoice
   };
 
   return (

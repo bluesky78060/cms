@@ -16,7 +16,9 @@
       "Read(//Users/leechanhee/construction-management-system/**)",
       "Bash(find:*)",
       "Bash(zip:*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(git commit:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []

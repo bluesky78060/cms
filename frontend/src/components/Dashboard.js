@@ -1,28 +1,54 @@
 import React from 'react';
+import { useApp } from '../contexts/AppContext';
 
 function Dashboard() {
+  const { clients, workItems, invoices, estimates } = useApp();
+  
+  // 견적서 통계 계산
+  const pendingEstimates = estimates.filter(e => e.status === 'draft' || e.status === 'sent').length;
+  const totalEstimateValue = estimates
+    .filter(e => e.status === 'draft' || e.status === 'sent')
+    .reduce((sum, e) => sum + e.total, 0);
+  
+  // 이번 달 데이터 계산
+  const currentMonth = new Date().toISOString().slice(0, 7);
+  const monthlyInvoices = invoices.filter(i => i.date.startsWith(currentMonth)).length;
+  const monthlyEstimates = estimates.filter(e => e.date.startsWith(currentMonth)).length;
+
   const stats = [
     {
       title: '이번 달 청구서',
-      value: '8',
+      value: monthlyInvoices.toString(),
       color: 'bg-blue-500',
       icon: '📄'
     },
     {
-      title: '미수금',
-      value: '15,000,000원',
+      title: '이번 달 견적서',
+      value: monthlyEstimates.toString(),
+      color: 'bg-indigo-500',
+      icon: '📋'
+    },
+    {
+      title: '대기 중인 견적',
+      value: pendingEstimates.toString(),
       color: 'bg-orange-500',
-      icon: '💰'
+      icon: '⏳'
+    },
+    {
+      title: '견적 총액',
+      value: `${(totalEstimateValue / 10000).toFixed(0)}만원`,
+      color: 'bg-yellow-500',
+      icon: '💎'
     },
     {
       title: '완료된 작업',
-      value: '23',
+      value: workItems.length.toString(),
       color: 'bg-green-500',
       icon: '✅'
     },
     {
       title: '등록된 건축주',
-      value: '12',
+      value: clients.length.toString(),
       color: 'bg-purple-500',
       icon: '👥'
     }

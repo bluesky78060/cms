@@ -71,6 +71,16 @@ function Navbar() {
                 업체 정보
               </Link>
               <Link
+                to="/estimates"
+                className={`px-3 py-2 rounded-md text-sm font-medium ${
+                  isActive('/estimates') 
+                    ? 'bg-blue-700 text-white' 
+                    : 'text-blue-100 hover:bg-blue-500 hover:text-white'
+                }`}
+              >
+                📋 견적서 관리
+              </Link>
+              <Link
                 to="/data-storage"
                 className={`px-3 py-2 rounded-md text-sm font-medium ${
                   isActive('/data-storage') 

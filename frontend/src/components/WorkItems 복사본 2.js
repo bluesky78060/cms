@@ -222,45 +222,38 @@ function WorkItems() {
   };
 
   const handleBulkItemChange = (index, field, value) => {
-     const updatedItems = [...bulkItems];
-   
-     // 'defaultPrice' 또는 'quantity' 필드를 처리하는 부분
-     if (field === 'defaultPrice' || field === 'quantity') {
-       const numbersOnly = String(value).replace(/[^\d]/g,'');
-      
-       // 입력값이 비어있으면 상태도 비워줍니다.
-        if (numbersOnly === '') {
-         updatedItems[index][field] = '';
-        } else {
-          // 숫자가 있다면 숫자로 변환하여 설정합니다.
-          updatedItems[index][field] = parseInt(numbersOnly,10);
-        }
-      } else {
-        // 다른 필드는 값을 그대로 반영합니다.
-        updatedItems[index][field] = value;
-      }
+    const updatedItems = [...bulkItems];
     
-      setBulkItems(updatedItems);
-    };
+    if (field === 'defaultPrice' || field === 'quantity') {
+      // 숫자만 추출하고 포맷팅
+      const numbersOnly = value.replace(/[^\d]/g, '');
+      const numericValue = parseInt(numbersOnly) || (field === 'quantity' ? 1 : 0);
+      updatedItems[index][field] = numericValue;
+    } else {
+      updatedItems[index][field] = value;
+    }
+    
+    setBulkItems(updatedItems);
+  };
 
+  const addBulkItem = () => {
+    setBulkItems(prev => [...prev, {
+      name: '',
+      category: '',
+      defaultPrice: 0,
+      quantity: 1,
+      unit: '',
+      description: '',
+      status: '예정',
+      notes: ''
+    }]);
+  };
 
   const removeBulkItem = (index) => {
     if (bulkItems.length > 1) {
       setBulkItems(prev => prev.filter((_, i) => i !== index));
     }
   };
-const addBulkItem = () => {
-        setBulkItems(prev => [...prev, {
-          name: '',
-          category: '',
-          defaultPrice: 0,
-         quantity: 1,
-          unit: '',
-          description: '',
-          status: '예정',
-          notes: ''
-        }]);
-      };
 
   const handleBulkSubmit = (e) => {
     e.preventDefault();

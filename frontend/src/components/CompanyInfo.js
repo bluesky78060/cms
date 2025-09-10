@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useApp } from '../contexts/AppContext';
 import { checkStorageAvailable, getStorageInfo, imageToBase64, saveStampImage, removeStampImage } from '../utils/imageStorage';
-import { handlePhoneInput } from '../utils/phoneFormatter';
+import { handlePhoneInput } from '../utils/phoneFormatter.js';
 
 function CompanyInfo() {
   const { companyInfo, setCompanyInfo, units, setUnits, categories, setCategories, stampImage, setStampImage } = useApp();

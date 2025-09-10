@@ -1,5 +1,6 @@
 import React from 'react';
 import { useApp } from '../contexts/AppContext';
+import MigrationPanel from './MigrationPanel';
 
 function Dashboard() {
   const { invoices, clients, workItems } = useApp();
@@ -140,6 +141,9 @@ function Dashboard() {
             </table>
           </div>
         </div>
+
+        {/* 마이그레이션 패널 */}
+        <MigrationPanel />
       </div>
     </div>
   );

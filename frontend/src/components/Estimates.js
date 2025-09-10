@@ -20,6 +20,9 @@ function Estimates() {
   const [showModal, setShowModal] = useState(false);
   const [editingEstimate, setEditingEstimate] = useState(null);
   const [printEstimate, setPrintEstimate] = useState(null);
+  const [selectedEstimates, setSelectedEstimates] = useState([]);
+  const [selectAll, setSelectAll] = useState(false);
+  const [showCustomProject, setShowCustomProject] = useState(false);
   
   const [newEstimate, setNewEstimate] = useState({
     clientId: '',
@@ -45,6 +48,29 @@ function Estimates() {
   const categories = ['토목공사', '구조공사', '철거공사', '마감공사', '설비공사', '내부공사', '기타'];
   const statuses = ['검토중', '승인됨', '거부됨', '수정 요청', '작업 전환됨'];
 
+  // 선택된 건축주의 프로젝트 목록 가져오기 (작업장의 프로젝트 정보 포함)
+  const getClientProjects = (clientId) => {
+    if (!clientId) return [];
+    
+    // 기존 견적서에서 프로젝트 가져오기
+    const clientEstimates = estimates.filter(estimate => estimate.clientId === parseInt(clientId));
+    const existingProjects = [...new Set(clientEstimates.map(estimate => estimate.projectName).filter(p => p))];
+    
+    // 건축주의 작업장에서 프로젝트 가져오기
+    const client = clients.find(c => c.id === parseInt(clientId));
+    const workplaceProjects = client?.workplaces?.map(wp => wp.project).filter(p => p) || [];
+    
+    // 두 목록을 합치고 중복 제거
+    const allProjects = [...new Set([...existingProjects, ...workplaceProjects])];
+    return allProjects.sort();
+  };
+
+  // 선택된 건축주의 작업장 목록
+  const getClientWorkplaces = (clientId) => {
+    const client = clients.find(c => c.id === parseInt(clientId));
+    return client?.workplaces || [];
+  };
+
   // Auto-reset printEstimate state to prevent UI issues
   useEffect(() => {
     if (printEstimate) {
@@ -56,12 +82,6 @@ function Estimates() {
       return () => clearTimeout(timer);
     }
   }, [printEstimate]);
-
-  // 선택된 건축주의 작업장 목록
-  const getClientWorkplaces = (clientId) => {
-    const client = clients.find(c => c.id === parseInt(clientId));
-    return client?.workplaces || [];
-  };
 
   // 필터링된 견적서 목록
   const filteredEstimates = estimates.filter(estimate => {
@@ -88,9 +108,21 @@ function Estimates() {
         [name]: newValue
       };
       
-      // 건축주가 변경되면 작업장 선택 초기화
+      // 건축주가 변경되면 작업장 및 프로젝트 선택 초기화
       if (name === 'clientId') {
         updated.workplaceId = '';
+        updated.projectName = '';
+        setShowCustomProject(false);
+      }
+
+      // 프로젝트명이 "custom"이면 커스텀 입력 모드로 변경
+      if (name === 'projectName') {
+        if (value === 'custom') {
+          setShowCustomProject(true);
+          updated.projectName = '';
+        } else {
+          setShowCustomProject(false);
+        }
       }
       
       return updated;
@@ -220,6 +252,45 @@ function Estimates() {
     });
     setEditingEstimate(estimate);
     setShowModal(true);
+  };
+
+  // 체크박스 관련 함수들
+  const handleSelectAll = (checked) => {
+    setSelectAll(checked);
+    if (checked) {
+      setSelectedEstimates(filteredEstimates.map(estimate => estimate.id));
+    } else {
+      setSelectedEstimates([]);
+    }
+  };
+
+  const handleSelectEstimate = (estimateId, checked) => {
+    if (checked) {
+      setSelectedEstimates(prev => [...prev, estimateId]);
+    } else {
+      setSelectedEstimates(prev => prev.filter(id => id !== estimateId));
+      setSelectAll(false);
+    }
+  };
+
+  // 선택된 견적서들 삭제
+  const handleDeleteSelectedEstimates = () => {
+    if (selectedEstimates.length === 0) {
+      alert('삭제할 견적서를 선택해주세요.');
+      return;
+    }
+
+    if (window.confirm(`정말로 선택된 ${selectedEstimates.length}개의 견적서를 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.`)) {
+      try {
+        setEstimates(prev => prev.filter(estimate => !selectedEstimates.includes(estimate.id)));
+        setSelectedEstimates([]);
+        setSelectAll(false);
+        alert(`${selectedEstimates.length}개의 견적서가 성공적으로 삭제되었습니다.`);
+      } catch (error) {
+        console.error('견적서 삭제 오류:', error);
+        alert('견적서 삭제 중 오류가 발생했습니다: ' + error.message);
+      }
+    }
   };
 
   const handleDelete = (id) => {
@@ -409,6 +480,14 @@ function Estimates() {
             <p className="text-gray-600">건축주별 견적서를 관리하고 작업 항목으로 변환하세요</p>
           </div>
           <div className="flex space-x-2">
+            {selectedEstimates.length > 0 && (
+              <button
+                onClick={handleDeleteSelectedEstimates}
+                className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded flex items-center"
+              >
+                🗑️ 선택 항목 삭제 ({selectedEstimates.length})
+              </button>
+            )}
             {/* Excel 관련 버튼들 */}
             <button
               onClick={handleDownloadTemplate}
@@ -554,27 +633,35 @@ function Estimates() {
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <input
+                  type="checkbox"
+                  checked={selectAll}
+                  onChange={(e) => handleSelectAll(e.target.checked)}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+              </th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                 견적서 번호
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                 건축주
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                 프로젝트
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                 작업장
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                 견적 금액
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                 상태
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                 유효기한
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                 작업
               </th>
             </tr>
@@ -583,42 +670,50 @@ function Estimates() {
             {filteredEstimates.map((estimate) => (
               <tr key={estimate.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">{estimate.id}</div>
-                  <div className="text-sm text-gray-500">{estimate.date}</div>
+                  <input
+                    type="checkbox"
+                    checked={selectedEstimates.includes(estimate.id)}
+                    onChange={(e) => handleSelectEstimate(estimate.id, e.target.checked)}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-base font-medium text-gray-900">{estimate.id}</div>
+                  <div className="text-base text-gray-500">{estimate.date}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
                     <div className="h-8 w-8 bg-gray-300 rounded-full flex items-center justify-center">
-                      <span className="text-xs font-medium text-gray-700">
+                      <span className="text-sm font-medium text-gray-700">
                         {estimate.clientName.charAt(0)}
                       </span>
                     </div>
                     <div className="ml-3">
-                      <div className="text-sm font-medium text-gray-900">{estimate.clientName}</div>
+                      <div className="text-base font-medium text-gray-900">{estimate.clientName}</div>
                     </div>
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">{estimate.projectName}</div>
-                  <div className="text-sm text-gray-500">{estimate.title}</div>
+                  <div className="text-base font-medium text-gray-900">{estimate.projectName}</div>
+                  <div className="text-base text-gray-500">{estimate.title}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{estimate.workplaceName}</div>
+                  <div className="text-base text-gray-900">{estimate.workplaceName}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">
+                  <div className="text-base font-medium text-gray-900">
                     {estimate.totalAmount.toLocaleString()}원
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(estimate.status)}`}>
+                  <span className={`px-2 py-1 inline-flex text-sm leading-5 font-semibold rounded-full ${getStatusColor(estimate.status)}`}>
                     {estimate.status}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{estimate.validUntil}</div>
+                  <div className="text-base text-gray-900">{estimate.validUntil}</div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <td className="px-6 py-4 whitespace-nowrap text-base font-medium">
                   <button 
                     onClick={() => handleEdit(estimate)}
                     className="text-blue-600 hover:text-blue-900 mr-2"
@@ -701,14 +796,48 @@ function Estimates() {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700">프로젝트명</label>
-                      <input
-                        type="text"
-                        name="projectName"
-                        value={newEstimate.projectName}
-                        onChange={handleInputChange}
-                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                        required
-                      />
+                      {!showCustomProject ? (
+                        <select
+                          name="projectName"
+                          value={newEstimate.projectName}
+                          onChange={handleInputChange}
+                          className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                          required
+                          disabled={!newEstimate.clientId}
+                        >
+                          <option value="">프로젝트 선택</option>
+                          {newEstimate.clientId && getClientProjects(newEstimate.clientId).map(project => (
+                            <option key={project} value={project}>{project}</option>
+                          ))}
+                          <option value="custom">+ 새 프로젝트 입력</option>
+                        </select>
+                      ) : (
+                        <div className="flex space-x-2">
+                          <input
+                            type="text"
+                            name="projectName"
+                            value={newEstimate.projectName}
+                            onChange={handleInputChange}
+                            placeholder="새 프로젝트명 입력"
+                            className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                            required
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowCustomProject(false);
+                              setNewEstimate(prev => ({ ...prev, projectName: '' }));
+                            }}
+                            className="mt-1 px-2 py-2 text-gray-400 hover:text-gray-600"
+                            title="기존 프로젝트 선택으로 돌아가기"
+                          >
+                            ↩
+                          </button>
+                        </div>
+                      )}
+                      {!newEstimate.clientId && (
+                        <p className="text-xs text-gray-500 mt-1">먼저 건축주를 선택하세요</p>
+                      )}
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700">견적서 제목</label>
@@ -936,10 +1065,10 @@ function Estimates() {
                 <div>
                   <div style={{ border: '2px solid #374151', padding: '20px', borderRadius: '8px', minWidth: '300px' }}>
                     <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '15px', color: '#1f2937', borderBottom: '1px solid #d1d5db', paddingBottom: '8px' }}>발주처 정보</h3>
-                    <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>건축주명:</strong> {printEstimate.clientName}</p>
-                    <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>프로젝트명:</strong> {printEstimate.projectName}</p>
-                    <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>작업장 주소:</strong> {printEstimate.workplaceAddress}</p>
-                    <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>유효기한:</strong> {printEstimate.validUntil}</p>
+                    <p style={{ margin: '8px 0', fontSize: '15px' }}><strong>건축주명:</strong> {printEstimate.clientName}</p>
+                    <p style={{ margin: '8px 0', fontSize: '15px' }}><strong>프로젝트명:</strong> {printEstimate.projectName}</p>
+                    <p style={{ margin: '8px 0', fontSize: '15px' }}><strong>작업장 주소:</strong> {printEstimate.workplaceAddress}</p>
+                    <p style={{ margin: '8px 0', fontSize: '15px' }}><strong>유효기한:</strong> {printEstimate.validUntil}</p>
                   </div>
                 </div>
                 
@@ -947,11 +1076,11 @@ function Estimates() {
                 <div>
                   <div style={{ border: '2px solid #374151', padding: '20px', borderRadius: '8px', minWidth: '300px' }}>
                     <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '15px', color: '#1f2937', borderBottom: '1px solid #d1d5db', paddingBottom: '8px' }}>시공업체 정보</h3>
-                    <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>업체명:</strong> {companyInfo.name}</p>
-                    <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>대표자:</strong> {companyInfo.representative}</p>
-                    <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>연락처:</strong> {companyInfo.phone}</p>
-                    <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>주소:</strong> {companyInfo.address}</p>
-                    {companyInfo.businessNumber && <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>사업자번호:</strong> {companyInfo.businessNumber}</p>}
+                    <p style={{ margin: '8px 0', fontSize: '15px' }}><strong>업체명:</strong> {companyInfo.name}</p>
+                    <p style={{ margin: '8px 0', fontSize: '15px' }}><strong>대표자:</strong> {companyInfo.representative}</p>
+                    <p style={{ margin: '8px 0', fontSize: '15px' }}><strong>연락처:</strong> {companyInfo.phone}</p>
+                    <p style={{ margin: '8px 0', fontSize: '15px' }}><strong>주소:</strong> {companyInfo.address}</p>
+                    {companyInfo.businessNumber && <p style={{ margin: '8px 0', fontSize: '15px' }}><strong>사업자번호:</strong> {companyInfo.businessNumber}</p>}
                   </div>
                 </div>
               </div>
@@ -967,7 +1096,7 @@ function Estimates() {
               <div style={{ marginBottom: '40px' }}>
                 <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '15px', color: '#1f2937', borderBottom: '2px solid #374151', paddingBottom: '8px' }}>세부 견적 내역</h3>
                 <div style={{ border: '2px solid #374151', borderRadius: '8px', overflow: 'hidden' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
                     <thead>
                       <tr style={{ backgroundColor: '#374151', color: 'white' }}>
                         <th style={{ padding: '12px 8px', border: '1px solid #6b7280', textAlign: 'center', fontWeight: 'bold', width: '50px' }}>순번</th>
@@ -995,7 +1124,7 @@ function Estimates() {
                             <div>
                               <strong>{item.name}</strong>
                               {item.description && (
-                                <div style={{ fontSize: '11px', color: '#6b7280', marginTop: '4px', fontStyle: 'italic' }}>
+                                <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px', fontStyle: 'italic' }}>
                                   {item.description}
                                 </div>
                               )}
@@ -1005,7 +1134,7 @@ function Estimates() {
                           <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center' }}>{item.unit}</td>
                           <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'right' }}>{Math.floor(item.unitPrice / 1000).toLocaleString()}</td>
                           <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'right', fontWeight: 'bold' }}>{Math.floor((item.quantity * item.unitPrice) / 1000).toLocaleString()}</td>
-                          <td style={{ padding: '12px 12px', border: '1px solid #e5e7eb', fontSize: '11px', color: '#374151' }}>
+                          <td style={{ padding: '12px 12px', border: '1px solid #e5e7eb', fontSize: '12px', color: '#374151' }}>
                             {item.notes || ''}
                           </td>
                         </tr>
@@ -1027,7 +1156,7 @@ function Estimates() {
                 <div style={{ marginBottom: '30px' }}>
                   <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '15px', color: '#1f2937', borderBottom: '2px solid #374151', paddingBottom: '8px' }}>특이사항 및 조건</h3>
                   <div style={{ border: '1px solid #d1d5db', padding: '16px', borderRadius: '8px', backgroundColor: '#fefce8' }}>
-                    <p style={{ margin: '0', fontSize: '13px', lineHeight: '1.6', whiteSpace: 'pre-line', color: '#374151' }}>{printEstimate.notes}</p>
+                    <p style={{ margin: '0', fontSize: '14px', lineHeight: '1.6', whiteSpace: 'pre-line', color: '#374151' }}>{printEstimate.notes}</p>
                   </div>
                 </div>
               )}

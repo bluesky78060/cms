@@ -56,17 +56,42 @@ function WorkItems() {
 
   const statuses = ['예정', '진행중', '완료', '보류'];
 
-  // 선택된 건축주의 프로젝트 목록 가져오기
+  // 선택된 건축주의 프로젝트 목록 가져오기 (작업장의 프로젝트 정보 포함)
   const getClientProjects = (clientId) => {
     if (!clientId) return [];
+    
+    // 기존 작업 항목에서 프로젝트 가져오기
     const clientWorkItems = workItems.filter(item => item.clientId === parseInt(clientId));
-    const projects = [...new Set(clientWorkItems.map(item => item.projectName).filter(p => p))];
-    return projects;
+    const existingProjects = [...new Set(clientWorkItems.map(item => item.projectName).filter(p => p))];
+    
+    // 건축주의 작업장에서 프로젝트 가져오기
+    const client = clients.find(c => c.id === parseInt(clientId));
+    const workplaceProjects = client?.workplaces?.map(wp => wp.project).filter(p => p) || [];
+    
+    // 두 목록을 합치고 중복 제거
+    const allProjects = [...new Set([...existingProjects, ...workplaceProjects])];
+    return allProjects.sort();
   };
 
-  // 모든 프로젝트 목록 가져오기
+  // 모든 프로젝트 목록 가져오기 (작업장의 프로젝트 정보 포함)
   const getAllProjects = () => {
-    const allProjects = [...new Set(workItems.map(item => item.projectName).filter(p => p))];
+    // 기존 작업 항목에서 프로젝트 가져오기
+    const workItemProjects = [...new Set(workItems.map(item => item.projectName).filter(p => p))];
+    
+    // 모든 건축주의 작업장에서 프로젝트 가져오기
+    const workplaceProjects = [];
+    clients.forEach(client => {
+      if (client.workplaces) {
+        client.workplaces.forEach(wp => {
+          if (wp.project) {
+            workplaceProjects.push(wp.project);
+          }
+        });
+      }
+    });
+    
+    // 두 목록을 합치고 중복 제거
+    const allProjects = [...new Set([...workItemProjects, ...workplaceProjects])];
     return allProjects.sort();
   };
 
@@ -125,9 +150,11 @@ function WorkItems() {
           [name]: newValue
         };
     
-        // 건축주가 변경되면 작업장 선택 초기화
+        // 건축주가 변경되면 작업장 및 프로젝트 선택 초기화
         if (name === 'clientId') {
           updated.workplaceId = '';
+          updated.projectName = '';
+          setShowCustomProject(false);
         }
 
         // 프로젝트명이 "custom"이면 커스텀 입력 모드로 변경
@@ -207,7 +234,8 @@ function WorkItems() {
     }));
     
     if (name === 'clientId') {
-      setBulkBaseInfo(prev => ({ ...prev, workplaceId: '' }));
+      setBulkBaseInfo(prev => ({ ...prev, workplaceId: '', projectName: '' }));
+      setShowBulkCustomProject(false);
     }
 
     // 프로젝트명이 "custom"이면 커스텀 입력 모드로 변경
@@ -729,7 +757,7 @@ const addBulkItem = () => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                 <input
                   type="checkbox"
                   onChange={(e) => handleSelectAll(e.target.checked)}
@@ -738,31 +766,31 @@ const addBulkItem = () => {
                   title="전체 선택"
                 />
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                 건축주
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                 내용
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                 작업장
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                 프로젝트
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                 카테고리
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                 단가/수량
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                 상태
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                 날짜
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                 작업
               </th>
             </tr>
@@ -787,37 +815,37 @@ const addBulkItem = () => {
                       </span>
                     </div>
                     <div className="ml-3">
-                      <div className="text-sm font-medium text-gray-900">{item.clientName}</div>
+                      <div className="text-base font-medium text-gray-900">{item.clientName}</div>
                     </div>
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div>
-                    <div className="text-sm font-medium text-gray-900">{item.name}</div>
-                    <div className="text-sm text-gray-500">{item.description}</div>
+                    <div className="text-base font-medium text-gray-900">{item.name}</div>
+                    <div className="text-base text-gray-500">{item.description}</div>
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{item.workplaceName}</div>
+                  <div className="text-base text-gray-900">{item.workplaceName}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{item.projectName}</div>
+                  <div className="text-base text-gray-900">{item.projectName}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getCategoryColor(item.category)}`}>
+                  <span className={`px-2 py-1 inline-flex text-sm leading-5 font-semibold rounded-full ${getCategoryColor(item.category)}`}>
                     {item.category}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">
+                  <div className="text-base font-medium text-gray-900">
                     {item.defaultPrice.toLocaleString()}원 × {item.quantity || 1}
                   </div>
-                  <div className="text-xs text-gray-500">
+                  <div className="text-sm text-gray-500">
                     = {((item.defaultPrice || 0) * (item.quantity || 1)).toLocaleString()}원 / {item.unit}
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                  <span className={`px-2 py-1 inline-flex text-sm leading-5 font-semibold rounded-full ${
                     item.status === '완료' ? 'bg-green-100 text-green-800' :
                     item.status === '진행중' ? 'bg-blue-100 text-blue-800' :
                     item.status === '보류' ? 'bg-red-100 text-red-800' :
@@ -827,7 +855,7 @@ const addBulkItem = () => {
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{item.date}</div>
+                  <div className="text-base text-gray-900">{item.date}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <button 
@@ -914,9 +942,10 @@ const addBulkItem = () => {
                         onChange={handleInputChange}
                         className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
                         required
+                        disabled={!newItem.clientId}
                       >
                         <option value="">프로젝트 선택</option>
-                        {getAllProjects().map(project => (
+                        {newItem.clientId && getClientProjects(newItem.clientId).map(project => (
                           <option key={project} value={project}>{project}</option>
                         ))}
                         <option value="custom">+ 새 프로젝트 입력</option>
@@ -944,6 +973,9 @@ const addBulkItem = () => {
                           ↩
                         </button>
                       </div>
+                    )}
+                    {!newItem.clientId && (
+                      <p className="text-xs text-gray-500 mt-1">먼저 건축주를 선택하세요</p>
                     )}
                   </div>
                   <div>
@@ -1128,9 +1160,10 @@ const addBulkItem = () => {
                           onChange={handleBulkBaseInfoChange}
                           className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
                           required
+                          disabled={!bulkBaseInfo.clientId}
                         >
                           <option value="">프로젝트 선택</option>
-                          {getAllProjects().map(project => (
+                          {bulkBaseInfo.clientId && getClientProjects(bulkBaseInfo.clientId).map(project => (
                             <option key={project} value={project}>{project}</option>
                           ))}
                           <option value="custom">+ 새 프로젝트 입력</option>
@@ -1158,6 +1191,9 @@ const addBulkItem = () => {
                             ↩
                           </button>
                         </div>
+                      )}
+                      {!bulkBaseInfo.clientId && (
+                        <p className="text-xs text-gray-500 mt-1">먼저 건축주를 선택하세요</p>
                       )}
                     </div>
                   </div>

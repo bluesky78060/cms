@@ -13,6 +13,17 @@ function Invoices() {
     return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
+  // 청구서 상태 변경 함수
+  const handleStatusChange = (invoiceId, newStatus) => {
+    setInvoices(prev => 
+      prev.map(invoice => 
+        invoice.id === invoiceId 
+          ? { ...invoice, status: newStatus }
+          : invoice
+      )
+    );
+  };
+
 
   // 작업 항목 템플릿 데이터 (WorkItems.js와 동일한 데이터)
   const [workItemTemplates] = useState([
@@ -101,6 +112,11 @@ function Invoices() {
   const [showModal, setShowModal] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [printInvoice, setPrintInvoice] = useState(null);
+  const [selectedInvoices, setSelectedInvoices] = useState([]);
+  const [selectAll, setSelectAll] = useState(false);
+  
+  // 상태 옵션 정의
+  const statusOptions = ['발송대기', '발송됨', '미결제', '결제완료'];
   const [newInvoice, setNewInvoice] = useState({
     clientId: '',
     client: '',
@@ -264,6 +280,45 @@ function Invoices() {
     setSelectedInvoice(invoice);
   };
 
+  // 체크박스 관련 함수들
+  const handleSelectAll = (checked) => {
+    setSelectAll(checked);
+    if (checked) {
+      setSelectedInvoices(invoices.map(invoice => invoice.id));
+    } else {
+      setSelectedInvoices([]);
+    }
+  };
+
+  const handleSelectInvoice = (invoiceId, checked) => {
+    if (checked) {
+      setSelectedInvoices(prev => [...prev, invoiceId]);
+    } else {
+      setSelectedInvoices(prev => prev.filter(id => id !== invoiceId));
+      setSelectAll(false);
+    }
+  };
+
+  // 선택된 청구서들 삭제
+  const handleDeleteSelectedInvoices = () => {
+    if (selectedInvoices.length === 0) {
+      alert('삭제할 청구서를 선택해주세요.');
+      return;
+    }
+
+    if (window.confirm(`정말로 선택된 ${selectedInvoices.length}개의 청구서를 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.`)) {
+      try {
+        setInvoices(prev => prev.filter(invoice => !selectedInvoices.includes(invoice.id)));
+        setSelectedInvoices([]);
+        setSelectAll(false);
+        alert(`${selectedInvoices.length}개의 청구서가 성공적으로 삭제되었습니다.`);
+      } catch (error) {
+        console.error('청구서 삭제 오류:', error);
+        alert('청구서 삭제 중 오류가 발생했습니다: ' + error.message);
+      }
+    }
+  };
+
   const handleDeleteInvoice = (invoiceId) => {
     if (window.confirm('Are you sure you want to delete this invoice?')) {
       setInvoices(prev => prev.filter(invoice => invoice.id !== invoiceId));
@@ -321,23 +376,23 @@ function Invoices() {
               }
               
               .header {
-                background: linear-gradient(135deg, #1e40af 0%, #3730a3 100%);
+                background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
                 color: white;
-                padding: 30px;
+                padding: 15px;
                 text-align: center;
               }
               
               .header h1 {
-                font-size: 36px;
+                font-size: 28px;
                 font-weight: 700;
-                margin-bottom: 10px;
-                letter-spacing: 8px;
+                margin-bottom: 5px;
+                letter-spacing: 4px;
               }
               
               .invoice-meta {
                 display: flex;
                 justify-content: space-between;
-                margin-top: 20px;
+                margin-top: 10px;
                 font-size: 14px;
               }
               
@@ -353,7 +408,7 @@ function Invoices() {
                 font-size: 18px;
                 font-weight: 700;
                 color: #1f2937;
-                border-left: 4px solid #3b82f6;
+                border-left: 4px solid #9ca3af;
                 padding-left: 12px;
                 margin-bottom: 20px;
               }
@@ -366,7 +421,7 @@ function Invoices() {
               }
               
               .info-box {
-                background-color: #f8fafc;
+                background-color: #f5f5f5;
                 padding: 20px;
                 border-radius: 12px;
                 border: 1px solid #e2e8f0;
@@ -375,29 +430,29 @@ function Invoices() {
               .info-box h4 {
                 font-size: 16px;
                 font-weight: 600;
-                color: #1e40af;
+                color: #374151;
                 margin-bottom: 15px;
               }
               
               .info-box p {
                 margin: 8px 0;
-                font-size: 14px;
+                font-size: 16px;
               }
               
               .amount-highlight {
-                background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-                padding: 20px;
-                border-radius: 12px;
-                border-left: 4px solid #3b82f6;
+                background: #f3f4f6;
+                padding: 10px;
+                border-radius: 6px;
+                border-left: 3px solid #9ca3af;
                 text-align: center;
-                margin: 30px 0;
+                margin: 20px 0;
               }
               
               .amount-highlight p {
                 margin: 0;
-                font-size: 20px;
+                font-size: 18px;
                 font-weight: 700;
-                color: #1e3a8a;
+                color: #374151;
               }
               
               .work-table {
@@ -414,15 +469,15 @@ function Invoices() {
                 padding: 15px 12px;
                 text-align: center;
                 font-weight: 700;
-                font-size: 12px;
+                font-size: 16px;
                 color: #1f2937;
                 border-bottom: 2px solid #e2e8f0;
               }
               
               .work-table td {
-                padding: 12px;
+                padding: 14px;
                 border-bottom: 1px solid #f1f5f9;
-                font-size: 11px;
+                font-size: 15px;
                 vertical-align: top;
               }
               
@@ -438,7 +493,7 @@ function Invoices() {
               .work-table tfoot td {
                 padding: 15px 12px;
                 border-top: 2px solid #cbd5e1;
-                font-size: 14px;
+                font-size: 18px;
               }
               
               .signature-section {
@@ -616,7 +671,7 @@ function Invoices() {
                   
                   <div class="info-box">
                     <h4>🏗️ 시공업체 정보</h4>
-                    <p style="font-weight: 700; font-size: 16px;">${companyInfo.name}</p>
+                    <p style="font-weight: 700; font-size: 17px;">${companyInfo.name}</p>
                     <p>사업자등록번호: ${companyInfo.businessNumber}</p>
                     <p>대표자: ${companyInfo.representative}</p>
                     <p>주소: ${companyInfo.address}</p>
@@ -650,7 +705,7 @@ function Invoices() {
                           <td style="text-align: center;">${index + 1}</td>
                           <td style="text-align: left;">
                             <strong>${item.name}</strong>
-                            ${item.description ? `<div style="font-size: 10px; color: #6b7280; margin-top: 4px;">${item.description}</div>` : ''}
+                            ${item.description ? `<div style="font-size: 11px; color: #6b7280; margin-top: 4px;">${item.description}</div>` : ''}
                           </td>
                           <td style="text-align: center;">${item.category || '-'}</td>
                           <td style="text-align: center;">${item.quantity}</td>
@@ -772,6 +827,14 @@ function Invoices() {
           <p className="text-gray-600">작업 완료 후 청구서를 생성하고 관리하세요</p>
         </div>
         <div className="flex space-x-2">
+          {selectedInvoices.length > 0 && (
+            <button
+              onClick={handleDeleteSelectedInvoices}
+              className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded flex items-center"
+            >
+              🗑️ 선택 항목 삭제 ({selectedInvoices.length})
+            </button>
+          )}
           <button
             onClick={handleDownloadTemplate}
             className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
@@ -805,30 +868,59 @@ function Invoices() {
         </div>
       </div>
 
+      {/* 상태 변경 방법 안내 */}
+      <div className="bg-white rounded-lg shadow p-6 mb-6">
+        <h4 className="text-md font-medium text-gray-800 mb-3">📝 청구서 상태 변경 방법</h4>
+        <div className="bg-blue-50 p-4 rounded-lg">
+          <ul className="text-sm text-gray-700 space-y-2">
+            <li className="flex items-start">
+              <span className="text-blue-600 mr-2">•</span>
+              <span><strong>새 청구서:</strong> 생성 시 자동으로 '발송대기' 상태로 설정됩니다</span>
+            </li>
+            <li className="flex items-start">
+              <span className="text-blue-600 mr-2">•</span>
+              <span><strong>상태 변경:</strong> 아래 청구서 목록의 '상태' 컬럼 드롭다운을 클릭하여 즉시 변경 가능</span>
+            </li>
+            <li className="flex items-start">
+              <span className="text-blue-600 mr-2">•</span>
+              <span><strong>미수금 계산:</strong> '미결제', '발송됨', '발송대기' 상태는 미수금으로 계산됩니다</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
       {/* 청구서 목록 */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <input
+                  type="checkbox"
+                  checked={selectAll}
+                  onChange={(e) => handleSelectAll(e.target.checked)}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+              </th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                 청구서 번호
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                 건축주
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                 프로젝트
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                 금액
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                 상태
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                 발행일
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                 작업
               </th>
             </tr>
@@ -837,33 +929,47 @@ function Invoices() {
             {invoices.map((invoice) => (
               <tr key={invoice.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">{invoice.id}</div>
+                  <input
+                    type="checkbox"
+                    checked={selectedInvoices.includes(invoice.id)}
+                    onChange={(e) => handleSelectInvoice(invoice.id, e.target.checked)}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{invoice.client}</div>
+                  <div className="text-base font-medium text-gray-900">{invoice.id}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{invoice.project}</div>
+                  <div className="text-base text-gray-900">{invoice.client}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">
+                  <div className="text-base text-gray-900">{invoice.project}</div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-base font-medium text-gray-900">
                     {invoice.amount.toLocaleString()}원
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                    invoice.status === '결제완료' ? 'bg-green-100 text-green-800' :
-                    invoice.status === '발송됨' ? 'bg-blue-100 text-blue-800' :
-                    invoice.status === '미결제' ? 'bg-red-100 text-red-800' :
-                    'bg-yellow-100 text-yellow-800'
-                  }`}>
-                    {invoice.status}
-                  </span>
+                  <select
+                    value={invoice.status}
+                    onChange={(e) => handleStatusChange(invoice.id, e.target.value)}
+                    className={`text-sm leading-5 font-semibold rounded px-2 py-1 border-0 cursor-pointer ${
+                      invoice.status === '결제완료' ? 'bg-green-100 text-green-800' :
+                      invoice.status === '발송됨' ? 'bg-blue-100 text-blue-800' :
+                      invoice.status === '미결제' ? 'bg-red-100 text-red-800' :
+                      'bg-yellow-100 text-yellow-800'
+                    }`}
+                  >
+                    {statusOptions.map(status => (
+                      <option key={status} value={status}>{status}</option>
+                    ))}
+                  </select>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{invoice.date}</div>
+                  <div className="text-base text-gray-900">{invoice.date}</div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <td className="px-6 py-4 whitespace-nowrap text-base font-medium">
                   <button 
                     onClick={() => viewInvoiceDetails(invoice)}
                     className="text-blue-600 hover:text-blue-900 mr-2"
@@ -1183,8 +1289,17 @@ function Invoices() {
           {printInvoice && (
             <>
               {/* 청구서 번호 및 제목 */}
-              <div style={{ marginBottom: '40px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
+              <div style={{ marginBottom: '30px' }}>
+                <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'flex-start', 
+                  marginBottom: '5px',
+                  backgroundColor: '#f5f5f5',
+                  padding: '4px 8px',
+                  borderRadius: '2px',
+                  border: '1px solid #e5e7eb'
+                }}>
                   <div style={{ fontSize: '14px', color: '#374151' }}>
                     <strong>청구서 번호:</strong> {printInvoice.id}
                   </div>
@@ -1192,8 +1307,8 @@ function Invoices() {
                     <strong>작성일:</strong> {printInvoice.date}
                   </div>
                 </div>
-                <div style={{ textAlign: 'center', borderBottom: '3px solid #1f2937', paddingBottom: '20px' }}>
-                  <h1 style={{ fontSize: '36px', margin: '0', fontWeight: 'bold', color: '#1f2937', letterSpacing: '8px' }}>청   구   서</h1>
+                <div style={{ textAlign: 'center', borderBottom: '2px solid #6b7280', paddingBottom: '15px' }}>
+                  <h1 style={{ fontSize: '32px', margin: '0', fontWeight: 'bold', color: '#374151', letterSpacing: '6px' }}>청   구   서</h1>
                 </div>
               </div>
 
@@ -1201,71 +1316,71 @@ function Invoices() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', marginBottom: '40px' }}>
                 {/* 건축주 정보 (왼쪽) */}
                 <div>
-                  <h3 style={{ margin: '0 0 15px 0', fontSize: '18px', fontWeight: 'bold', color: '#1f2937', borderLeft: '4px solid #4f46e5', paddingLeft: '12px' }}>
+                  <h3 style={{ margin: '0 0 15px 0', fontSize: '18px', fontWeight: 'bold', color: '#1f2937', borderLeft: '4px solid #9ca3af', paddingLeft: '12px' }}>
                     발주자 정보
                   </h3>
                   <div style={{ backgroundColor: '#f9fafb', padding: '20px', borderRadius: '8px' }}>
-                    <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>건축주명:</strong> {printInvoice.client}</p>
-                    <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>프로젝트명:</strong> {printInvoice.project}</p>
-                    <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>작업장 주소:</strong> {printInvoice.workplaceAddress}</p>
+                    <p style={{ margin: '8px 0', fontSize: '17px' }}><strong>건축주명:</strong> {printInvoice.client}</p>
+                    <p style={{ margin: '8px 0', fontSize: '17px' }}><strong>프로젝트명:</strong> {printInvoice.project}</p>
+                    <p style={{ margin: '8px 0', fontSize: '17px' }}><strong>작업장 주소:</strong> {printInvoice.workplaceAddress}</p>
                   </div>
                 </div>
                 
                 {/* 업체 정보 (오른쪽) */}
                 <div>
-                  <h3 style={{ margin: '0 0 15px 0', fontSize: '18px', fontWeight: 'bold', color: '#1f2937', borderLeft: '4px solid #4f46e5', paddingLeft: '12px' }}>
+                  <h3 style={{ margin: '0 0 15px 0', fontSize: '18px', fontWeight: 'bold', color: '#1f2937', borderLeft: '4px solid #9ca3af', paddingLeft: '12px' }}>
                     시공업체 정보
                   </h3>
                   <div style={{ backgroundColor: '#f9fafb', padding: '20px', borderRadius: '8px' }}>
-                    <p style={{ margin: '8px 0', fontSize: '14px', fontWeight: 'bold' }}>{companyInfo.name}</p>
-                    <p style={{ margin: '8px 0', fontSize: '12px' }}>사업자등록번호: {companyInfo.businessNumber}</p>
-                    <p style={{ margin: '8px 0', fontSize: '12px' }}>대표자: {companyInfo.representative}</p>
-                    <p style={{ margin: '8px 0', fontSize: '12px' }}>주소: {companyInfo.address}</p>
-                    <p style={{ margin: '8px 0', fontSize: '12px' }}>연락처: {companyInfo.phone}</p>
-                    {companyInfo.email && <p style={{ margin: '8px 0', fontSize: '12px' }}>이메일: {companyInfo.email}</p>}
+                    <p style={{ margin: '8px 0', fontSize: '17px', fontWeight: 'bold' }}>{companyInfo.name}</p>
+                    <p style={{ margin: '8px 0', fontSize: '15px' }}>사업자등록번호: {companyInfo.businessNumber}</p>
+                    <p style={{ margin: '8px 0', fontSize: '15px' }}>대표자: {companyInfo.representative}</p>
+                    <p style={{ margin: '8px 0', fontSize: '15px' }}>주소: {companyInfo.address}</p>
+                    <p style={{ margin: '8px 0', fontSize: '15px' }}>연락처: {companyInfo.phone}</p>
+                    {companyInfo.email && <p style={{ margin: '8px 0', fontSize: '15px' }}>이메일: {companyInfo.email}</p>}
                   </div>
                 </div>
               </div>
 
 
               {/* 총 청구 금액 */}
-              <div style={{ marginBottom: '30px', padding: '15px', backgroundColor: '#dbeafe', borderRadius: '8px', borderLeft: '4px solid #3b82f6', textAlign: 'left' }}>
-                <p style={{ margin: '0', fontSize: '18px', fontWeight: 'bold', color: '#1e3a8a' }}>
+              <div style={{ marginBottom: '20px', padding: '10px', backgroundColor: '#f3f4f6', borderRadius: '6px', borderLeft: '3px solid #9ca3af', textAlign: 'left' }}>
+                <p style={{ margin: '0', fontSize: '18px', fontWeight: 'bold', color: '#374151' }}>
                   총 청구금액 : 금 {numberToKorean(printInvoice.amount)} 원정
                 </p>
               </div>
 
               {/* 세부 작업 내역 */}
               <div style={{ marginBottom: '40px' }}>
-                <h3 style={{ margin: '0 0 20px 0', fontSize: '18px', fontWeight: 'bold', color: '#1f2937', borderLeft: '4px solid #4f46e5', paddingLeft: '12px' }}>
+                <h3 style={{ margin: '0 0 20px 0', fontSize: '18px', fontWeight: 'bold', color: '#1f2937', borderLeft: '4px solid #9ca3af', paddingLeft: '12px' }}>
                   세부 작업 내역
                 </h3>
                 <div style={{ overflowX: 'auto' }}>
                   <table style={{ width: '100%', minWidth: '600px', borderCollapse: 'collapse', backgroundColor: '#fff', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)' }}>
                     <thead>
                       <tr style={{ backgroundColor: '#f9fafb' }}>
-                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', width: '40px', fontSize: '12px' }}>
+                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', width: '40px', fontSize: '18px' }}>
                           연번
                         </th>
-                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', fontSize: '12px' }}>
+                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', fontSize: '18px' }}>
                           내용
                         </th>
-                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', fontSize: '12px' }}>
+                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', fontSize: '18px' }}>
                           규격
                         </th>
-                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', fontSize: '12px' }}>
+                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', fontSize: '18px' }}>
                           수량
                         </th>
-                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', fontSize: '12px' }}>
+                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', fontSize: '18px' }}>
                           단위
                         </th>
-                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', fontSize: '12px' }}>
+                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', fontSize: '18px' }}>
                           단가
                         </th>
-                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', fontSize: '12px' }}>
+                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', fontSize: '18px' }}>
                           공급가액
                         </th>
-                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', fontSize: '12px' }}>
+                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', fontSize: '18px' }}>
                           비고
                         </th>
                       </tr>
@@ -1273,23 +1388,23 @@ function Invoices() {
                     <tbody>
                       {printInvoice.workItems.map((item, index) => (
                         <tr key={index} style={{ ':hover': { backgroundColor: '#f1f5f9' } }}>
-                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontSize: '11px' }}>{index + 1}</td>
-                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'left', fontSize: '11px' }}>
+                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontSize: '17px' }}>{index + 1}</td>
+                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'left', fontSize: '17px' }}>
                             <div>
-                              <strong>{item.name}</strong>
+                              <strong style={{ fontSize: '19px' }}>{item.name}</strong>
                               {item.description && (
-                                <div style={{ fontSize: '10px', color: '#6b7280', marginTop: '4px' }}>
+                                <div style={{ fontSize: '19px', color: '#6b7280', marginTop: '4px' }}>
                                   {item.description}
                                 </div>
                               )}
                             </div>
                           </td>
-                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontSize: '11px' }}>{item.category || '-'}</td>
-                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontSize: '11px' }}>{item.quantity}</td>
-                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontSize: '11px' }}>식</td>
-                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'right', fontSize: '11px' }}>{Math.floor(item.unitPrice / item.quantity).toLocaleString()}원</td>
-                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'right', fontSize: '11px' }}>{item.unitPrice.toLocaleString()}원</td>
-                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'left', fontSize: '11px', verticalAlign: 'top' }}>
+                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontSize: '17px' }}>{item.category || '-'}</td>
+                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontSize: '17px' }}>{item.quantity}</td>
+                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontSize: '17px' }}>식</td>
+                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'right', fontSize: '17px' }}>{Math.floor(item.unitPrice / item.quantity).toLocaleString()}원</td>
+                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'right', fontSize: '17px' }}>{item.unitPrice.toLocaleString()}원</td>
+                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'left', fontSize: '17px', verticalAlign: 'top' }}>
                             {item.notes || '-'}
                           </td>
                         </tr>
@@ -1297,10 +1412,10 @@ function Invoices() {
                     </tbody>
                     <tfoot>
                       <tr style={{ backgroundColor: '#f0f0f0', fontWeight: 'bold', color: '#1f2937' }}>
-                        <td colSpan="7" style={{ padding: '15px 16px', border: '1px solid #e5e7eb', textAlign: 'right', fontSize: '16px' }}>
+                        <td colSpan="7" style={{ padding: '15px 16px', border: '1px solid #e5e7eb', textAlign: 'right', fontSize: '18px' }}>
                           합계:
                         </td>
-                        <td style={{ padding: '15px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontSize: '16px', fontWeight: 'bold' }}>
+                        <td style={{ padding: '15px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontSize: '18px', fontWeight: 'bold' }}>
                           {printInvoice.amount.toLocaleString()}원
                         </td>
                       </tr>
@@ -1311,7 +1426,7 @@ function Invoices() {
 
               {/* 결제 정보 */}
               <div style={{ marginTop: '20px', marginBottom: '20px' }}>
-                <h3 style={{ margin: '0 0 10px 0', fontSize: '18px', fontWeight: 'bold', color: '#1f2937', borderLeft: '4px solid #4f46e5', paddingLeft: '12px' }}>
+                <h3 style={{ margin: '0 0 10px 0', fontSize: '18px', fontWeight: 'bold', color: '#1f2937', borderLeft: '4px solid #9ca3af', paddingLeft: '12px' }}>
                   결제 정보
                 </h3>
                 <div style={{ backgroundColor: '#f9fafb', padding: '12px', borderRadius: '8px' }}>

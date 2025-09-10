@@ -79,13 +79,13 @@ function Dashboard() {
               <tbody>
                 {recentInvoices.map((invoice) => (
                   <tr key={invoice.id} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="py-3 text-sm text-gray-900">{invoice.client}</td>
-                    <td className="py-3 text-sm text-gray-900">{invoice.project}</td>
-                    <td className="py-3 text-sm font-medium text-gray-900">
+                    <td className="py-3 text-base text-gray-900">{invoice.client}</td>
+                    <td className="py-3 text-base text-gray-900">{invoice.project}</td>
+                    <td className="py-3 text-base font-medium text-gray-900">
                       {invoice.amount.toLocaleString()}원
                     </td>
                     <td className="py-3">
-                      <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                      <span className={`px-2 py-1 text-sm font-semibold rounded-full ${
                         invoice.status === '결제완료' ? 'bg-green-100 text-green-800' :
                         invoice.status === '발송됨' ? 'bg-blue-100 text-blue-800' :
                         invoice.status === '미결제' ? 'bg-red-100 text-red-800' :
@@ -94,7 +94,7 @@ function Dashboard() {
                         {invoice.status}
                       </span>
                     </td>
-                    <td className="py-3 text-sm text-gray-600">{invoice.date}</td>
+                    <td className="py-3 text-base text-gray-600">{invoice.date}</td>
                   </tr>
                 ))}
               </tbody>

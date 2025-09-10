@@ -540,6 +540,31 @@ export const AppProvider = ({ children }) => {
     saveToStorage(STORAGE_KEYS.STAMP_IMAGE, stampImage);
   }, [stampImage]);
 
+  // 건축주별 통계 계산 함수들
+  const getClientProjectCount = (clientId) => {
+    const client = clients.find(c => c.id === clientId);
+    if (!client || !client.workplaces) return 0;
+    return client.workplaces.filter(wp => wp.project).length;
+  };
+
+  const getClientTotalBilled = (clientId) => {
+    const clientInvoices = invoices.filter(invoice => {
+      const client = clients.find(c => c.id === clientId);
+      return client && (invoice.client === client.name || invoice.clientId === clientId);
+    });
+    return clientInvoices.reduce((total, invoice) => total + (invoice.amount || 0), 0);
+  };
+
+  const getClientOutstanding = (clientId) => {
+    const clientInvoices = invoices.filter(invoice => {
+      const client = clients.find(c => c.id === clientId);
+      return client && (invoice.client === client.name || invoice.clientId === clientId);
+    });
+    return clientInvoices
+      .filter(invoice => invoice.status === '미결제' || invoice.status === '발송됨' || invoice.status === '발송대기')
+      .reduce((total, invoice) => total + (invoice.amount || 0), 0);
+  };
+
   // 견적서를 작업 항목으로 변환하는 함수
   const convertEstimateToWorkItems = (estimateId) => {
     const estimate = estimates.find(est => est.id === estimateId);
@@ -595,7 +620,10 @@ export const AppProvider = ({ children }) => {
     getCompletedWorkItems,
     getCompletedWorkItemsByClient,
     addWorkItemToInvoice,
-    convertEstimateToWorkItems
+    convertEstimateToWorkItems,
+    getClientProjectCount,
+    getClientTotalBilled,
+    getClientOutstanding
   };
 
   return (

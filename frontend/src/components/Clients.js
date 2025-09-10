@@ -2,9 +2,20 @@ import React, { useState, useRef } from 'react';
 import { useApp } from '../contexts/AppContext';
 import { numberToKorean } from '../utils/numberToKorean';
 import { exportToExcel, importFromExcel, createTemplate } from '../utils/excelUtils';
+import { handlePhoneInput } from '../utils/phoneFormatter';
 
 function Clients() {
-  const { clients, setClients } = useApp();
+  const { 
+    clients, 
+    setClients, 
+    workItems, 
+    setWorkItems, 
+    invoices, 
+    setInvoices,
+    getClientProjectCount,
+    getClientTotalBilled,
+    getClientOutstanding
+  } = useApp();
 
   const [showModal, setShowModal] = useState(false);
   const [selectedClient, setSelectedClient] = useState(null);
@@ -17,8 +28,10 @@ function Clients() {
     email: '',
     address: '',
     notes: '',
-    workplaces: [{ name: '', address: '', description: '' }]
+    workplaces: [{ name: '', address: '', project: '' }]
   });
+  const [selectedClients, setSelectedClients] = useState([]);
+  const [selectAll, setSelectAll] = useState(false);
 
   const fileInputRef = useRef(null);
 
@@ -48,9 +61,19 @@ function Clients() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    
+    let formattedValue = value;
+    
+    // 전화번호 필드는 자동 포맷팅 적용
+    if (name === 'phone') {
+      formattedValue = handlePhoneInput(value, false);
+    } else if (name === 'mobile') {
+      formattedValue = handlePhoneInput(value, true);
+    }
+    
     setNewClient(prev => ({
       ...prev,
-      [name]: value
+      [name]: formattedValue
     }));
   };
 
@@ -66,7 +89,7 @@ function Clients() {
   const addWorkplace = () => {
     setNewClient(prev => ({
       ...prev,
-      workplaces: [...prev.workplaces, { name: '', address: '', description: '' }]
+      workplaces: [...prev.workplaces, { name: '', address: '', project: '' }]
     }));
   };
 
@@ -122,7 +145,7 @@ function Clients() {
       email: '',
       address: '',
       notes: '',
-      workplaces: [{ name: '', address: '', description: '' }]
+      workplaces: [{ name: '', address: '', project: '' }]
     });
     setShowModal(false);
     setIsEditing(false);
@@ -143,9 +166,165 @@ function Clients() {
       email: client.email,
       address: client.address,
       notes: client.notes,
-      workplaces: client.workplaces || [{ name: '', address: '', description: '' }]
+      workplaces: client.workplaces || [{ name: '', address: '', project: '' }]
     });
     setShowModal(true);
+  };
+
+  // 체크박스 관련 함수들
+  const handleSelectAll = (checked) => {
+    setSelectAll(checked);
+    if (checked) {
+      setSelectedClients(clients.map(client => client.id));
+    } else {
+      setSelectedClients([]);
+    }
+  };
+
+  const handleSelectClient = (clientId, checked) => {
+    if (checked) {
+      setSelectedClients(prev => [...prev, clientId]);
+    } else {
+      setSelectedClients(prev => prev.filter(id => id !== clientId));
+      setSelectAll(false);
+    }
+  };
+
+  // 선택된 건축주들 삭제
+  const handleDeleteSelectedClients = () => {
+    if (selectedClients.length === 0) {
+      alert('삭제할 건축주를 선택해주세요.');
+      return;
+    }
+
+    const selectedClientData = clients.filter(client => selectedClients.includes(client.id));
+    
+    // 관련 데이터 확인
+    let totalRelatedWorkItems = 0;
+    let totalRelatedInvoices = 0;
+    
+    selectedClientData.forEach(client => {
+      const relatedWorkItems = workItems ? workItems.filter(item => 
+        item.clientId === client.id || item.clientName === client.name
+      ) : [];
+      const relatedInvoices = invoices ? invoices.filter(invoice => 
+        invoice.clientId === client.id || invoice.clientName === client.name
+      ) : [];
+      
+      totalRelatedWorkItems += relatedWorkItems.length;
+      totalRelatedInvoices += relatedInvoices.length;
+    });
+
+    let confirmMessage = `정말로 선택된 ${selectedClients.length}개의 건축주를 삭제하시겠습니까?`;
+    
+    if (totalRelatedWorkItems > 0 || totalRelatedInvoices > 0) {
+      confirmMessage += `\n\n⚠️ 주의사항:`;
+      if (totalRelatedWorkItems > 0) {
+        confirmMessage += `\n• 연관된 작업 항목 ${totalRelatedWorkItems}개도 함께 삭제됩니다.`;
+      }
+      if (totalRelatedInvoices > 0) {
+        confirmMessage += `\n• 연관된 청구서 ${totalRelatedInvoices}개도 함께 삭제됩니다.`;
+      }
+    }
+    
+    confirmMessage += `\n\n이 작업은 되돌릴 수 없습니다.`;
+
+    if (window.confirm(confirmMessage)) {
+      try {
+        // 건축주들 삭제
+        setClients(prev => prev.filter(client => !selectedClients.includes(client.id)));
+        
+        // 관련 작업 항목 삭제
+        if (totalRelatedWorkItems > 0 && workItems && setWorkItems) {
+          setWorkItems(prev => prev.filter(item => {
+            const client = selectedClientData.find(c => 
+              c.id === item.clientId || c.name === item.clientName
+            );
+            return !client;
+          }));
+        }
+        
+        // 관련 청구서 삭제
+        if (totalRelatedInvoices > 0 && invoices && setInvoices) {
+          setInvoices(prev => prev.filter(invoice => {
+            const client = selectedClientData.find(c => 
+              c.id === invoice.clientId || c.name === invoice.clientName
+            );
+            return !client;
+          }));
+        }
+        
+        let successMessage = `${selectedClients.length}개의 건축주가 성공적으로 삭제되었습니다.`;
+        if (totalRelatedWorkItems > 0 || totalRelatedInvoices > 0) {
+          successMessage += `\n연관된 데이터도 함께 정리되었습니다.`;
+        }
+        
+        // 선택 상태 초기화
+        setSelectedClients([]);
+        setSelectAll(false);
+        
+        alert(successMessage);
+      } catch (error) {
+        console.error('건축주 삭제 오류:', error);
+        alert('건축주 삭제 중 오류가 발생했습니다: ' + error.message);
+      }
+    }
+  };
+
+  const handleDeleteClient = (client) => {
+    // 관련 작업 항목 및 청구서 확인
+    const relatedWorkItems = workItems ? workItems.filter(item => 
+      item.clientId === client.id || item.clientName === client.name
+    ) : [];
+    
+    const relatedInvoices = invoices ? invoices.filter(invoice => 
+      invoice.clientId === client.id || invoice.clientName === client.name
+    ) : [];
+
+    let confirmMessage = `정말로 "${client.name}" 건축주를 삭제하시겠습니까?`;
+    
+    if (relatedWorkItems.length > 0 || relatedInvoices.length > 0) {
+      confirmMessage += `\n\n⚠️ 주의사항:`;
+      if (relatedWorkItems.length > 0) {
+        confirmMessage += `\n• 연관된 작업 항목 ${relatedWorkItems.length}개도 함께 삭제됩니다.`;
+      }
+      if (relatedInvoices.length > 0) {
+        confirmMessage += `\n• 연관된 청구서 ${relatedInvoices.length}개도 함께 삭제됩니다.`;
+      }
+    }
+    
+    confirmMessage += `\n\n이 작업은 되돌릴 수 없습니다.`;
+
+    if (window.confirm(confirmMessage)) {
+      try {
+        // 건축주 삭제
+        setClients(prev => prev.filter(c => c.id !== client.id));
+        
+        // 관련 작업 항목 삭제
+        if (relatedWorkItems.length > 0 && workItems && setWorkItems) {
+          setWorkItems(prev => prev.filter(item => 
+            item.clientId !== client.id && item.clientName !== client.name
+          ));
+        }
+        
+        // 관련 청구서 삭제
+        if (relatedInvoices.length > 0 && invoices && setInvoices) {
+          setInvoices(prev => prev.filter(invoice => 
+            invoice.clientId !== client.id && invoice.clientName !== client.name
+          ));
+        }
+        
+        let successMessage = '건축주가 성공적으로 삭제되었습니다.';
+        if (relatedWorkItems.length > 0 || relatedInvoices.length > 0) {
+          successMessage += `\n연관된 데이터도 함께 정리되었습니다.`;
+        }
+        
+        alert(successMessage);
+      } catch (error) {
+        console.error('건축주 삭제 오류:', error);
+        alert('건축주 삭제 중 오류가 발생했습니다: ' + error.message);
+      }
+    }
   };
 
   return (
@@ -156,6 +335,14 @@ function Clients() {
           <p className="text-gray-600">건축주 정보를 관리하고 프로젝트 이력을 추적하세요</p>
         </div>
         <div className="flex space-x-2">
+          {selectedClients.length > 0 && (
+            <button
+              onClick={handleDeleteSelectedClients}
+              className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded flex items-center"
+            >
+              🗑️ 선택 항목 삭제 ({selectedClients.length})
+            </button>
+          )}
           <button
             onClick={handleDownloadTemplate}
             className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded flex items-center"
@@ -211,7 +398,7 @@ function Clients() {
             <div>
               <p className="text-sm font-medium text-gray-600 mb-1">총 청구금액 :</p>
               <p className="text-3xl font-bold text-green-600">
-                금 {numberToKorean(clients.reduce((sum, client) => sum + client.totalBilled, 0))} 원정
+                금 {numberToKorean(clients.reduce((sum, client) => sum + getClientTotalBilled(client.id), 0))} 원정
               </p>
             </div>
             <div className="bg-green-500 rounded-full p-3 text-white text-2xl">
@@ -225,7 +412,7 @@ function Clients() {
             <div>
               <p className="text-sm font-medium text-gray-600 mb-1">미수금</p>
               <p className="text-3xl font-bold text-red-600">
-                {clients.reduce((sum, client) => sum + client.outstanding, 0).toLocaleString()}원
+                {clients.reduce((sum, client) => sum + getClientOutstanding(client.id), 0).toLocaleString()}원
               </p>
             </div>
             <div className="bg-red-500 rounded-full p-3 text-white text-2xl">
@@ -239,7 +426,7 @@ function Clients() {
             <div>
               <p className="text-sm font-medium text-gray-600 mb-1">미수금 건수</p>
               <p className="text-3xl font-bold text-orange-600">
-                {clients.filter(client => client.outstanding > 0).length}
+                {clients.filter(client => getClientOutstanding(client.id) > 0).length}
               </p>
             </div>
             <div className="bg-orange-500 rounded-full p-3 text-white text-2xl">
@@ -255,24 +442,32 @@ function Clients() {
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <input
+                  type="checkbox"
+                  checked={selectAll}
+                  onChange={(e) => handleSelectAll(e.target.checked)}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+              </th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                 이름
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                 연락처
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                 주소
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                 프로젝트 수
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                 총 청구액
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                 미수금
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                 작업
               </th>
             </tr>
@@ -281,6 +476,14 @@ function Clients() {
             {clients.map((client) => (
               <tr key={client.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">
+                  <input
+                    type="checkbox"
+                    checked={selectedClients.includes(client.id)}
+                    onChange={(e) => handleSelectClient(client.id, e.target.checked)}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
                     <div className="h-10 w-10 bg-gray-300 rounded-full flex items-center justify-center">
                       <span className="text-sm font-medium text-gray-700">
@@ -288,8 +491,8 @@ function Clients() {
                       </span>
                     </div>
                     <div className="ml-4">
-                      <div className="text-sm font-medium text-gray-900">{client.name}</div>
-                      <div className="text-sm text-gray-500">{client.email}</div>
+                      <div className="text-base font-medium text-gray-900">{client.name}</div>
+                      <div className="text-base text-gray-500">{client.email}</div>
                     </div>
                   </div>
                 </td>
@@ -300,24 +503,24 @@ function Clients() {
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{client.address}</div>
+                  <div className="text-base text-gray-900">{client.address}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{client.projects.length}개</div>
+                  <div className="text-base text-gray-900">{getClientProjectCount(client.id)}개</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">
-                    {client.totalBilled.toLocaleString()}원
+                  <div className="text-base font-medium text-gray-900">
+                    {getClientTotalBilled(client.id).toLocaleString()}원
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className={`text-sm font-medium ${
-                    client.outstanding > 0 ? 'text-red-600' : 'text-green-600'
+                  <div className={`text-base font-medium ${
+                    getClientOutstanding(client.id) > 0 ? 'text-red-600' : 'text-green-600'
                   }`}>
-                    {client.outstanding.toLocaleString()}원
+                    {getClientOutstanding(client.id).toLocaleString()}원
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <td className="px-6 py-4 whitespace-nowrap text-base font-medium">
                   <button 
                     onClick={() => viewClientDetails(client)}
                     className="text-blue-600 hover:text-blue-900 mr-2"
@@ -330,7 +533,12 @@ function Clients() {
                   >
                     편집
                   </button>
-                  <button className="text-red-600 hover:text-red-900">삭제</button>
+                  <button 
+                    className="text-red-600 hover:text-red-900"
+                    onClick={() => handleDeleteClient(client)}
+                  >
+                    삭제
+                  </button>
                 </td>
               </tr>
             ))}
@@ -458,12 +666,12 @@ function Clients() {
                           className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
                           required
                         />
-                        <textarea
-                          placeholder="작업장 설명 (선택사항)"
-                          value={workplace.description}
-                          onChange={(e) => handleWorkplaceChange(index, 'description', e.target.value)}
+                        <input
+                          type="text"
+                          placeholder="프로젝트명 (예: 신축공사, 리모델링 등)"
+                          value={workplace.project}
+                          onChange={(e) => handleWorkplaceChange(index, 'project', e.target.value)}
                           className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
-                          rows="2"
                         />
                       </div>
                     </div>
@@ -483,7 +691,7 @@ function Clients() {
                         email: '',
                         address: '',
                         notes: '',
-                        workplaces: [{ name: '', address: '', description: '' }]
+                        workplaces: [{ name: '', address: '', project: '' }]
                       });
                     }}
                     className="px-4 py-2 text-gray-500 hover:text-gray-700"
@@ -529,13 +737,13 @@ function Clients() {
                 </div>
                 <div>
                   <h4 className="font-medium mb-3">재무 정보</h4>
-                  <p className="mb-2"><strong>총 청구액:</strong> {selectedClient.totalBilled.toLocaleString()}원</p>
+                  <p className="mb-2"><strong>총 청구액:</strong> {getClientTotalBilled(selectedClient.id).toLocaleString()}원</p>
                   <p className="mb-2"><strong>미수금:</strong> 
-                    <span className={selectedClient.outstanding > 0 ? 'text-red-600 font-medium' : 'text-green-600'}>
-                      {selectedClient.outstanding.toLocaleString()}원
+                    <span className={getClientOutstanding(selectedClient.id) > 0 ? 'text-red-600 font-medium' : 'text-green-600'}>
+                      {getClientOutstanding(selectedClient.id).toLocaleString()}원
                     </span>
                   </p>
-                  <p><strong>완료 프로젝트:</strong> {selectedClient.projects.length}개</p>
+                  <p><strong>프로젝트 수:</strong> {getClientProjectCount(selectedClient.id)}개</p>
                 </div>
               </div>
               
@@ -554,9 +762,9 @@ function Clients() {
                         <p className="text-sm text-gray-600 mb-1">
                           <strong>주소:</strong> {workplace.address}
                         </p>
-                        {workplace.description && (
+                        {workplace.project && (
                           <p className="text-sm text-gray-600">
-                            <strong>설명:</strong> {workplace.description}
+                            <strong>프로젝트:</strong> {workplace.project}
                           </p>
                         )}
                       </div>

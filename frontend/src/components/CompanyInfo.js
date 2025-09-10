@@ -1,6 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { useApp } from '../contexts/AppContext';
 import { checkStorageAvailable, getStorageInfo, imageToBase64, saveStampImage, removeStampImage } from '../utils/imageStorage';
+import { handlePhoneInput } from '../utils/phoneFormatter';
 
 function CompanyInfo() {
   const { companyInfo, setCompanyInfo, units, setUnits, categories, setCategories, stampImage, setStampImage } = useApp();
@@ -10,21 +11,23 @@ function CompanyInfo() {
   // 설정 관련 상태
   const [newUnit, setNewUnit] = useState('');
   const [newCategory, setNewCategory] = useState('');
-  const [storageInfo, setStorageInfo] = useState({ used: '0 KB', stampImageSize: '0 KB' });
+  const [storageInfo] = useState(() => checkStorageAvailable() ? getStorageInfo() : { used: '0 KB', stampImageSize: '0 KB' });
   const fileInputRef = useRef(null);
 
-  // 컴포넌트 로드 시 저장소 정보 업데이트
-  useEffect(() => {
-    if (checkStorageAvailable()) {
-      setStorageInfo(getStorageInfo());
-    }
-  }, [stampImage]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    
+    let formattedValue = value;
+    
+    // 전화번호 필드는 자동 포맷팅 적용
+    if (name === 'phone') {
+      formattedValue = handlePhoneInput(value, false);
+    }
+    
     setEditForm(prev => ({
       ...prev,
-      [name]: value
+      [name]: formattedValue
     }));
   };
 

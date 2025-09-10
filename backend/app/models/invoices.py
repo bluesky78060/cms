@@ -11,8 +11,8 @@ class TaxMode(str, enum.Enum):
 class Invoice(Base):
     __tablename__ = "invoices"
     
-    invoice_id = Column(Integer, primary_key=True, index=True)
-    project_id = Column(Integer, ForeignKey("projects.project_id"), nullable=False)
+    id = Column(Integer, primary_key=True, index=True)
+    project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
     invoice_number = Column(String, unique=True, index=True)
     issue_date = Column(Date, nullable=False)
     period_from = Column(Date, nullable=False)

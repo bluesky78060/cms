@@ -10,8 +10,8 @@ class RateType(str, enum.Enum):
 class LaborEntry(Base):
     __tablename__ = "labor_entries"
     
-    entry_id = Column(Integer, primary_key=True, index=True)
-    item_id = Column(Integer, ForeignKey("work_items.item_id"), nullable=False)
+    id = Column(Integer, primary_key=True, index=True)
+    work_item_id = Column(Integer, ForeignKey("work_items.id"), nullable=False)
     trade = Column(String, nullable=False)  # 직종 (목공, 철근공, 타일공 등)
     persons = Column(Integer, nullable=False)  # 투입인원
     hours = Column(Numeric(4, 1), nullable=False)  # 시간

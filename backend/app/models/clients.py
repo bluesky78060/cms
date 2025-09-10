@@ -6,7 +6,7 @@ from ..database import Base
 class Client(Base):
     __tablename__ = "clients"
     
-    client_id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, index=True)
     company_name = Column(String, nullable=False, index=True)
     representative = Column(String)
     business_number = Column(String, unique=True, index=True)  # 사업자등록번호

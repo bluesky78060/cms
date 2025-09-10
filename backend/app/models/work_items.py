@@ -5,8 +5,8 @@ from ..database import Base
 class WorkItem(Base):
     __tablename__ = "work_items"
     
-    item_id = Column(Integer, primary_key=True, index=True)
-    work_id = Column(Integer, ForeignKey("work_logs.work_id"), nullable=False)
+    id = Column(Integer, primary_key=True, index=True)
+    work_log_id = Column(Integer, ForeignKey("work_logs.id"), nullable=False)
     task_code = Column(String, nullable=False, index=True)  # 작업코드 (대분류.중분류.세분류)
     task_name = Column(String, nullable=False)
     specification = Column(String)  # 규격/치수

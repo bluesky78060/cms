@@ -12,8 +12,8 @@ class VATMode(str, enum.Enum):
 class Project(Base):
     __tablename__ = "projects"
     
-    project_id = Column(Integer, primary_key=True, index=True)
-    client_id = Column(Integer, ForeignKey("clients.client_id"), nullable=False)
+    id = Column(Integer, primary_key=True, index=True)
+    client_id = Column(Integer, ForeignKey("clients.id"), nullable=False)
     project_name = Column(String, nullable=False, index=True)
     address = Column(String)
     contract_amount = Column(Numeric(15, 2))

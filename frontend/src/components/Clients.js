@@ -1,6 +1,5 @@
 import React, { useState, useRef } from 'react';
 import { useApp } from '../contexts/AppContext';
-import { numberToKorean } from '../utils/numberToKorean';
 import { exportToExcel, importFromExcel, createTemplate } from '../utils/excelUtils';
 import { handlePhoneInput } from '../utils/phoneFormatter';
 
@@ -398,7 +397,7 @@ function Clients() {
             <div>
               <p className="text-sm font-medium text-gray-600 mb-1">총 청구금액 :</p>
               <p className="text-3xl font-bold text-green-600">
-                금 {numberToKorean(clients.reduce((sum, client) => sum + getClientTotalBilled(client.id), 0))} 원정
+                {clients.reduce((sum, client) => sum + getClientTotalBilled(client.id), 0).toLocaleString()}원
               </p>
             </div>
             <div className="bg-green-500 rounded-full p-3 text-white text-2xl">

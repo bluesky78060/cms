@@ -1,39 +1,70 @@
 import React from 'react';
+import { useApp } from '../contexts/AppContext';
 
 function Dashboard() {
+  const { invoices, clients, workItems } = useApp();
+
+  // 현재 날짜
+  const today = new Date();
+  const currentMonth = today.getMonth();
+  const currentYear = today.getFullYear();
+
+  // 이번 달 청구서 수
+  const thisMonthInvoices = invoices.filter(invoice => {
+    const invoiceDate = new Date(invoice.date);
+    return invoiceDate.getMonth() === currentMonth && invoiceDate.getFullYear() === currentYear;
+  }).length;
+
+  // 미수금 (미결제 + 발송됨 상태의 청구서 총합)
+  const unpaidAmount = invoices
+    .filter(invoice => invoice.status === '미결제' || invoice.status === '발송됨')
+    .reduce((sum, invoice) => sum + (invoice.amount || 0), 0);
+
+  // 완료된 작업 수
+  const completedWorkItems = workItems.filter(item => item.status === '완료').length;
+
+  // 등록된 건축주 수
+  const totalClients = clients.length;
+
   const stats = [
     {
       title: '이번 달 청구서',
-      value: '8',
+      value: thisMonthInvoices.toString(),
       color: 'bg-blue-500',
       icon: '📄'
     },
     {
       title: '미수금',
-      value: '15,000,000원',
+      value: `${unpaidAmount.toLocaleString()}원`,
       color: 'bg-orange-500',
       icon: '💰'
     },
     {
       title: '완료된 작업',
-      value: '23',
+      value: completedWorkItems.toString(),
       color: 'bg-green-500',
       icon: '✅'
     },
     {
       title: '등록된 건축주',
-      value: '12',
+      value: totalClients.toString(),
       color: 'bg-purple-500',
       icon: '👥'
     }
   ];
 
-  const recentInvoices = [
-    { id: 1, client: '김철수', project: '단독주택 신축', amount: 8500000, status: '발송됨', date: '2024-09-01' },
-    { id: 2, client: '박영희', project: '아파트 리모델링', amount: 3200000, status: '결제완료', date: '2024-08-28' },
-    { id: 3, client: '이민호', project: '상가 내부공사', amount: 5800000, status: '미결제', date: '2024-08-25' },
-    { id: 4, client: '정수진', project: '화장실 리모델링', amount: 1500000, status: '발송대기', date: '2024-08-22' }
-  ];
+  // 최근 청구서 (날짜 순 정렬, 최대 5개)
+  const recentInvoices = invoices
+    .sort((a, b) => new Date(b.date) - new Date(a.date))
+    .slice(0, 5)
+    .map(invoice => ({
+      id: invoice.id,
+      client: invoice.client,
+      project: invoice.project,
+      amount: invoice.amount,
+      status: invoice.status,
+      date: invoice.date
+    }));
 
   return (
     <div className="p-6">
@@ -77,26 +108,34 @@ function Dashboard() {
                 </tr>
               </thead>
               <tbody>
-                {recentInvoices.map((invoice) => (
-                  <tr key={invoice.id} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="py-3 text-base text-gray-900">{invoice.client}</td>
-                    <td className="py-3 text-base text-gray-900">{invoice.project}</td>
-                    <td className="py-3 text-base font-medium text-gray-900">
-                      {invoice.amount.toLocaleString()}원
+                {recentInvoices.length > 0 ? (
+                  recentInvoices.map((invoice) => (
+                    <tr key={invoice.id} className="border-b border-gray-100 hover:bg-gray-50">
+                      <td className="py-3 text-base text-gray-900">{invoice.client}</td>
+                      <td className="py-3 text-base text-gray-900">{invoice.project}</td>
+                      <td className="py-3 text-base font-medium text-gray-900">
+                        {invoice.amount ? invoice.amount.toLocaleString() : '0'}원
+                      </td>
+                      <td className="py-3">
+                        <span className={`px-2 py-1 text-sm font-semibold rounded-full ${
+                          invoice.status === '결제완료' ? 'bg-green-100 text-green-800' :
+                          invoice.status === '발송됨' ? 'bg-blue-100 text-blue-800' :
+                          invoice.status === '미결제' ? 'bg-red-100 text-red-800' :
+                          'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {invoice.status}
+                        </span>
+                      </td>
+                      <td className="py-3 text-base text-gray-600">{invoice.date}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="5" className="py-6 text-center text-gray-500">
+                      아직 생성된 청구서가 없습니다.
                     </td>
-                    <td className="py-3">
-                      <span className={`px-2 py-1 text-sm font-semibold rounded-full ${
-                        invoice.status === '결제완료' ? 'bg-green-100 text-green-800' :
-                        invoice.status === '발송됨' ? 'bg-blue-100 text-blue-800' :
-                        invoice.status === '미결제' ? 'bg-red-100 text-red-800' :
-                        'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {invoice.status}
-                      </span>
-                    </td>
-                    <td className="py-3 text-base text-gray-600">{invoice.date}</td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { migrateLocalStorageToSupabase, backupLocalStorageData, hasLocalStorageData } from '../utils/dataMigration';
-import { restoreFromBackup, getCurrentDataSummary } from '../utils/dataRestore';
+import { restoreFromBackup } from '../utils/dataRestore';
 
 const MigrationPanel = () => {
   const [migrationStatus, setMigrationStatus] = useState('ready'); // ready, running, completed, error

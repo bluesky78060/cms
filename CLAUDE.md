@@ -55,8 +55,15 @@ This is a **dual-architecture system** with both a **React SPA frontend** for we
 
 **Current Implementation:**
 - **AppContext (React Context API)**: All data stored in `frontend/src/contexts/AppContext.js`
-- **In-Memory State**: No persistence between sessions
+- **localStorage Persistence**: Data persisted in browser's localStorage
+- **Data Migration System**: Complete migration infrastructure from localStorage to Supabase
+- **Backup/Restore System**: JSON-based data backup and restoration capabilities
 - **Excel as Data Source**: Primary method for bulk data import/export
+
+**Data Storage Evolution:**
+1. **Phase 1 (Current)**: localStorage with in-browser persistence
+2. **Phase 2 (Available)**: Supabase cloud database with migration tools
+3. **Phase 3 (Planned)**: Full cloud-native with real-time sync
 
 **Key Data Entities:**
 - `companyInfo`: Construction company details (single object)
@@ -74,6 +81,9 @@ This is a **dual-architecture system** with both a **React SPA frontend** for we
 **Shared Utilities:**
 - `excelUtils.js`: Complete Excel operations (import/export/templates) for all entities
 - `numberToKorean.js`: Currency formatting for Korean invoices
+- `dataMigration.js`: localStorage to Supabase migration functionality
+- `dataRestore.js`: JSON backup file restoration utilities
+- `phoneFormatter.js`: Korean phone number formatting
 
 ### Key Features
 
@@ -105,6 +115,14 @@ const handleDownloadTemplate = () => createTemplate.entityName();
 - Client-side PDF generation using `jspdf` and browser printing
 - Korean font support via Google Fonts
 - Invoice templates with company branding and legal formatting
+
+**Data Migration & Backup System:**
+- **MigrationPanel Component**: UI for data backup, restore, and migration operations
+- **Three-stage process**: 📁 데이터 백업 → 📂 데이터 복원 → 🚀 마이그레이션 시작
+- **JSON Backup**: Complete data export to timestamped JSON files
+- **File-based Restore**: Upload and restore from backup JSON files
+- **Supabase Migration**: Direct migration from localStorage to cloud database
+- **Safety Features**: Confirmation dialogs, detailed logging, error handling
 
 ### Bulk Operations
 
@@ -152,6 +170,13 @@ addWorkItemToInvoice(workItem)
 - App icon and metadata configured for Korean market
 - Build process includes React production build
 
+**Deployment Configuration:**
+- **Netlify**: Configured for automatic deployment with `netlify.toml`
+- **Node.js 18**: Specified version for consistent builds
+- **SPA Routing**: Redirects configured for single-page application
+- **Build Command**: `npm install && npm run build` for dependency resolution
+- **ESLint**: Strict mode enabled, treats warnings as errors in CI
+
 ### Backend Integration (When Needed)
 
 The backend follows FastAPI patterns with:
@@ -164,6 +189,12 @@ The backend follows FastAPI patterns with:
 - `clients`, `projects` (workplaces), `work_logs` (work items)
 - `invoices`, `invoice_lines` with proper relationships
 - Reference data for standard construction pricing
+
+**Supabase Integration:**
+- **Environment Configuration**: Database connection via `backend/.env`
+- **Transaction Pooler**: Uses Supabase pooler for connection management
+- **Migration Scripts**: Available in `backend/setup_database.py`
+- **API Layer**: Simple endpoints in `backend/app/main.py` for migration testing
 
 To integrate backend:
 1. Replace AppContext state with API calls using `axios`
@@ -194,3 +225,66 @@ To integrate backend:
 - Database integration for data persistence
 - Server-side Excel processing for large datasets
 - Caching strategies for frequently accessed data
+
+## Data Migration & Backup Patterns
+
+### Migration System Architecture
+
+**Three-Tier Approach:**
+1. **Local Storage (localStorage)**: Browser-based persistence with JSON serialization
+2. **Backup System**: File-based JSON export/import for data portability
+3. **Cloud Database (Supabase)**: PostgreSQL with migration utilities
+
+**Migration Flow:**
+```javascript
+// 1. Extract from localStorage
+const localData = extractLocalStorageData();
+
+// 2. Transform to API format
+const apiData = transformClientData(localData.CLIENTS);
+
+// 3. Send to backend
+await fetch('/api/clients', { method: 'POST', body: JSON.stringify(apiData) });
+```
+
+### Backup/Restore Patterns
+
+**Backup Creation:**
+```javascript
+// Automatic timestamped backup
+const backup = {
+  timestamp: new Date().toISOString(),
+  data: extractLocalStorageData()
+};
+downloadAsJSON(backup, `localStorage-backup-${dateStamp}.json`);
+```
+
+**Restore Process:**
+```javascript
+// File upload → Parse → Validate → Restore → Reload
+const restoreFromBackup = async (backupFile) => {
+  const data = JSON.parse(await backupFile.text());
+  Object.keys(STORAGE_KEYS).forEach(key => {
+    localStorage.setItem(STORAGE_KEYS[key], JSON.stringify(data[key]));
+  });
+  window.location.reload();
+};
+```
+
+### ESLint Configuration Considerations
+
+**Strict Mode:** The application runs ESLint in strict mode where warnings become errors during CI builds. Key patterns:
+
+- **Remove unused imports** immediately to prevent build failures
+- **Avoid unused variables** in utility functions
+- **Export only used functions** from utility modules
+- **Clean imports** when refactoring migration utilities
+
+### Development Workflow for Data Features
+
+**Adding New Migration Features:**
+1. **Update localStorage schema** in `dataMigration.js` constants
+2. **Add transformation functions** for new data types
+3. **Test backup/restore** with sample data
+4. **Update MigrationPanel UI** for new functionality
+5. **Verify Netlify deployment** passes ESLint checks

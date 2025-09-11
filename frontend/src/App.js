@@ -13,7 +13,7 @@ import CompanyInfo from './components/CompanyInfo';
 function App() {
   return (
     <AppProvider>
-      <Router basename="/construction-management-system">
+      <Router basename="/cms">
         <div className="min-h-screen bg-gray-50">
           <Navbar />
           <main>

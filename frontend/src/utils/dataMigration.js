@@ -45,34 +45,6 @@ function transformClientData(localClient) {
   };
 }
 
-// 프로젝트 데이터 변환 (localStorage의 workplace → API 형식)
-function transformProjectData(workplace, clientId) {
-  return {
-    client_id: clientId,
-    project_name: workplace.name,
-    location: workplace.address || '',
-    contract_amount: workplace.contractAmount || 0,
-    vat_mode: 'inclusive', // 기본값
-    advance_rate: 10,
-    defect_rate: 3,
-    notes: workplace.project || '',
-  };
-}
-
-// 청구서 데이터 변환
-function transformInvoiceData(localInvoice, projectMapping) {
-  return {
-    project_id: projectMapping[localInvoice.clientId] || null,
-    invoice_number: localInvoice.id,
-    issue_date: localInvoice.date,
-    due_date: localInvoice.dueDate,
-    tax_mode: 'taxable',
-    vat_rate: 10,
-    total_amount: localInvoice.amount || 0,
-    status: mapInvoiceStatus(localInvoice.status),
-    notes: localInvoice.notes || '',
-  };
-}
 
 // 청구서 상태 매핑
 function mapInvoiceStatus(localStatus) {

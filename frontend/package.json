@@ -36,7 +36,7 @@
     "wait-on": "^8.0.4"
   },
   "main": "public/electron.js",
-  "homepage": "./",
+  "homepage": "https://bluesky78060.github.io/construction-management-system",
   "scripts": {
     "start": "craco start",
     "build": "craco build",

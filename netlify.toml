@@ -3,6 +3,10 @@
   publish = "build"
   command = "npm install && npm run build"
 
+[settings]
+  # Site name preference - actual change must be done in Netlify dashboard
+  # Preferred site name: build-manager
+
 [build.environment]
   NODE_VERSION = "18"
   NPM_FLAGS = "--legacy-peer-deps"

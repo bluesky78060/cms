@@ -13,10 +13,14 @@ const MigrationPanel = () => {
     setHasData(hasLocalStorageData());
   }, []);
 
-  const handleBackupData = () => {
+  const handleBackupData = async () => {
     try {
-      backupLocalStorageData();
-      alert('데이터 백업이 완료되었습니다!');
+      const result = await backupLocalStorageData();
+      if (result.success) {
+        alert(`백업 완료!\n\n${result.message}`);
+      } else {
+        alert(`백업 실패: ${result.message}`);
+      }
     } catch (error) {
       alert('백업 중 오류가 발생했습니다: ' + error.message);
     }

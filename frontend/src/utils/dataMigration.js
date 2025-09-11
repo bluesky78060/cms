@@ -124,25 +124,85 @@ export async function migrateLocalStorageToSupabase() {
   }
 }
 
-// 마이그레이션 후 localStorage 백업
-export function backupLocalStorageData() {
-  const localData = extractLocalStorageData();
-  const backup = {
-    timestamp: new Date().toISOString(),
-    data: localData,
-  };
-  
-  const backupJson = JSON.stringify(backup, null, 2);
-  const blob = new Blob([backupJson], { type: 'application/json' });
+// 백업 폴더 생성 및 다운로드 처리
+function downloadToBackupFolder(blob, filename) {
+  // File System Access API가 지원되는 경우 (Chrome 86+)
+  if ('showSaveFilePicker' in window) {
+    return downloadWithFileSystemAPI(blob, filename);
+  } else {
+    // 기존 방식 (일반적인 다운로드)
+    return downloadWithTraditionalMethod(blob, filename);
+  }
+}
+
+// File System Access API 사용 (Chrome 86+)
+async function downloadWithFileSystemAPI(blob, filename) {
+  try {
+    // 사용자에게 백업 폴더 선택 또는 생성 요청
+    const opts = {
+      suggestedName: filename,
+      types: [{
+        description: 'JSON 백업 파일',
+        accept: { 'application/json': ['.json'] }
+      }],
+      startIn: 'downloads'
+    };
+    
+    const fileHandle = await window.showSaveFilePicker(opts);
+    const writable = await fileHandle.createWritable();
+    await writable.write(blob);
+    await writable.close();
+    
+    return { success: true, message: '백업 파일이 선택한 위치에 저장되었습니다.' };
+  } catch (error) {
+    if (error.name !== 'AbortError') {
+      console.warn('파일 시스템 API 사용 실패, 기본 다운로드로 전환:', error);
+    }
+    return downloadWithTraditionalMethod(blob, filename);
+  }
+}
+
+// 기존 다운로드 방식 (모든 브라우저 지원)
+function downloadWithTraditionalMethod(blob, filename) {
   const url = URL.createObjectURL(blob);
-  
   const a = document.createElement('a');
   a.href = url;
-  a.download = `localStorage-backup-${new Date().toISOString().split('T')[0]}.json`;
+  a.download = filename;
+  a.style.display = 'none';
+  
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+  
+  return { 
+    success: true, 
+    message: '백업 파일이 다운로드 폴더에 저장되었습니다.\n백업 관리를 위해 별도 폴더에 정리하는 것을 권장합니다.' 
+  };
+}
+
+// 마이그레이션 후 localStorage 백업
+export async function backupLocalStorageData() {
+  const localData = extractLocalStorageData();
+  const backup = {
+    timestamp: new Date().toISOString(),
+    data: localData,
+    version: '1.0',
+    description: '건설관리시스템 데이터 백업'
+  };
+  
+  const backupJson = JSON.stringify(backup, null, 2);
+  const blob = new Blob([backupJson], { type: 'application/json' });
+  const timestamp = new Date().toISOString().split('T')[0];
+  const filename = `건설관리시스템-백업-${timestamp}.json`;
+  
+  try {
+    const result = await downloadToBackupFolder(blob, filename);
+    return result;
+  } catch (error) {
+    console.error('백업 중 오류 발생:', error);
+    return { success: false, message: `백업 실패: ${error.message}` };
+  }
 }
 
 // localStorage 데이터 존재 여부 확인

@@ -171,11 +171,14 @@ addWorkItemToInvoice(workItem)
 - Build process includes React production build
 
 **Deployment Configuration:**
-- **Netlify**: Configured for automatic deployment with `netlify.toml`
-- **Node.js 18**: Specified version for consistent builds
-- **SPA Routing**: Redirects configured for single-page application
+- **GitHub Pages**: Primary deployment via GitHub Actions workflow (`.github/workflows/deploy.yml`)
+- **Repository Name**: Short URL using `cms` repository name → `https://username.github.io/cms`
+- **SPA Routing**: GitHub Pages SPA routing with `404.html` and routing script in `index.html`
+- **React Router**: Uses `basename="/cms"` for GitHub Pages subpath routing
+- **Node.js 18**: Specified version for consistent builds with `--legacy-peer-deps` flag
 - **Build Command**: `npm install && npm run build` for dependency resolution
 - **ESLint**: Strict mode enabled, treats warnings as errors in CI
+- **Netlify**: Legacy configuration maintained in `netlify.toml` for reference
 
 ### Backend Integration (When Needed)
 
@@ -287,4 +290,34 @@ const restoreFromBackup = async (backupFile) => {
 2. **Add transformation functions** for new data types
 3. **Test backup/restore** with sample data
 4. **Update MigrationPanel UI** for new functionality
-5. **Verify Netlify deployment** passes ESLint checks
+5. **Verify GitHub Pages deployment** passes ESLint checks
+
+### GitHub Pages Deployment Workflow
+
+**Automatic Deployment:**
+- Triggers on push to `main` branch via GitHub Actions
+- Builds React app with correct `basename="/cms"` configuration
+- Deploys to `https://username.github.io/cms` automatically
+- SPA routing handled by `404.html` redirect mechanism
+
+**Manual Deployment:**
+- Can be triggered via GitHub Actions "workflow_dispatch" event
+- All builds use Node.js 18 with `--legacy-peer-deps` for compatibility
+
+**Repository Name Changes:**
+- When changing repository name, update:
+  1. `homepage` field in `frontend/package.json`
+  2. `basename` prop in `frontend/src/App.js` React Router
+  3. Rebuild and deploy for changes to take effect
+
+### User Interface Enhancements
+
+**Dashboard Features:**
+- **Backup Reminder**: Elegant notice in top-right corner encouraging daily data backup
+- **Statistics Cards**: Real-time display of monthly invoices, unpaid amounts, completed work, and client count
+- **Recent Invoices Table**: Shows latest 5 invoices with status indicators
+
+**Data Protection:**
+- Prominent backup reminder with gradient styling and 💾 icon
+- Three-tier data management: localStorage → JSON backup → Cloud database migration
+- Color-coded status indicators throughout the interface for better UX

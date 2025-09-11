@@ -69,9 +69,27 @@ function Dashboard() {
 
   return (
     <div className="p-6">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">대시보드</h1>
-        <p className="text-gray-600">청구서 발행 현황을 한눈에 확인하세요</p>
+      <div className="mb-8 flex justify-between items-start">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">대시보드</h1>
+          <p className="text-gray-600">청구서 발행 현황을 한눈에 확인하세요</p>
+        </div>
+        
+        {/* 데이터 백업 안내 */}
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-400 p-4 rounded-r-lg shadow-sm max-w-xs">
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <span className="text-blue-400 text-xl">💾</span>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-semibold text-blue-800">데이터 보호 안내</h3>
+              <p className="text-xs text-blue-600 mt-1 leading-tight">
+                소중한 데이터 보호를 위해<br />
+                <span className="font-medium">매일 백업</span>을 권장합니다
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* 통계 카드 */}

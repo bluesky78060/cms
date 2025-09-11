@@ -46,16 +46,6 @@ function transformClientData(localClient) {
 }
 
 
-// 청구서 상태 매핑
-function mapInvoiceStatus(localStatus) {
-  const statusMap = {
-    '발송대기': 'pending',
-    '발송됨': 'sent',
-    '결제완료': 'paid',
-    '미결제': 'unpaid',
-  };
-  return statusMap[localStatus] || 'pending';
-}
 
 // 마이그레이션 실행 (간단한 버전)
 export async function migrateLocalStorageToSupabase() {

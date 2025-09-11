@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { migrateLocalStorageToSupabase, backupLocalStorageData, hasLocalStorageData } from '../utils/dataMigration';
+import { restoreFromBackup, getCurrentDataSummary } from '../utils/dataRestore';
 
 const MigrationPanel = () => {
   const [migrationStatus, setMigrationStatus] = useState('ready'); // ready, running, completed, error
   const [migrationResult, setMigrationResult] = useState(null);
   const [hasData, setHasData] = useState(false);
+  const [restoreResult, setRestoreResult] = useState(null);
 
   useEffect(() => {
     // localStorage 데이터 존재 여부 확인
@@ -18,6 +20,38 @@ const MigrationPanel = () => {
     } catch (error) {
       alert('백업 중 오류가 발생했습니다: ' + error.message);
     }
+  };
+
+  const handleRestoreData = () => {
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = '.json';
+    fileInput.onchange = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      try {
+        const text = await file.text();
+        const backupData = JSON.parse(text);
+        
+        if (!window.confirm('현재 데이터를 백업 파일로 덮어쓰시겠습니까?\n기존 데이터는 삭제됩니다.')) {
+          return;
+        }
+
+        const result = restoreFromBackup(backupData);
+        setRestoreResult(result);
+
+        if (result.success) {
+          alert('데이터 복원이 완료되었습니다! 페이지를 새로고침하겠습니다.');
+          window.location.reload();
+        } else {
+          alert('데이터 복원 중 오류가 발생했습니다.');
+        }
+      } catch (error) {
+        alert('백업 파일을 읽는 중 오류가 발생했습니다: ' + error.message);
+      }
+    };
+    fileInput.click();
   };
 
   const handleMigration = async () => {
@@ -116,6 +150,7 @@ const MigrationPanel = () => {
           style={{
             padding: '10px 15px',
             marginRight: '10px',
+            marginBottom: '10px',
             backgroundColor: '#17a2b8',
             color: 'white',
             border: 'none',
@@ -128,10 +163,29 @@ const MigrationPanel = () => {
         </button>
 
         <button
+          onClick={handleRestoreData}
+          disabled={migrationStatus === 'running'}
+          style={{
+            padding: '10px 15px',
+            marginRight: '10px',
+            marginBottom: '10px',
+            backgroundColor: '#fd7e14',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: migrationStatus !== 'running' ? 'pointer' : 'not-allowed',
+            opacity: migrationStatus !== 'running' ? 1 : 0.6
+          }}
+        >
+          📂 데이터 복원
+        </button>
+
+        <button
           onClick={handleMigration}
           disabled={!hasData || migrationStatus === 'running'}
           style={{
             padding: '10px 15px',
+            marginBottom: '10px',
             backgroundColor: '#28a745',
             color: 'white',
             border: 'none',
@@ -143,6 +197,42 @@ const MigrationPanel = () => {
           {migrationStatus === 'running' ? '⏳ 마이그레이션 중...' : '🚀 마이그레이션 시작'}
         </button>
       </div>
+
+      {/* 데이터 복원 결과 표시 */}
+      {restoreResult && (
+        <div style={{
+          padding: '15px',
+          backgroundColor: restoreResult.success ? '#d4edda' : '#f8d7da',
+          border: `1px solid ${restoreResult.success ? '#c3e6cb' : '#f5c6cb'}`,
+          borderRadius: '4px',
+          color: restoreResult.success ? '#155724' : '#721c24',
+          marginBottom: '20px'
+        }}>
+          <h4>{restoreResult.success ? '✅ 데이터 복원 성공' : '❌ 데이터 복원 실패'}</h4>
+          
+          {restoreResult.summary && (
+            <div style={{ margin: '10px 0' }}>
+              <strong>복원된 데이터:</strong>
+              <ul>
+                {Object.entries(restoreResult.summary).map(([key, value]) => (
+                  <li key={key}>{key}: {value}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {restoreResult.errors && restoreResult.errors.length > 0 && (
+            <div style={{ marginTop: '10px' }}>
+              <strong>오류 목록:</strong>
+              <ul>
+                {restoreResult.errors.map((error, index) => (
+                  <li key={index} style={{ color: '#721c24' }}>{error}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* 마이그레이션 결과 표시 */}
       {migrationResult && (
@@ -242,10 +332,16 @@ const MigrationPanel = () => {
       }}>
         <p><strong>💡 사용법:</strong></p>
         <ol>
-          <li>먼저 "데이터 백업"을 클릭하여 현재 데이터를 백업하세요</li>
-          <li>"마이그레이션 시작"을 클릭하여 데이터를 Supabase로 이동합니다</li>
-          <li>마이그레이션 결과를 확인하고 문제가 있으면 백업 파일을 사용하세요</li>
+          <li><strong>데이터 백업:</strong> 현재 데이터를 JSON 파일로 백업합니다</li>
+          <li><strong>데이터 복원:</strong> 백업 파일(.json)을 선택하여 데이터를 복원합니다</li>
+          <li><strong>마이그레이션 시작:</strong> localStorage 데이터를 Supabase로 이동합니다</li>
         </ol>
+        <p><strong>⚠️ 주의사항:</strong></p>
+        <ul>
+          <li>데이터 복원 시 기존 데이터가 완전히 덮어쓰입니다</li>
+          <li>마이그레이션 전에 반드시 데이터 백업을 권장합니다</li>
+          <li>복원 후 페이지가 자동으로 새로고침됩니다</li>
+        </ul>
       </div>
     </div>
   );

@@ -3,7 +3,7 @@ import { useUser } from './UserContext';
 
 // 환경 감지: Electron 환경인지 확인
 const isElectron = () => {
-  return typeof window !== 'undefined' && window.process && window.process.type;
+  return typeof window !== 'undefined' && window.process && window.process.type && window.require;
 };
 
 // 로컬 파일 저장소 (Electron에서만 사용)
@@ -182,9 +182,13 @@ export const AppProvider = ({ children }) => {
   // 저장소 초기화
   useEffect(() => {
     const init = async () => {
-      const fileStorageReady = await initFileStorage();
+      try {
+        const fileStorageReady = await initFileStorage();
+        console.log(`[DEBUG] Storage initialized: file=${fileStorageReady}, localStorage=true`);
+      } catch (error) {
+        console.warn('[DEBUG] File storage init failed, using localStorage only:', error);
+      }
       setStorageInitialized(true);
-      console.log(`[DEBUG] Storage initialized: file=${fileStorageReady}, localStorage=true`);
     };
     init();
   }, []);

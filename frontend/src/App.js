@@ -19,7 +19,7 @@ import AdminKeygenRedirect from './components/AdminKeygenRedirect';
 // 메인 앱 컴포넌트 (로그인 후 화면)
 function MainApp() {
   return (
-    <Router basename="/cms">
+    <Router basename="/construction-management-system">
       <div className="min-h-screen bg-gray-50">
         <AdminKeygenRedirect />
         <Navbar />
@@ -80,7 +80,7 @@ function AppWithAuth() {
       }
     }
     return false;
-  }, [clearSecurityCache]);
+  }, [clearSecurityCache, handleClearSecurityCache]);
 
   // 보안 캐시 삭제 함수 (사용자 계정 정보는 보존)
   const handleClearSecurityCache = () => {
@@ -166,7 +166,7 @@ function AppWithAuth() {
         window.removeEventListener('beforeunload', handleBeforeUnload);
       };
     }
-  }, [isSecurityVerified, currentUser, validateStoredSecurityKey, forceSecurityAuth]);
+  }, [isSecurityVerified, currentUser, validateStoredSecurityKey, forceSecurityAuth, handleClearSecurityCache]);
 
   const handleSecurityAuthenticated = () => {
     setIsSecurityVerified(true);

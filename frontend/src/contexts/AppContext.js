@@ -202,7 +202,7 @@ export const AppProvider = ({ children }) => {
       // UI는 로그인 화면으로 전환되므로 데이터가 보이지 않음
       setIsDataLoaded(false);
     }
-  }, [isLoggedIn, currentUser, storageInitialized]);
+  }, [isLoggedIn, currentUser, storageInitialized, loadUserData]);
 
   // 사용자 데이터 로드 함수
   const loadUserData = async (username) => {

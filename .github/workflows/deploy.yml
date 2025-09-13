@@ -35,6 +35,16 @@ jobs:
       - name: Build React app
         run: cd frontend && npm run build
         
+      - name: List build contents
+        run: ls -la frontend/build && ls -la frontend/build/static
+        
+      - name: Verify build files
+        run: |
+          echo "Checking index.html content:"
+          head -5 frontend/build/index.html
+          echo "Checking if JS files exist:"
+          ls frontend/build/static/js/
+          
       - name: Setup Pages
         uses: actions/configure-pages@v4
         

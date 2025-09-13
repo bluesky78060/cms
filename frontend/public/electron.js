@@ -1,6 +1,10 @@
-const { app, BrowserWindow, Menu } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain } = require('electron');
 const path = require('path');
 const isDev = require('electron-is-dev');
+const { bootstrapDataDir } = require('../src/utils/bootstrapDataDir');
+
+// 전역 데이터 경로 변수
+let globalDataPath = null;
 
 function createWindow() {
   // 메인 윈도우 생성
@@ -10,9 +14,9 @@ function createWindow() {
     minWidth: 1200,
     minHeight: 800,
     webPreferences: {
-      nodeIntegration: false,
-      contextIsolation: true,
-      enableRemoteModule: false
+      nodeIntegration: true,
+      contextIsolation: false,
+      enableRemoteModule: true
     },
     icon: path.join(__dirname, 'favicon.ico'), // 아이콘 설정
     title: '건설 청구서 관리 시스템',
@@ -125,8 +129,63 @@ function createMenu() {
   Menu.setApplicationMenu(menu);
 }
 
-// 앱이 준비되면 윈도우 생성
-app.whenReady().then(createWindow);
+// IPC 핸들러 설정
+function setupIpcHandlers() {
+  // 데이터 경로 가져오기
+  ipcMain.handle('get-data-path', () => {
+    return globalDataPath;
+  });
+  
+  // 시스템 정보 가져오기
+  ipcMain.handle('get-system-info', () => {
+    return {
+      platform: process.platform,
+      arch: process.arch,
+      version: process.version,
+      appVersion: app.getVersion()
+    };
+  });
+}
+
+// 앱 초기화 함수
+async function initializeApp() {
+  try {
+    console.log('📁 데이터 폴더 초기화 중...');
+    
+    // 데이터 디렉토리 부트스트랩
+    const { dataPath, firstRun } = await bootstrapDataDir({ 
+      version: app.getVersion() || '1.0.0' 
+    });
+    
+    globalDataPath = dataPath;
+    
+    console.log(`✅ 데이터 폴더 준비 완료: ${dataPath}`);
+    if (firstRun) {
+      console.log('🎉 첫 실행: 초기 설정이 완료되었습니다.');
+    }
+    
+    // IPC 핸들러 설정
+    setupIpcHandlers();
+    
+    // 윈도우 생성
+    createWindow();
+    
+  } catch (error) {
+    console.error('❌ 앱 초기화 실패:', error);
+    
+    // 오류 다이얼로그 표시
+    const { dialog } = require('electron');
+    await dialog.showErrorBox(
+      'CMS 초기화 실패', 
+      `데이터 폴더 생성에 실패했습니다:\n\n${error.message}\n\n앱을 종료합니다.`
+    );
+    
+    app.quit();
+  }
+}
+
+// 앱이 준비되면 초기화 시작
+app.whenReady().then(initializeApp);
 
 // 모든 윈도우가 닫혔을 때
 app.on('window-all-closed', () => {

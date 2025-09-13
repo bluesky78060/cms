@@ -1,0 +1,10 @@
+{
+  "keyId": "CMS-ADMIN-2024-UNIVERSAL",
+  "issuedTo": "admin",
+  "issuedDate": "2024-09-12",
+  "expiryDate": "2025-12-31",
+  "permissions": ["read", "write", "admin"],
+  "signature": "admin_key_2024_authenticated_secure",
+  "version": "1.0",
+  "description": "admin 전용 범용 보안 키 - 어떤 컴퓨터에서든 접속 가능"
+}

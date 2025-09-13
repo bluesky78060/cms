@@ -1,0 +1,2143 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>건설 청구서 관리 시스템 - 종합 상세 설명서</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans KR', 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .presentation {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .slide {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            margin: 50px 0;
+            padding: 60px;
+            min-height: 600px;
+            page-break-after: always;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .slide::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+        
+        .slide h1 {
+            color: #2c3e50;
+            font-size: 2.8em;
+            margin-bottom: 30px;
+            text-align: center;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .slide h2 {
+            color: #34495e;
+            font-size: 2.2em;
+            margin-bottom: 25px;
+            margin-top: 40px;
+            font-weight: 600;
+            border-left: 4px solid #3498db;
+            padding-left: 20px;
+        }
+        
+        .slide h3 {
+            color: #2980b9;
+            font-size: 1.6em;
+            margin-bottom: 20px;
+            margin-top: 30px;
+            font-weight: 500;
+        }
+        
+        .slide h4 {
+            color: #27ae60;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+        
+        .slide p, .slide li {
+            font-size: 1.1em;
+            line-height: 1.8;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        
+        .slide ul {
+            padding-left: 30px;
+        }
+        
+        .slide li {
+            margin-bottom: 12px;
+            position: relative;
+        }
+        
+        .slide li::marker {
+            color: #3498db;
+        }
+        
+        .title-slide {
+            text-align: center;
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .title-slide h1 {
+            font-size: 4em;
+            color: white;
+            margin-bottom: 30px;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+        }
+        
+        .title-slide .subtitle {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            opacity: 0.95;
+            font-weight: 300;
+        }
+        
+        .title-slide .info {
+            font-size: 1.3em;
+            margin-top: 50px;
+            opacity: 0.9;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin: 30px 0;
+        }
+        
+        .feature-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 30px;
+            border-radius: 12px;
+            border-left: 6px solid #3498db;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+        }
+        
+        .feature-card h4 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .feature-card .icon {
+            font-size: 1.8em;
+            color: #3498db;
+        }
+        
+        .step-number {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+        }
+        
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: start;
+        }
+        
+        .three-column {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            align-items: start;
+        }
+        
+        .workflow-container {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 30px 0;
+            border: 2px solid #e9ecef;
+        }
+        
+        .workflow-step {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        
+        .workflow-arrow {
+            text-align: center;
+            color: #3498db;
+            font-size: 2em;
+            margin: 10px 0;
+        }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 5px solid #ffc107;
+        }
+        
+        .warning-box {
+            background: linear-gradient(135deg, #f8d7da 0%, #f1c0c3 100%);
+            border: 1px solid #dc3545;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 5px solid #dc3545;
+        }
+        
+        .success-box {
+            background: linear-gradient(135deg, #d1ecf1 0%, #b8daff 100%);
+            border: 1px solid #17a2b8;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 5px solid #17a2b8;
+        }
+        
+        .tech-specs {
+            background: #2c3e50;
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin: 30px 0;
+        }
+        
+        .tech-specs h3 {
+            color: #74b9ff;
+            border-bottom: 2px solid #74b9ff;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.95em;
+        }
+        
+        .comparison-table th,
+        .comparison-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .comparison-table th {
+            background: #3498db;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .comparison-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        .navigation {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(52, 152, 219, 0.95);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 30px;
+            font-size: 14px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        .slide-counter {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            background: rgba(52, 152, 219, 0.1);
+            color: #3498db;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+        
+        .timeline {
+            position: relative;
+            padding: 20px 0;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: #3498db;
+            transform: translateX(-50%);
+        }
+        
+        .timeline-item {
+            position: relative;
+            margin: 40px 0;
+            display: flex;
+            align-items: center;
+        }
+        
+        .timeline-item:nth-child(odd) .timeline-content {
+            margin-right: calc(50% + 30px);
+            text-align: right;
+        }
+        
+        .timeline-item:nth-child(even) .timeline-content {
+            margin-left: calc(50% + 30px);
+            text-align: left;
+        }
+        
+        .timeline-marker {
+            position: absolute;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            background: #3498db;
+            border-radius: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 0 4px white, 0 0 0 8px #3498db;
+        }
+        
+        .timeline-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            flex: 1;
+        }
+        
+        @media print {
+            .navigation, .slide-counter { display: none; }
+            body { background: white; }
+            .presentation { max-width: none; padding: 0; }
+            .slide { margin: 20px 0; padding: 40px; box-shadow: none; }
+            .slide::before { display: none; }
+        }
+        
+        @media (max-width: 768px) {
+            .two-column, .three-column { grid-template-columns: 1fr; }
+            .slide { padding: 30px; }
+            .slide h1 { font-size: 2.2em; }
+            .title-slide h1 { font-size: 2.8em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation">
+        
+        <!-- Slide 1: 표지 -->
+        <div class="slide title-slide">
+            <div class="slide-counter">1/25</div>
+            <h1>🏗️ 건설 청구서 관리 시스템</h1>
+            <div class="subtitle">Construction Management System</div>
+            <div class="subtitle">종합 사용 설명서 (Comprehensive User Manual)</div>
+            <div class="info">
+                <p><strong>Version 2.0</strong> | 2025년 9월 업데이트</p>
+                <p>React + GitHub Pages 기반 웹 애플리케이션</p>
+                <p>완전한 로컬 데이터 저장 방식</p>
+                <br>
+                <p>📧 bluesky78060@gmail.com | 📞 010-7137-8720</p>
+            </div>
+        </div>
+
+        <!-- Slide 2: 목차 -->
+        <div class="slide">
+            <div class="slide-counter">2/25</div>
+            <h1>📋 목차 (Table of Contents)</h1>
+            <div class="two-column">
+                <div>
+                    <h3>시스템 기본</h3>
+                    <p><span class="step-number">1</span>시스템 개요 및 특징</p>
+                    <p><span class="step-number">2</span>기술 사양 및 요구사항</p>
+                    <p><span class="step-number">3</span>배포 및 접속 방법</p>
+                    <p><span class="step-number">4</span>메인 대시보드 구성</p>
+                    
+                    <h3>환경 설정</h3>
+                    <p><span class="step-number">5</span>업체 정보 관리</p>
+                    <p><span class="step-number">6</span>도장 관리 시스템</p>
+                    
+                    <h3>핵심 기능</h3>
+                    <p><span class="step-number">7</span>건축주 관리 시스템</p>
+                    <p><span class="step-number">8</span>작업 항목 관리</p>
+                    <p><span class="step-number">9</span>견적서 작성 및 관리</p>
+                </div>
+                <div>
+                    <h3>업무 프로세스</h3>
+                    <p><span class="step-number">10</span>청구서 발행 시스템</p>
+                    <p><span class="step-number">11</span>PDF 문서 생성</p>
+                    <p><span class="step-number">12</span>Excel 데이터 연동</p>
+                    
+                    <h3>데이터 관리</h3>
+                    <p><span class="step-number">13</span>데이터 백업 시스템</p>
+                    <p><span class="step-number">14</span>마이그레이션 도구</p>
+                    
+                    <h3>고급 활용</h3>
+                    <p><span class="step-number">15</span>업무 워크플로우</p>
+                    <p><span class="step-number">16</span>효율적 사용 방법</p>
+                    <p><span class="step-number">17</span>문제해결 가이드</p>
+                    <p><span class="step-number">18</span>보안 및 유지관리</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: 시스템 개요 -->
+        <div class="slide">
+            <div class="slide-counter">3/25</div>
+            <h1>🎯 시스템 개요 및 특징</h1>
+            
+            <div class="success-box">
+                <h3>💡 프로젝트 목표</h3>
+                <p><strong>건설업 현장의 디지털 전환</strong>을 통한 업무 효율성 극대화 및 문서 관리의 체계화</p>
+            </div>
+
+            <h2>🌟 핵심 특징</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h4><span class="icon">🌐</span>웹 기반 접근성</h4>
+                    <p>GitHub Pages 배포로 언제 어디서나 접속 가능</p>
+                    <p>설치 불필요, URL만으로 즉시 사용</p>
+                </div>
+                <div class="feature-card">
+                    <h4><span class="icon">💾</span>로컬 데이터 저장</h4>
+                    <p>브라우저 localStorage 기반</p>
+                    <p>인터넷 없이도 완전한 기능 사용</p>
+                </div>
+                <div class="feature-card">
+                    <h4><span class="icon">📊</span>Excel 완전 호환</h4>
+                    <p>기존 Excel 데이터 일괄 가져오기</p>
+                    <p>표준 템플릿 제공 및 데이터 검증</p>
+                </div>
+                <div class="feature-card">
+                    <h4><span class="icon">🖨️</span>전문 문서 출력</h4>
+                    <p>도장이 포함된 PDF 자동 생성</p>
+                    <p>한국 건설업계 표준 양식 준수</p>
+                </div>
+                <div class="feature-card">
+                    <h4><span class="icon">🔒</span>데이터 보안</h4>
+                    <p>모든 데이터가 사용자 기기에만 저장</p>
+                    <p>외부 서버 전송 없음으로 보안 극대화</p>
+                </div>
+                <div class="feature-card">
+                    <h4><span class="icon">⚡</span>실시간 업데이트</h4>
+                    <p>GitHub Actions 자동 배포</p>
+                    <p>새로운 기능 자동 업데이트</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: 기술 사양 -->
+        <div class="slide">
+            <div class="slide-counter">4/25</div>
+            <h1>⚙️ 기술 사양 및 시스템 요구사항</h1>
+            
+            <div class="tech-specs">
+                <h3>🛠️ 기술 스택 (Technology Stack)</h3>
+                <div class="two-column">
+                    <div>
+                        <p><strong>Frontend:</strong> React 18.2.0</p>
+                        <p><strong>UI Framework:</strong> Tailwind CSS 3.2.7</p>
+                        <p><strong>상태 관리:</strong> React Context API</p>
+                        <p><strong>PDF 생성:</strong> jsPDF + AutoTable</p>
+                    </div>
+                    <div>
+                        <p><strong>Excel 처리:</strong> SheetJS (xlsx) 0.18.5</p>
+                        <p><strong>데이터 저장:</strong> Browser localStorage</p>
+                        <p><strong>배포:</strong> GitHub Pages</p>
+                        <p><strong>빌드 도구:</strong> CRACO (Create React App Config)</p>
+                    </div>
+                </div>
+            </div>
+
+            <h2>📱 지원 브라우저 및 환경</h2>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>브라우저</th>
+                        <th>최소 버전</th>
+                        <th>권장 버전</th>
+                        <th>특별 요구사항</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Google Chrome</td>
+                        <td>70+</td>
+                        <td>최신 버전</td>
+                        <td>JavaScript 활성화 필수</td>
+                    </tr>
+                    <tr>
+                        <td>Mozilla Firefox</td>
+                        <td>65+</td>
+                        <td>최신 버전</td>
+                        <td>localStorage 사용 허용</td>
+                    </tr>
+                    <tr>
+                        <td>Safari</td>
+                        <td>12+</td>
+                        <td>최신 버전</td>
+                        <td>쿠키 및 사이트 데이터 허용</td>
+                    </tr>
+                    <tr>
+                        <td>Microsoft Edge</td>
+                        <td>79+</td>
+                        <td>최신 버전</td>
+                        <td>팝업 차단 해제 권장</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="two-column">
+                <div class="highlight-box">
+                    <h4>💻 권장 시스템 사양</h4>
+                    <ul>
+                        <li>화면 해상도: 1024×768 이상</li>
+                        <li>RAM: 4GB 이상</li>
+                        <li>저장 공간: 100MB (브라우저 캐시)</li>
+                        <li>인터넷 연결: 초기 로드시에만 필요</li>
+                    </ul>
+                </div>
+                <div class="warning-box">
+                    <h4>⚠️ 주의사항</h4>
+                    <ul>
+                        <li>브라우저 시크릿 모드에서는 데이터 유지 불가</li>
+                        <li>브라우저 캐시 삭제 시 데이터 손실</li>
+                        <li>정기적인 Excel 백업 필수</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: 배포 및 접속 -->
+        <div class="slide">
+            <div class="slide-counter">5/25</div>
+            <h1>🌐 배포 및 접속 방법</h1>
+            
+            <h2>📡 GitHub Pages 배포 시스템</h2>
+            <div class="workflow-container">
+                <div class="workflow-step">
+                    <span class="step-number">1</span>
+                    <div>
+                        <h4>자동 배포 프로세스</h4>
+                        <p>GitHub Actions를 통한 자동 빌드 및 배포</p>
+                        <p><code>main</code> 브랜치 업데이트 시 자동 실행</p>
+                    </div>
+                </div>
+                <div class="workflow-arrow">⬇️</div>
+                <div class="workflow-step">
+                    <span class="step-number">2</span>
+                    <div>
+                        <h4>React 앱 빌드</h4>
+                        <p>Node.js 18 환경에서 프로덕션 빌드</p>
+                        <p><code>npm run build</code> 명령어 실행</p>
+                    </div>
+                </div>
+                <div class="workflow-arrow">⬇️</div>
+                <div class="workflow-step">
+                    <span class="step-number">3</span>
+                    <div>
+                        <h4>GitHub Pages 배포</h4>
+                        <p>빌드된 정적 파일을 GitHub Pages에 업로드</p>
+                        <p>SPA 라우팅을 위한 404.html 구성</p>
+                    </div>
+                </div>
+            </div>
+
+            <h2>🔗 접속 주소 및 방법</h2>
+            <div class="success-box">
+                <h3>메인 접속 주소</h3>
+                <p style="font-size: 1.4em; font-weight: 600; color: #2c3e50;">
+                    🌐 <a href="https://bluesky78060.github.io/cms" style="color: #3498db;">https://bluesky78060.github.io/cms</a>
+                </p>
+                <p>※ 북마크 추가 권장 - 자주 사용하는 업무 도구로 등록</p>
+            </div>
+
+            <div class="two-column">
+                <div>
+                    <h3>✅ 접속 확인 방법</h3>
+                    <ul>
+                        <li>URL 입력 후 3-5초 대기</li>
+                        <li>메인 대시보드 화면 확인</li>
+                        <li>상단 네비게이션 메뉴 정상 표시</li>
+                        <li>우측 상단 "데이터 백업 안내" 표시</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3>🔧 연결 문제 해결</h3>
+                    <ul>
+                        <li>브라우저 새로고침 (F5 또는 Ctrl+R)</li>
+                        <li>브라우저 캐시 삭제</li>
+                        <li>다른 브라우저로 접속 시도</li>
+                        <li>인터넷 연결 상태 확인</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: 메인 대시보드 -->
+        <div class="slide">
+            <div class="slide-counter">6/25</div>
+            <h1>🏠 메인 대시보드 구성</h1>
+            
+            <h2>📊 실시간 통계 카드</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h4><span class="icon">📄</span>이번 달 청구서</h4>
+                    <p>현재 월 발행된 청구서 수량</p>
+                    <p>자동 계산 및 실시간 업데이트</p>
+                </div>
+                <div class="feature-card">
+                    <h4><span class="icon">💰</span>미수금 현황</h4>
+                    <p>미결제 + 발송됨 상태의 총액</p>
+                    <p>한국어 숫자 표기법 지원</p>
+                </div>
+                <div class="feature-card">
+                    <h4><span class="icon">✅</span>완료된 작업</h4>
+                    <p>완료 상태의 작업 항목 수</p>
+                    <p>진행률 및 성과 추적</p>
+                </div>
+                <div class="feature-card">
+                    <h4><span class="icon">👥</span>등록된 건축주</h4>
+                    <p>시스템에 등록된 총 건축주 수</p>
+                    <p>고객 관리 현황 파악</p>
+                </div>
+            </div>
+
+            <h2>🎛️ 네비게이션 구조</h2>
+            <div class="two-column">
+                <div>
+                    <h3>주 메뉴 (Primary Menu)</h3>
+                    <ul>
+                        <li><strong>대시보드:</strong> 현황 요약 및 최근 활동</li>
+                        <li><strong>견적서:</strong> 견적서 작성 및 관리</li>
+                        <li><strong>청구서:</strong> 청구서 발행 및 추적</li>
+                        <li><strong>건축주:</strong> 고객 정보 관리</li>
+                        <li><strong>작업 항목:</strong> 프로젝트 작업 관리</li>
+                        <li><strong>업체 정보:</strong> 환경설정 및 도장 관리</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3>특별 기능</h3>
+                    <div class="highlight-box">
+                        <h4>💾 데이터 백업 안내</h4>
+                        <p>우측 상단에 상시 표시</p>
+                        <p>"매일 백업을 권장합니다" 메시지</p>
+                        <p>그라데이션 배경과 아이콘으로 강조</p>
+                    </div>
+                    <div class="success-box">
+                        <h4>📋 최근 청구서 테이블</h4>
+                        <p>최신 5개 청구서 요약 표시</p>
+                        <p>상태별 색상 구분</p>
+                        <p>클릭 시 상세 정보 확인</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: 업체정보 관리 -->
+        <div class="slide">
+            <div class="slide-counter">7/25</div>
+            <h1>🏢 업체 정보 관리</h1>
+            
+            <h2>📝 설정 가능 항목</h2>
+            <div class="three-column">
+                <div class="feature-card">
+                    <h4>기본 정보</h4>
+                    <ul style="font-size: 0.95em;">
+                        <li>업체명 (필수)</li>
+                        <li>사업자등록번호</li>
+                        <li>대표자명</li>
+                        <li>설립일</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <h4>연락 정보</h4>
+                    <ul style="font-size: 0.95em;">
+                        <li>사업장 주소</li>
+                        <li>전화번호</li>
+                        <li>팩스번호</li>
+                        <li>이메일 주소</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <h4>금융 정보</h4>
+                    <ul style="font-size: 0.95em;">
+                        <li>은행명</li>
+                        <li>계좌번호</li>
+                        <li>예금주명</li>
+                        <li>사업자 분류</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h2>🔄 정보 활용 방식</h2>
+            <div class="workflow-container">
+                <div class="workflow-step">
+                    <span class="step-number">1</span>
+                    <div>
+                        <h4>자동 문서 생성</h4>
+                        <p>견적서 및 청구서 상단에 업체 정보 자동 삽입</p>
+                    </div>
+                </div>
+                <div class="workflow-arrow">→</div>
+                <div class="workflow-step">
+                    <span class="step-number">2</span>
+                    <div>
+                        <h4>계좌 정보 표시</h4>
+                        <p>청구서 하단에 입금 계좌 정보 자동 포함</p>
+                    </div>
+                </div>
+                <div class="workflow-arrow">→</div>
+                <div class="workflow-step">
+                    <span class="step-number">3</span>
+                    <div>
+                        <h4>법적 문서 규격</h4>
+                        <p>사업자등록번호 등 법정 필수 정보 표시</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <h3>💡 설정 팁</h3>
+                <ul>
+                    <li><strong>정확성 확인:</strong> 사업자등록번호, 계좌번호 등 숫자 정보 재확인</li>
+                    <li><strong>주소 완성:</strong> 우편번호를 포함한 전체 주소 입력</li>
+                    <li><strong>연락처 형식:</strong> 하이픈(-)을 포함한 표준 형식 사용</li>
+                    <li><strong>실시간 저장:</strong> 입력 즉시 localStorage에 자동 저장</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 8: 도장 관리 시스템 -->
+        <div class="slide">
+            <div class="slide-counter">8/25</div>
+            <h1>🔒 도장 관리 시스템</h1>
+            
+            <h2>📷 지원 이미지 규격</h2>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>항목</th>
+                        <th>권장 사양</th>
+                        <th>지원 범위</th>
+                        <th>비고</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>파일 형식</td>
+                        <td>PNG (투명배경)</td>
+                        <td>PNG, JPG, JPEG</td>
+                        <td>투명 배경 PNG 권장</td>
+                    </tr>
+                    <tr>
+                        <td>파일 크기</td>
+                        <td>1MB 이하</td>
+                        <td>5MB 이하</td>
+                        <td>로딩 속도 고려</td>
+                    </tr>
+                    <tr>
+                        <td>이미지 크기</td>
+                        <td>300×300px</td>
+                        <td>100×100px ~ 1000×1000px</td>
+                        <td>정사각형 권장</td>
+                    </tr>
+                    <tr>
+                        <td>해상도</td>
+                        <td>300 DPI</td>
+                        <td>72 DPI 이상</td>
+                        <td>인쇄 품질 고려</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>🛠️ 도장 업로드 프로세스</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-marker"></div>
+                    <div class="timeline-content">
+                        <h4>1단계: 이미지 선택</h4>
+                        <p>파일 선택 버튼 클릭 또는 드래그 앤 드롭</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker"></div>
+                    <div class="timeline-content">
+                        <h4>2단계: 자동 검증</h4>
+                        <p>파일 형식, 크기, 해상도 자동 확인</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker"></div>
+                    <div class="timeline-content">
+                        <h4>3단계: 미리보기</h4>
+                        <p>업로드된 이미지 실시간 미리보기 제공</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker"></div>
+                    <div class="timeline-content">
+                        <h4>4단계: 저장 완료</h4>
+                        <p>localStorage에 Base64 형태로 영구 저장</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="two-column">
+                <div class="success-box">
+                    <h4>✅ 도장 최적화 가이드</h4>
+                    <ul>
+                        <li>스캔 시 300DPI 이상 사용</li>
+                        <li>배경 제거 후 PNG 저장</li>
+                        <li>도장 테두리만 남기고 여백 제거</li>
+                        <li>명도/대비 조정으로 선명도 향상</li>
+                    </ul>
+                </div>
+                <div class="warning-box">
+                    <h4>⚠️ 주의사항</h4>
+                    <ul>
+                        <li>개인 도장의 무단 사용 금지</li>
+                        <li>법인 도장 사용 권한 확인</li>
+                        <li>이미지 파일 별도 백업 권장</li>
+                        <li>브라우저 변경 시 재업로드 필요</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: 건축주 관리 시스템 -->
+        <div class="slide">
+            <div class="slide-counter">9/25</div>
+            <h1>👥 건축주 관리 시스템</h1>
+            
+            <h2>📊 건축주 정보 구조</h2>
+            <div class="workflow-container">
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <div style="background: #3498db; color: white; padding: 15px; border-radius: 8px; display: inline-block;">
+                        <h4>건축주 (Client)</h4>
+                        <p>기본 정보 + 연락처 + 주소</p>
+                    </div>
+                </div>
+                <div class="workflow-arrow">⬇️</div>
+                <div style="text-align: center; margin: 20px 0;">
+                    <div style="background: #27ae60; color: white; padding: 15px; border-radius: 8px; display: inline-block;">
+                        <h4>작업장 (Workplace)</h4>
+                        <p>프로젝트별 작업 위치</p>
+                    </div>
+                </div>
+                <div class="workflow-arrow">⬇️</div>
+                <div style="text-align: center;">
+                    <div style="background: #e74c3c; color: white; padding: 15px; border-radius: 8px; display: inline-block;">
+                        <h4>작업 항목 (Work Items)</h4>
+                        <p>실제 수행 작업 및 진행 상황</p>
+                    </div>
+                </div>
+            </div>
+
+            <h2>🔍 고급 검색 및 필터링</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h4><span class="icon">🔍</span>통합 검색</h4>
+                    <p>건축주명, 전화번호, 주소 통합 검색</p>
+                    <p>실시간 자동완성 지원</p>
+                </div>
+                <div class="feature-card">
+                    <h4><span class="icon">📋</span>상태별 분류</h4>
+                    <p>활성/비활성 건축주 구분</p>
+                    <p>미수금 유무에 따른 필터링</p>
+                </div>
+                <div class="feature-card">
+                    <h4><span class="icon">📈</span>통계 정보</h4>
+                    <p>건축주별 총 청구액</p>
+                    <p>완료된 프로젝트 수</p>
+                </div>
+                <div class="feature-card">
+                    <h4><span class="icon">📊</span>관계 추적</h4>
+                    <p>연관된 견적서/청구서 연결</p>
+                    <p>작업 진행 상황 실시간 업데이트</p>
+                </div>
+            </div>
+
+            <h2>📝 건축주 등록 필수/선택 항목</h2>
+            <div class="two-column">
+                <div>
+                    <div style="border: 3px solid #e74c3c; border-radius: 8px; padding: 20px;">
+                        <h3 style="color: #e74c3c;">🚨 필수 정보</h3>
+                        <ul>
+                            <li><strong>건축주명:</strong> 개인/법인명</li>
+                            <li><strong>연락처:</strong> 최소 1개 이상</li>
+                            <li><strong>주소:</strong> 기본 주소 정보</li>
+                            <li><strong>작업장:</strong> 최소 1개 작업장</li>
+                        </ul>
+                    </div>
+                </div>
+                <div>
+                    <div style="border: 3px solid #27ae60; border-radius: 8px; padding: 20px;">
+                        <h3 style="color: #27ae60;">📋 선택 정보</h3>
+                        <ul>
+                            <li><strong>이메일:</strong> 문서 발송용</li>
+                            <li><strong>팩스번호:</strong> 공식 문서 전송</li>
+                            <li><strong>사업자번호:</strong> 법인 고객용</li>
+                            <li><strong>특이사항:</strong> 메모 및 참고사항</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: 작업 항목 관리 -->
+        <div class="slide">
+            <div class="slide-counter">10/25</div>
+            <h1>⚒️ 작업 항목 관리</h1>
+            
+            <h2>🔄 작업 상태 관리 시스템</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-marker" style="background: #ffc107;"></div>
+                    <div class="timeline-content" style="border-left: 4px solid #ffc107;">
+                        <h4>예정 (Scheduled)</h4>
+                        <p>계약 완료, 작업 시작 예정 상태</p>
+                        <p><strong>표시 색상:</strong> 노란색 (#ffc107)</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker" style="background: #007bff;"></div>
+                    <div class="timeline-content" style="border-left: 4px solid #007bff;">
+                        <h4>진행중 (In Progress)</h4>
+                        <p>현재 작업이 진행되고 있는 상태</p>
+                        <p><strong>표시 색상:</strong> 파란색 (#007bff)</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker" style="background: #28a745;"></div>
+                    <div class="timeline-content" style="border-left: 4px solid #28a745;">
+                        <h4>완료 (Completed)</h4>
+                        <p>작업이 완전히 완료된 상태</p>
+                        <p><strong>표시 색상:</strong> 초록색 (#28a745)</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker" style="background: #dc3545;"></div>
+                    <div class="timeline-content" style="border-left: 4px solid #dc3545;">
+                        <h4>보류 (On Hold)</h4>
+                        <p>일시적으로 중단된 상태</p>
+                        <p><strong>표시 색상:</strong> 빨간색 (#dc3545)</p>
+                    </div>
+                </div>
+            </div>
+
+            <h2>⚡ 일괄 작업 등록 기능</h2>
+            <div class="success-box">
+                <h3>🎯 일괄 등록의 효율성</h3>
+                <p>동일한 건축주의 여러 작업을 한 번에 등록하여 <strong>입력 시간을 90% 단축</strong></p>
+            </div>
+
+            <div class="workflow-container">
+                <h4>📋 일괄 등록 프로세스</h4>
+                <div class="workflow-step">
+                    <span class="step-number">1</span>
+                    <div>
+                        <strong>건축주 선택:</strong> 드롭다운에서 기존 건축주 선택 또는 신규 등록
+                    </div>
+                </div>
+                <div class="workflow-step">
+                    <span class="step-number">2</span>
+                    <div>
+                        <strong>작업장 지정:</strong> 해당 건축주의 작업장 중 선택
+                    </div>
+                </div>
+                <div class="workflow-step">
+                    <span class="step-number">3</span>
+                    <div>
+                        <strong>작업 항목 추가:</strong> "+" 버튼으로 다중 작업 항목 입력
+                    </div>
+                </div>
+                <div class="workflow-step">
+                    <span class="step-number">4</span>
+                    <div>
+                        <strong>가격 계산:</strong> 단가 × 수량 자동 계산 및 총액 표시
+                    </div>
+                </div>
+                <div class="workflow-step">
+                    <span class="step-number">5</span>
+                    <div>
+                        <strong>일괄 저장:</strong> 모든 항목을 동일한 조건으로 한 번에 등록
+                    </div>
+                </div>
+            </div>
+
+            <div class="two-column">
+                <div class="feature-card">
+                    <h4>📊 가격 관리</h4>
+                    <ul style="font-size: 0.9em;">
+                        <li>기본 단가 템플릿 제공</li>
+                        <li>작업별 표준 단가 설정</li>
+                        <li>할인/할증 요율 적용</li>
+                        <li>부가세 자동 계산</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <h4>🔍 고급 필터링</h4>
+                    <ul style="font-size: 0.9em;">
+                        <li>상태별 작업 항목 분류</li>
+                        <li>건축주별 작업 현황</li>
+                        <li>기간별 완료 작업 조회</li>
+                        <li>금액 범위별 검색</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 11: 견적서 작성 및 관리 -->
+        <div class="slide">
+            <div class="slide-counter">11/25</div>
+            <h1>📋 견적서 작성 및 관리</h1>
+            
+            <h2>✍️ 견적서 작성 워크플로우</h2>
+            <div class="workflow-container">
+                <div class="workflow-step">
+                    <span class="step-number">1</span>
+                    <div>
+                        <h4>프로젝트 정보 설정</h4>
+                        <p>건축주, 작업장, 프로젝트명, 견적 유효기간 입력</p>
+                    </div>
+                </div>
+                <div class="workflow-arrow">⬇️</div>
+                <div class="workflow-step">
+                    <span class="step-number">2</span>
+                    <div>
+                        <h4>작업 항목 구성</h4>
+                        <p>카테고리별 작업 추가, 수량 및 단가 설정</p>
+                    </div>
+                </div>
+                <div class="workflow-arrow">⬇️</div>
+                <div class="workflow-step">
+                    <span class="step-number">3</span>
+                    <div>
+                        <h4>금액 계산 및 검토</h4>
+                        <p>부가세 포함 총액 자동 계산, 할인 적용</p>
+                    </div>
+                </div>
+                <div class="workflow-arrow">⬇️</div>
+                <div class="workflow-step">
+                    <span class="step-number">4</span>
+                    <div>
+                        <h4>PDF 생성 및 발송</h4>
+                        <p>전문 양식의 PDF 생성, 도장 자동 포함</p>
+                    </div>
+                </div>
+            </div>
+
+            <h2>📊 견적서 상태 관리</h2>
+            <div class="feature-grid">
+                <div class="feature-card" style="border-left-color: #ffc107;">
+                    <h4><span class="icon">📝</span>작성중</h4>
+                    <p>견적서 초안 작성 단계</p>
+                    <p>수정 및 편집 가능</p>
+                </div>
+                <div class="feature-card" style="border-left-color: #17a2b8;">
+                    <h4><span class="icon">📤</span>발송됨</h4>
+                    <p>고객에게 전달된 상태</p>
+                    <p>응답 대기 중</p>
+                </div>
+                <div class="feature-card" style="border-left-color: #28a745;">
+                    <h4><span class="icon">✅</span>승인됨</h4>
+                    <p>고객이 견적을 승인</p>
+                    <p>작업 항목으로 자동 전환</p>
+                </div>
+                <div class="feature-card" style="border-left-color: #dc3545;">
+                    <h4><span class="icon">❌</span>거부됨</h4>
+                    <p>고객이 견적을 거부</p>
+                    <p>수정 후 재발송 가능</p>
+                </div>
+            </div>
+
+            <h2>💼 견적서 템플릿 구성</h2>
+            <div class="two-column">
+                <div>
+                    <h3>📄 상단부 (Header)</h3>
+                    <ul>
+                        <li>업체 정보 (회사명, 주소, 연락처)</li>
+                        <li>견적서 제목 및 번호</li>
+                        <li>작성일자 및 유효기간</li>
+                        <li>건축주 정보</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3>📊 본문부 (Body)</h3>
+                    <ul>
+                        <li>작업 항목별 상세 내역</li>
+                        <li>수량, 단가, 금액 표시</li>
+                        <li>부가세 별도 표기</li>
+                        <li>총 견적 금액 (한글 표기 포함)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <h3>💡 견적서 작성 팁</h3>
+                <ul>
+                    <li><strong>상세 기술:</strong> 작업 범위와 포함/제외 사항 명확히 기재</li>
+                    <li><strong>단가 근거:</strong> 표준 단가표 기준으로 합리적 가격 설정</li>
+                    <li><strong>유효기간:</strong> 자재비 변동을 고려하여 적절한 기간 설정</li>
+                    <li><strong>추가 조건:</strong> 결제 조건, 작업 기간, 보증 내용 포함</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 12: 청구서 발행 시스템 -->
+        <div class="slide">
+            <div class="slide-counter">12/25</div>
+            <h1>💰 청구서 발행 시스템</h1>
+            
+            <h2>🔄 청구서 발행 프로세스</h2>
+            <div class="workflow-container">
+                <div class="workflow-step">
+                    <span class="step-number">1</span>
+                    <div>
+                        <h4>완료 작업 확인</h4>
+                        <p>작업 항목 목록에서 "완료" 상태 작업 자동 추출</p>
+                        <p>건축주별 완료 작업 그룹핑</p>
+                    </div>
+                </div>
+                <div class="workflow-arrow">⬇️</div>
+                <div class="workflow-step">
+                    <span class="step-number">2</span>
+                    <div>
+                        <h4>청구 대상 선택</h4>
+                        <p>체크박스를 통한 다중 선택</p>
+                        <p>동일 건축주 작업만 선택 가능 (자동 검증)</p>
+                    </div>
+                </div>
+                <div class="workflow-arrow">⬇️</div>
+                <div class="workflow-step">
+                    <span class="step-number">3</span>
+                    <div>
+                        <h4>청구서 정보 입력</h4>
+                        <p>청구서 제목, 발행일, 결제 조건 설정</p>
+                        <p>총 청구 금액 자동 계산 및 표시</p>
+                    </div>
+                </div>
+                <div class="workflow-arrow">⬇️</div>
+                <div class="workflow-step">
+                    <span class="step-number">4</span>
+                    <div>
+                        <h4>PDF 생성 및 관리</h4>
+                        <p>전문 양식의 청구서 PDF 자동 생성</p>
+                        <p>도장 이미지 자동 삽입</p>
+                    </div>
+                </div>
+            </div>
+
+            <h2>💳 청구서 상태 추적</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-marker" style="background: #6c757d;"></div>
+                    <div class="timeline-content">
+                        <h4>작성중 (Draft)</h4>
+                        <p>청구서 초안 단계, 수정 가능</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker" style="background: #007bff;"></div>
+                    <div class="timeline-content">
+                        <h4>발송됨 (Sent)</h4>
+                        <p>고객에게 전달됨, 입금 대기 중</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker" style="background: #ffc107;"></div>
+                    <div class="timeline-content">
+                        <h4>미결제 (Unpaid)</h4>
+                        <p>결제 기한 초과, 독촉 필요</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker" style="background: #28a745;"></div>
+                    <div class="timeline-content">
+                        <h4>결제완료 (Paid)</h4>
+                        <p>입금 확인 완료, 거래 종료</p>
+                    </div>
+                </div>
+            </div>
+
+            <h2>📊 청구서 구성 요소</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h4><span class="icon">🏢</span>업체 정보부</h4>
+                    <p>회사명, 주소, 연락처</p>
+                    <p>사업자등록번호</p>
+                    <p>도장 이미지 자동 삽입</p>
+                </div>
+                <div class="feature-card">
+                    <h4><span class="icon">👤</span>고객 정보부</h4>
+                    <p>건축주명 및 주소</p>
+                    <p>프로젝트명</p>
+                    <p>청구서 발행일</p>
+                </div>
+                <div class="feature-card">
+                    <h4><span class="icon">📋</span>작업 내역부</h4>
+                    <p>완료된 작업 항목 목록</p>
+                    <p>수량, 단가, 금액</p>
+                    <p>부가세 별도 표시</p>
+                </div>
+                <div class="feature-card">
+                    <h4><span class="icon">💰</span>결제 정보부</h4>
+                    <p>총 청구 금액</p>
+                    <p>한국어 금액 표기</p>
+                    <p>계좌 정보 (입금 안내)</p>
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <h3>⚠️ 청구서 발행 시 주의사항</h3>
+                <ul>
+                    <li><strong>작업 완료 확인:</strong> 실제로 완료된 작업만 포함</li>
+                    <li><strong>금액 검증:</strong> 견적서와 실제 작업 범위 일치 여부 확인</li>
+                    <li><strong>결제 조건:</strong> 계약서의 결제 조건과 일치하는지 확인</li>
+                    <li><strong>법적 요건:</strong> 사업자등록번호, 계좌 정보 정확성 확인</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 13: PDF 문서 생성 -->
+        <div class="slide">
+            <div class="slide-counter">13/25</div>
+            <h1>🖨️ PDF 문서 생성 시스템</h1>
+            
+            <h2>🔧 PDF 생성 기술 스택</h2>
+            <div class="tech-specs">
+                <div class="two-column">
+                    <div>
+                        <h3>핵심 라이브러리</h3>
+                        <p><strong>jsPDF:</strong> 클라이언트 사이드 PDF 생성</p>
+                        <p><strong>jsPDF-AutoTable:</strong> 표 형태 데이터 자동 배치</p>
+                        <p><strong>한글 폰트:</strong> Google Fonts 나눔고딕 사용</p>
+                    </div>
+                    <div>
+                        <h3>브라우저 기능 활용</h3>
+                        <p><strong>Print API:</strong> 브라우저 내장 인쇄 기능</p>
+                        <p><strong>Canvas API:</strong> 도장 이미지 렌더링</p>
+                        <p><strong>LocalStorage:</strong> 도장 이미지 저장</p>
+                    </div>
+                </div>
+            </div>
+
+            <h2>📄 PDF 문서 구성</h2>
+            <div class="workflow-container">
+                <div class="workflow-step">
+                    <span class="step-number">1</span>
+                    <div>
+                        <h4>문서 헤더 생성</h4>
+                        <p>업체 로고, 회사명, 연락처 정보</p>
+                        <p>문서 제목 및 발행일 자동 삽입</p>
+                    </div>
+                </div>
+                <div class="workflow-arrow">⬇️</div>
+                <div class="workflow-step">
+                    <span class="step-number">2</span>
+                    <div>
+                        <h4>고객 정보 영역</h4>
+                        <p>건축주명, 주소, 연락처</p>
+                        <p>프로젝트명 및 작업 기간</p>
+                    </div>
+                </div>
+                <div class="workflow-arrow">⬇️</div>
+                <div class="workflow-step">
+                    <span class="step-number">3</span>
+                    <div>
+                        <h4>작업 내역 테이블</h4>
+                        <p>작업명, 수량, 단가, 금액 표 형태</p>
+                        <p>자동 페이지 분할 및 헤더 반복</p>
+                    </div>
+                </div>
+                <div class="workflow-arrow">⬇️</div>
+                <div class="workflow-step">
+                    <span class="step-number">4</span>
+                    <div>
+                        <h4>합계 및 서명</h4>
+                        <p>부가세 포함 총액 계산</p>
+                        <p>한국어 금액 표기 + 도장 이미지</p>
+                    </div>
+                </div>
+            </div>
+
+            <h2>🎨 PDF 스타일링 특징</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h4><span class="icon">🇰🇷</span>한국어 최적화</h4>
+                    <p>나눔고딕 폰트 자동 적용</p>
+                    <p>금액의 한국어 표기법</p>
+                    <p>("금 오백만원정" 형식)</p>
+                </div>
+                <div class="feature-card">
+                    <h4><span class="icon">🎭</span>전문적 디자인</h4>
+                    <p>건설업계 표준 양식</p>
+                    <p>깔끔한 표 스타일</p>
+                    <p>일관된 여백 및 정렬</p>
+                </div>
+                <div class="feature-card">
+                    <h4><span class="icon">🖼️</span>이미지 처리</h4>
+                    <p>도장 이미지 자동 삽입</p>
+                    <p>적절한 크기 조정</p>
+                    <p>투명 배경 지원</p>
+                </div>
+                <div class="feature-card">
+                    <h4><span class="icon">📱</span>반응형 레이아웃</h4>
+                    <p>A4 용지 크기 최적화</p>
+                    <p>내용량에 따른 자동 페이지 분할</p>
+                    <p>인쇄 친화적 여백 설정</p>
+                </div>
+            </div>
+
+            <div class="two-column">
+                <div class="success-box">
+                    <h4>✅ PDF 생성 성공 체크리스트</h4>
+                    <ul>
+                        <li>업체 정보 자동 포함 확인</li>
+                        <li>도장 이미지 정상 표시</li>
+                        <li>한국어 폰트 정상 렌더링</li>
+                        <li>표 형태의 깔끔한 작업 내역</li>
+                        <li>총액의 한국어 표기 정확성</li>
+                    </ul>
+                </div>
+                <div class="highlight-box">
+                    <h4>💡 PDF 품질 향상 팁</h4>
+                    <ul>
+                        <li>도장 이미지: 300DPI 이상 권장</li>
+                        <li>작업 설명: 간결하고 명확한 표현</li>
+                        <li>페이지 분할: 항목별 자연스러운 구분</li>
+                        <li>인쇄 테스트: 실제 A4 용지로 확인</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 14: Excel 데이터 연동 -->
+        <div class="slide">
+            <div class="slide-counter">14/25</div>
+            <h1>📊 Excel 데이터 연동 시스템</h1>
+            
+            <h2>🔄 Excel 연동 아키텍처</h2>
+            <div class="tech-specs">
+                <h3>SheetJS (xlsx) 라이브러리 활용</h3>
+                <div class="two-column">
+                    <div>
+                        <p><strong>읽기 기능:</strong> .xlsx, .xls, .csv 파일 지원</p>
+                        <p><strong>쓰기 기능:</strong> 다양한 형식으로 내보내기</p>
+                        <p><strong>데이터 검증:</strong> 필수 필드 자동 확인</p>
+                    </div>
+                    <div>
+                        <p><strong>한글 지원:</strong> UTF-8 완전 호환</p>
+                        <p><strong>대용량 처리:</strong> 스트리밍 방식 처리</p>
+                        <p><strong>오류 처리:</strong> 상세한 에러 메시지</p>
+                    </div>
+                </div>
+            </div>
+
+            <h2>📥 Excel 가져오기 프로세스</h2>
+            <div class="workflow-container">
+                <div class="workflow-step">
+                    <span class="step-number">1</span>
+                    <div>
+                        <h4>템플릿 다운로드</h4>
+                        <p>표준 Excel 템플릿 제공</p>
+                        <p>한국어 컬럼 헤더 포함</p>
+                    </div>
+                </div>
+                <div class="workflow-arrow">⬇️</div>
+                <div class="workflow-step">
+                    <span class="step-number">2</span>
+                    <div>
+                        <h4>데이터 입력</h4>
+                        <p>템플릿 양식에 맞춰 데이터 작성</p>
+                        <p>필수 필드 확인</p>
+                    </div>
+                </div>
+                <div class="workflow-arrow">⬇️</div>
+                <div class="workflow-step">
+                    <span class="step-number">3</span>
+                    <div>
+                        <h4>파일 업로드</h4>
+                        <p>드래그 앤 드롭 또는 파일 선택</p>
+                        <p>자동 파일 형식 감지</p>
+                    </div>
+                </div>
+                <div class="workflow-arrow">⬇️</div>
+                <div class="workflow-step">
+                    <span class="step-number">4</span>
+                    <div>
+                        <h4>데이터 검증</h4>
+                        <p>필수 필드 누락 확인</p>
+                        <p>데이터 형식 유효성 검사</p>
+                    </div>
+                </div>
+                <div class="workflow-arrow">⬇️</div>
+                <div class="workflow-step">
+                    <span class="step-number">5</span>
+                    <div>
+                        <h4>시스템 등록</h4>
+                        <p>기존 데이터와 병합</p>
+                        <p>중복 데이터 처리</p>
+                    </div>
+                </div>
+            </div>
+
+            <h2>📤 Excel 내보내기 기능</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h4><span class="icon">👥</span>건축주 데이터</h4>
+                    <p>전체 건축주 목록</p>
+                    <p>연락처 및 주소 정보</p>
+                    <p>프로젝트 연결 상태</p>
+                </div>
+                <div class="feature-card">
+                    <h4><span class="icon">⚒️</span>작업 항목</h4>
+                    <p>모든 작업 내역</p>
+                    <p>상태별 분류</p>
+                    <p>금액 및 진행률</p>
+                </div>
+                <div class="feature-card">
+                    <h4><span class="icon">📋</span>견적서 내역</h4>
+                    <p>견적서별 상세 정보</p>
+                    <p>승인 상태 추적</p>
+                    <p>고객별 견적 이력</p>
+                </div>
+                <div class="feature-card">
+                    <h4><span class="icon">💰</span>청구서 관리</h4>
+                    <p>발행된 청구서 목록</p>
+                    <p>결제 상태 현황</p>
+                    <p>미수금 관리</p>
+                </div>
+            </div>
+
+            <h2>🎯 Excel 템플릿 구성</h2>
+            <div class="two-column">
+                <div>
+                    <h3>🏢 건축주 템플릿</h3>
+                    <table class="comparison-table" style="font-size: 0.85em;">
+                        <thead>
+                            <tr>
+                                <th>컬럼명</th>
+                                <th>필수여부</th>
+                                <th>데이터 형식</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>건축주명</td><td>필수</td><td>텍스트</td></tr>
+                            <tr><td>전화번호</td><td>필수</td><td>숫자/하이픈</td></tr>
+                            <tr><td>주소</td><td>필수</td><td>텍스트</td></tr>
+                            <tr><td>이메일</td><td>선택</td><td>이메일 형식</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div>
+                    <h3>⚒️ 작업항목 템플릿</h3>
+                    <table class="comparison-table" style="font-size: 0.85em;">
+                        <thead>
+                            <tr>
+                                <th>컬럼명</th>
+                                <th>필수여부</th>
+                                <th>데이터 형식</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>작업명</td><td>필수</td><td>텍스트</td></tr>
+                            <tr><td>수량</td><td>필수</td><td>숫자</td></tr>
+                            <tr><td>단가</td><td>필수</td><td>숫자</td></tr>
+                            <tr><td>상태</td><td>선택</td><td>예정/진행/완료</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <h3>⚠️ Excel 연동 시 주의사항</h3>
+                <ul>
+                    <li><strong>인코딩 문제:</strong> 한글이 포함된 파일은 UTF-8로 저장</li>
+                    <li><strong>필수 필드:</strong> 빨간색으로 표시된 필수 컬럼 누락 금지</li>
+                    <li><strong>데이터 형식:</strong> 숫자 필드에 텍스트 입력 금지</li>
+                    <li><strong>중복 데이터:</strong> 기존 데이터와 중복될 경우 덮어쓰기 여부 확인</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 15: 데이터 백업 시스템 -->
+        <div class="slide">
+            <div class="slide-counter">15/25</div>
+            <h1>💾 데이터 백업 시스템</h1>
+            
+            <h2>🛡️ 3단계 데이터 보호 전략</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-marker" style="background: #28a745;"></div>
+                    <div class="timeline-content" style="border-left: 4px solid #28a745;">
+                        <h4>1단계: 자동 로컬 저장</h4>
+                        <p>브라우저 localStorage에 실시간 자동 저장</p>
+                        <p>모든 데이터 변경사항 즉시 반영</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker" style="background: #ffc107;"></div>
+                    <div class="timeline-content" style="border-left: 4px solid #ffc107;">
+                        <h4>2단계: 정기 백업 (권장)</h4>
+                        <p>주 1회 이상 JSON 파일로 전체 데이터 백업</p>
+                        <p>타임스탬프가 포함된 파일명 자동 생성</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker" style="background: #17a2b8;"></div>
+                    <div class="timeline-content" style="border-left: 4px solid #17a2b8;">
+                        <h4>3단계: 클라우드 마이그레이션</h4>
+                        <p>Supabase 클라우드 데이터베이스 연동</p>
+                        <p>실시간 동기화 및 다기기 접근</p>
+                    </div>
+                </div>
+            </div>
+
+            <h2>📁 백업 데이터 구조</h2>
+            <div class="tech-specs">
+                <h3>JSON 백업 파일 구성</h3>
+                <pre style="background: #2c3e50; color: #ecf0f1; padding: 20px; border-radius: 8px; font-size: 0.9em; line-height: 1.4;">
+{
+  "timestamp": "2024-09-11T15:30:00.000Z",
+  "version": "2.0",
+  "data": {
+    "COMPANY_INFO": { ... },      // 업체 정보
+    "CLIENTS": [ ... ],           // 건축주 데이터
+    "WORK_ITEMS": [ ... ],        // 작업 항목
+    "ESTIMATES": [ ... ],         // 견적서
+    "INVOICES": [ ... ],          // 청구서
+    "STAMP_IMAGE": "data:image/png;base64,..."  // 도장 이미지
+  },
+  "statistics": {
+    "totalClients": 15,
+    "totalWorkItems": 128,
+    "totalInvoices": 45
+  }
+}</pre>
+            </div>
+
+            <h2>🔄 백업 및 복원 프로세스</h2>
+            <div class="workflow-container">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <h3>📁 데이터 백업 과정</h3>
+                </div>
+                <div class="workflow-step">
+                    <span class="step-number">1</span>
+                    <div>
+                        <h4>백업 버튼 클릭</h4>
+                        <p>대시보드 우측 상단 "데이터 백업" 버튼</p>
+                    </div>
+                </div>
+                <div class="workflow-arrow">⬇️</div>
+                <div class="workflow-step">
+                    <span class="step-number">2</span>
+                    <div>
+                        <h4>데이터 추출</h4>
+                        <p>localStorage의 모든 데이터 수집</p>
+                    </div>
+                </div>
+                <div class="workflow-arrow">⬇️</div>
+                <div class="workflow-step">
+                    <span class="step-number">3</span>
+                    <div>
+                        <h4>JSON 생성</h4>
+                        <p>타임스탬프 포함 백업 파일 생성</p>
+                    </div>
+                </div>
+                <div class="workflow-arrow">⬇️</div>
+                <div class="workflow-step">
+                    <span class="step-number">4</span>
+                    <div>
+                        <h4>파일 다운로드</h4>
+                        <p>자동 다운로드 시작</p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin: 30px 0;"></div>
+
+            <div class="workflow-container">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <h3>📂 데이터 복원 과정</h3>
+                </div>
+                <div class="workflow-step">
+                    <span class="step-number">1</span>
+                    <div>
+                        <h4>복원 버튼 클릭</h4>
+                        <p>"데이터 복원" 버튼 클릭</p>
+                    </div>
+                </div>
+                <div class="workflow-arrow">⬇️</div>
+                <div class="workflow-step">
+                    <span class="step-number">2</span>
+                    <div>
+                        <h4>백업 파일 선택</h4>
+                        <p>이전에 생성한 JSON 백업 파일 업로드</p>
+                    </div>
+                </div>
+                <div class="workflow-arrow">⬇️</div>
+                <div class="workflow-step">
+                    <span class="step-number">3</span>
+                    <div>
+                        <h4>데이터 검증</h4>
+                        <p>백업 파일 형식 및 무결성 확인</p>
+                    </div>
+                </div>
+                <div class="workflow-arrow">⬇️</div>
+                <div class="workflow-step">
+                    <span class="step-number">4</span>
+                    <div>
+                        <h4>복원 완료</h4>
+                        <p>localStorage 복원 및 페이지 새로고침</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="two-column">
+                <div class="success-box">
+                    <h4>✅ 백업 모범 사례</h4>
+                    <ul>
+                        <li><strong>정기 백업:</strong> 주 1회 이상 실시</li>
+                        <li><strong>파일명 규칙:</strong> 날짜 포함 체계적 관리</li>
+                        <li><strong>저장 위치:</strong> 클라우드 드라이브 활용</li>
+                        <li><strong>복원 테스트:</strong> 정기적 복원 테스트</li>
+                    </ul>
+                </div>
+                <div class="warning-box">
+                    <h4>⚠️ 백업 주의사항</h4>
+                    <ul>
+                        <li><strong>브라우저 의존성:</strong> 동일 브라우저 사용 권장</li>
+                        <li><strong>개인정보 보호:</strong> 백업 파일 보안 관리</li>
+                        <li><strong>파일 손상:</strong> 텍스트 에디터로 수정 금지</li>
+                        <li><strong>용량 제한:</strong> 대용량 이미지 주의</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 계속해서 나머지 슬라이드들... -->
+
+        <!-- Slide 16: 업무 워크플로우 -->
+        <div class="slide">
+            <div class="slide-counter">16/25</div>
+            <h1>🔄 효율적 업무 워크플로우</h1>
+            
+            <h2>🎯 표준 프로젝트 진행 단계</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-marker" style="background: #6c757d;"></div>
+                    <div class="timeline-content">
+                        <h4>1. 초기 설정 (Initial Setup)</h4>
+                        <p><strong>환경설정:</strong> 업체 정보, 도장 이미지 등록</p>
+                        <p><strong>템플릿 준비:</strong> Excel 템플릿 다운로드</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker" style="background: #007bff;"></div>
+                    <div class="timeline-content">
+                        <h4>2. 고객 등록 (Customer Registration)</h4>
+                        <p><strong>건축주 정보:</strong> 기본 정보 및 작업장 등록</p>
+                        <p><strong>프로젝트 설정:</strong> 작업 범위 및 일정 협의</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker" style="background: #28a745;"></div>
+                    <div class="timeline-content">
+                        <h4>3. 견적 단계 (Estimation Phase)</h4>
+                        <p><strong>견적서 작성:</strong> 작업별 상세 견적 산출</p>
+                        <p><strong>검토 및 협상:</strong> 고객과의 견적 조율</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker" style="background: #ffc107;"></div>
+                    <div class="timeline-content">
+                        <h4>4. 계약 및 작업 (Contract & Work)</h4>
+                        <p><strong>계약 체결:</strong> 견적 승인 및 계약서 작성</p>
+                        <p><strong>작업 등록:</strong> 승인된 견적을 작업 항목으로 전환</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker" style="background: #e74c3c;"></div>
+                    <div class="timeline-content">
+                        <h4>5. 진행 관리 (Progress Management)</h4>
+                        <p><strong>상태 업데이트:</strong> 작업 진행 상황 실시간 추적</p>
+                        <p><strong>고객 소통:</strong> 정기적 진행 상황 보고</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker" style="background: #17a2b8;"></div>
+                    <div class="timeline-content">
+                        <h4>6. 완료 및 청구 (Completion & Billing)</h4>
+                        <p><strong>작업 완료:</strong> 최종 검수 및 상태 변경</p>
+                        <p><strong>청구서 발행:</strong> 완료된 작업 대상 청구</p>
+                    </div>
+                </div>
+            </div>
+
+            <h2>⚡ 효율성 극대화 전략</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h4><span class="icon">📊</span>데이터 중심 관리</h4>
+                    <p>Excel 템플릿으로 대량 데이터 일괄 등록</p>
+                    <p>정기적인 현황 분석 및 보고서 작성</p>
+                </div>
+                <div class="feature-card">
+                    <h4><span class="icon">🔄</span>자동화 활용</h4>
+                    <p>견적서에서 작업 항목 자동 전환</p>
+                    <p>완료 작업의 청구서 자동 연결</p>
+                </div>
+                <div class="feature-card">
+                    <h4><span class="icon">💾</span>백업 루틴</h4>
+                    <p>주간 단위 정기 데이터 백업</p>
+                    <p>중요 문서의 PDF 별도 보관</p>
+                </div>
+                <div class="feature-card">
+                    <h4><span class="icon">📱</span>접근성 최적화</h4>
+                    <p>북마크 등록으로 빠른 접속</p>
+                    <p>모바일 기기에서도 조회 가능</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 17: 문제해결 가이드 -->
+        <div class="slide">
+            <div class="slide-counter">17/25</div>
+            <h1>🔧 문제해결 가이드</h1>
+            
+            <h2>❗ 일반적인 문제 상황</h2>
+            <div class="feature-grid">
+                <div class="feature-card" style="border-left-color: #dc3545;">
+                    <h4><span class="icon">💾</span>데이터가 사라졌어요</h4>
+                    <div style="font-size: 0.9em;">
+                        <p><strong>원인:</strong></p>
+                        <ul>
+                            <li>브라우저 캐시 삭제</li>
+                            <li>시크릿 모드 사용</li>
+                            <li>다른 브라우저로 접속</li>
+                        </ul>
+                        <p><strong>해결방법:</strong></p>
+                        <ul>
+                            <li>동일 브라우저에서 접속</li>
+                            <li>백업 파일로 복원</li>
+                            <li>Excel 파일 재 가져오기</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="feature-card" style="border-left-color: #ffc107;">
+                    <h4><span class="icon">🖼️</span>도장이 표시되지 않아요</h4>
+                    <div style="font-size: 0.9em;">
+                        <p><strong>점검사항:</strong></p>
+                        <ul>
+                            <li>파일 크기: 5MB 이하</li>
+                            <li>형식: PNG, JPG만 지원</li>
+                            <li>브라우저 새로고침 시도</li>
+                        </ul>
+                        <p><strong>해결방법:</strong></p>
+                        <ul>
+                            <li>이미지 크기 줄이기</li>
+                            <li>PNG 형식으로 재저장</li>
+                            <li>도장 이미지 재업로드</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="feature-card" style="border-left-color: #17a2b8;">
+                    <h4><span class="icon">📄</span>PDF가 생성되지 않아요</h4>
+                    <div style="font-size: 0.9em;">
+                        <p><strong>확인사항:</strong></p>
+                        <ul>
+                            <li>팝업 차단 해제</li>
+                            <li>JavaScript 활성화</li>
+                            <li>브라우저 최신 버전</li>
+                        </ul>
+                        <p><strong>해결방법:</strong></p>
+                        <ul>
+                            <li>팝업 허용 설정</li>
+                            <li>브라우저 업데이트</li>
+                            <li>다른 브라우저 시도</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="feature-card" style="border-left-color: #28a745;">
+                    <h4><span class="icon">📊</span>Excel 가져오기 오류</h4>
+                    <div style="font-size: 0.9em;">
+                        <p><strong>주요 원인:</strong></p>
+                        <ul>
+                            <li>템플릿 형식 불일치</li>
+                            <li>필수 필드 누락</li>
+                            <li>데이터 형식 오류</li>
+                        </ul>
+                        <p><strong>해결방법:</strong></p>
+                        <ul>
+                            <li>공식 템플릿 사용</li>
+                            <li>필수 필드 입력 확인</li>
+                            <li>숫자 필드 형식 검증</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <h2>🛠️ 고급 문제해결</h2>
+            <div class="two-column">
+                <div class="warning-box">
+                    <h4>⚠️ 성능 관련 문제</h4>
+                    <ul>
+                        <li><strong>느린 로딩:</strong> 브라우저 캐시 정리</li>
+                        <li><strong>메모리 부족:</strong> 다른 탭 닫기</li>
+                        <li><strong>응답 없음:</strong> 페이지 새로고침</li>
+                        <li><strong>데이터 많음:</strong> Excel 분할 가져오기</li>
+                    </ul>
+                </div>
+                <div class="success-box">
+                    <h4>✅ 예방 조치</h4>
+                    <ul>
+                        <li><strong>정기 백업:</strong> 주 1회 이상</li>
+                        <li><strong>브라우저 관리:</strong> 캐시 주기적 정리</li>
+                        <li><strong>파일 관리:</strong> PDF 문서 별도 보관</li>
+                        <li><strong>접속 환경:</strong> 안정된 네트워크</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h2>📞 추가 지원</h2>
+            <div class="highlight-box">
+                <h3>🆘 기술 지원 연락처</h3>
+                <div class="two-column">
+                    <div>
+                        <p><strong>📧 이메일 지원:</strong></p>
+                        <p>bluesky78060@gmail.com</p>
+                        <p>평일 9:00-18:00 (24시간 내 답변)</p>
+                    </div>
+                    <div>
+                        <p><strong>📞 전화 지원:</strong></p>
+                        <p>010-7137-8720</p>
+                        <p>긴급 상황 시 즉시 연락</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 18: 보안 및 유지관리 -->
+        <div class="slide">
+            <div class="slide-counter">18/25</div>
+            <h1>🔒 보안 및 유지관리</h1>
+            
+            <h2>🛡️ 데이터 보안 정책</h2>
+            <div class="feature-grid">
+                <div class="feature-card" style="border-left-color: #28a745;">
+                    <h4><span class="icon">💻</span>로컬 저장 방식</h4>
+                    <p><strong>장점:</strong></p>
+                    <ul style="font-size: 0.9em;">
+                        <li>외부 서버 전송 없음</li>
+                        <li>인터넷 없이 사용 가능</li>
+                        <li>해킹 위험 최소화</li>
+                    </ul>
+                </div>
+                <div class="feature-card" style="border-left-color: #17a2b8;">
+                    <h4><span class="icon">🔐</span>개인정보 보호</h4>
+                    <p><strong>준수사항:</strong></p>
+                    <ul style="font-size: 0.9em;">
+                        <li>건축주 연락처 보안</li>
+                        <li>사업자 정보 암호화</li>
+                        <li>불필요한 정보 수집 금지</li>
+                    </ul>
+                </div>
+                <div class="feature-card" style="border-left-color: #ffc107;">
+                    <h4><span class="icon">📊</span>데이터 백업</h4>
+                    <p><strong>관리방법:</strong></p>
+                    <ul style="font-size: 0.9em;">
+                        <li>정기적 JSON 백업</li>
+                        <li>클라우드 저장소 활용</li>
+                        <li>접근 권한 관리</li>
+                    </ul>
+                </div>
+                <div class="feature-card" style="border-left-color: #e74c3c;">
+                    <h4><span class="icon">⚠️</span>위험 요소</h4>
+                    <p><strong>주의사항:</strong></p>
+                    <ul style="font-size: 0.9em;">
+                        <li>브라우저 캐시 삭제</li>
+                        <li>공용 컴퓨터 사용</li>
+                        <li>백업 파일 분실</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h2>🔄 시스템 업데이트</h2>
+            <div class="workflow-container">
+                <div class="workflow-step">
+                    <span class="step-number">1</span>
+                    <div>
+                        <h4>자동 업데이트</h4>
+                        <p>GitHub Pages 자동 배포 시스템</p>
+                        <p>새로운 기능 자동 반영</p>
+                    </div>
+                </div>
+                <div class="workflow-arrow">⬇️</div>
+                <div class="workflow-step">
+                    <span class="step-number">2</span>
+                    <div>
+                        <h4>호환성 확인</h4>
+                        <p>기존 데이터 호환성 검증</p>
+                        <p>브라우저 지원 범위 확인</p>
+                    </div>
+                </div>
+                <div class="workflow-arrow">⬇️</div>
+                <div class="workflow-step">
+                    <span class="step-number">3</span>
+                    <div>
+                        <h4>사용자 알림</h4>
+                        <p>주요 변경사항 공지</p>
+                        <p>새로운 기능 사용법 안내</p>
+                    </div>
+                </div>
+            </div>
+
+            <h2>📈 성능 최적화</h2>
+            <div class="two-column">
+                <div>
+                    <h3>🚀 시스템 최적화</h3>
+                    <ul>
+                        <li><strong>코드 분할:</strong> 필요한 기능만 로드</li>
+                        <li><strong>이미지 압축:</strong> 도장 이미지 최적화</li>
+                        <li><strong>캐싱 전략:</strong> 정적 자원 캐시 활용</li>
+                        <li><strong>지연 로딩:</strong> 대용량 데이터 점진적 로드</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3>💾 데이터 최적화</h3>
+                    <ul>
+                        <li><strong>중복 제거:</strong> 불필요한 데이터 정리</li>
+                        <li><strong>압축 저장:</strong> JSON 데이터 압축</li>
+                        <li><strong>인덱싱:</strong> 검색 성능 향상</li>
+                        <li><strong>정리 작업:</strong> 완료된 프로젝트 아카이브</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h2>📅 정기 유지관리 체크리스트</h2>
+            <div class="success-box">
+                <h3>월간 점검 항목</h3>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>☐ 데이터 백업 실시</li>
+                            <li>☐ 브라우저 캐시 정리</li>
+                            <li>☐ PDF 문서 보관함 정리</li>
+                            <li>☐ 도장 이미지 품질 확인</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <ul>
+                            <li>☐ 완료 프로젝트 아카이브</li>
+                            <li>☐ 미수금 현황 정리</li>
+                            <li>☐ Excel 템플릿 업데이트</li>
+                            <li>☐ 시스템 접속 테스트</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 19: 마무리 -->
+        <div class="slide title-slide">
+            <div class="slide-counter">19/25</div>
+            <h1>🎉 감사합니다!</h1>
+            <div class="subtitle">건설 청구서 관리 시스템을 선택해 주셔서 감사합니다</div>
+            
+            <div class="info" style="margin-top: 60px;">
+                <h2 style="color: white; margin-bottom: 30px;">💡 성공적인 시스템 활용을 위한 마지막 팁</h2>
+                
+                <div class="two-column" style="text-align: left; margin-top: 40px;">
+                    <div>
+                        <h3 style="color: #74b9ff;">📊 업무 효율성</h3>
+                        <p>✅ Excel 템플릿으로 대량 데이터 관리</p>
+                        <p>✅ 일괄 작업 등록으로 시간 단축</p>
+                        <p>✅ 자동 PDF 생성으로 전문성 확보</p>
+                    </div>
+                    <div>
+                        <h3 style="color: #74b9ff;">💾 데이터 안전성</h3>
+                        <p>✅ 주간 단위 정기 백업 실시</p>
+                        <p>✅ 중요 문서 별도 보관</p>
+                        <p>✅ 브라우저 환경 일관성 유지</p>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 50px; padding: 30px; background: rgba(255,255,255,0.1); border-radius: 15px;">
+                    <h3 style="color: white;">📞 지속적인 지원</h3>
+                    <p><strong>📧 이메일:</strong> bluesky78060@gmail.com</p>
+                    <p><strong>📱 전화:</strong> 010-7137-8720</p>
+                    <p><strong>⏰ 지원시간:</strong> 평일 09:00-18:00</p>
+                    
+                    <p style="margin-top: 20px; font-size: 1.1em;">
+                        <strong>🌟 시스템 개선을 위한 여러분의 소중한 의견을 기다립니다!</strong>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    
+    <div class="navigation">
+        📊 건설 청구서 관리 시스템 v2.0 | 총 19개 슬라이드 | 2025년 9월
+    </div>
+
+    <script>
+        // 키보드 네비게이션
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
+                e.preventDefault();
+                window.scrollBy({
+                    top: window.innerHeight,
+                    behavior: 'smooth'
+                });
+            } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+                e.preventDefault();
+                window.scrollBy({
+                    top: -window.innerHeight,
+                    behavior: 'smooth'
+                });
+            } else if (e.key === 'Home') {
+                e.preventDefault();
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            } else if (e.key === 'End') {
+                e.preventDefault();
+                window.scrollTo({
+                    top: document.body.scrollHeight,
+                    behavior: 'smooth'
+                });
+            }
+        });
+        
+        // 프레젠테이션 모드 토글
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'F11' || (e.key === 'f' && e.ctrlKey)) {
+                e.preventDefault();
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                } else {
+                    document.documentElement.requestFullscreen();
+                }
+            }
+        });
+
+        // 슬라이드 자동 계산
+        document.addEventListener('DOMContentLoaded', function() {
+            const slides = document.querySelectorAll('.slide');
+            const totalSlides = slides.length;
+            
+            slides.forEach((slide, index) => {
+                const counter = slide.querySelector('.slide-counter');
+                if (counter) {
+                    counter.textContent = `${index + 1}/${totalSlides}`;
+                }
+            });
+
+            // 네비게이션 업데이트
+            const navigation = document.querySelector('.navigation');
+            if (navigation) {
+                navigation.textContent = `📊 건설 청구서 관리 시스템 v2.0 | 총 ${totalSlides}개 슬라이드 | 2025년 9월`;
+            }
+        });
+
+        // 인쇄 최적화
+        if (window.matchMedia) {
+            var mediaQueryList = window.matchMedia('print');
+            mediaQueryList.addListener(function(mql) {
+                if (mql.matches) {
+                    document.body.style.fontSize = '12px';
+                    document.querySelectorAll('.slide').forEach(slide => {
+                        slide.style.pageBreakAfter = 'always';
+                    });
+                }
+            });
+        }
+
+        // 스크롤 진행률 표시
+        window.addEventListener('scroll', function() {
+            const scrollTop = window.pageYOffset;
+            const docHeight = document.body.scrollHeight - window.innerHeight;
+            const scrollPercent = (scrollTop / docHeight) * 100;
+            
+            // 진행률 바 업데이트 (필요시 추가)
+            const progressBar = document.querySelector('.progress-bar');
+            if (progressBar) {
+                progressBar.style.width = scrollPercent + '%';
+            }
+        });
+
+        // 접근성 향상
+        document.addEventListener('keydown', function(e) {
+            // ESC 키로 전체화면 종료
+            if (e.key === 'Escape' && document.fullscreenElement) {
+                document.exitFullscreen();
+            }
+        });
+    </script>
+</body>
+</html>

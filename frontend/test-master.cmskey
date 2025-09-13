@@ -1,0 +1,10 @@
+{
+  "keyId": "CMS-MASTER-2024-001",
+  "issuedTo": "관리자",
+  "issuedDate": "2024-09-12",
+  "expiryDate": "2025-12-31",
+  "permissions": ["read", "write", "admin"],
+  "signature": "master_key_2024_authenticated_secure",
+  "version": "1.0",
+  "description": "마스터 관리자 키"
+}

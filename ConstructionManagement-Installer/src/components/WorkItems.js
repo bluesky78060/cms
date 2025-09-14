@@ -56,12 +56,18 @@ function WorkItems() {
 
   const statuses = ['예정', '진행중', '완료', '보류'];
 
-  // 선택된 건축주의 프로젝트 목록 가져오기
+  // 선택된 건축주의 프로젝트 목록 가져오기 (작업항목 + 건축주 작업장 설명 기반)
   const getClientProjects = (clientId) => {
     if (!clientId) return [];
-    const clientWorkItems = workItems.filter(item => item.clientId === parseInt(clientId));
-    const projects = [...new Set(clientWorkItems.map(item => item.projectName).filter(p => p))];
-    return projects;
+    const cid = parseInt(clientId);
+    const fromWorkItems = workItems
+      .filter(item => item.clientId === cid)
+      .map(item => item.projectName)
+      .filter(Boolean);
+    const fromWorkplaces = (clients.find(c => c.id === cid)?.workplaces || [])
+      .map(wp => wp.description)
+      .filter(Boolean);
+    return Array.from(new Set([...fromWorkItems, ...fromWorkplaces]));
   };
 
   // 모든 프로젝트 목록 가져오기
@@ -729,7 +735,7 @@ const addBulkItem = () => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-base font-medium text-gray-500 uppercase tracking-wider">
                 <input
                   type="checkbox"
                   onChange={(e) => handleSelectAll(e.target.checked)}
@@ -738,31 +744,31 @@ const addBulkItem = () => {
                   title="전체 선택"
                 />
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-base font-medium text-gray-500 uppercase tracking-wider">
                 건축주
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-base font-medium text-gray-500 uppercase tracking-wider">
                 내용
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-base font-medium text-gray-500 uppercase tracking-wider">
                 작업장
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-base font-medium text-gray-500 uppercase tracking-wider">
                 프로젝트
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-base font-medium text-gray-500 uppercase tracking-wider">
                 카테고리
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-base font-medium text-gray-500 uppercase tracking-wider">
                 단가/수량
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-base font-medium text-gray-500 uppercase tracking-wider">
                 상태
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-base font-medium text-gray-500 uppercase tracking-wider">
                 날짜
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-base font-medium text-gray-500 uppercase tracking-wider">
                 작업
               </th>
             </tr>

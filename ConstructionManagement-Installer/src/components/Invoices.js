@@ -6,6 +6,19 @@ import { exportToExcel, importFromExcel, createTemplate } from '../utils/excelUt
 function Invoices() {
   // eslint-disable-next-line no-unused-vars
   const { clients, invoices, setInvoices, companyInfo, workItems, stampImage } = useApp();
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+
+  const allVisibleIds = invoices.map(inv => inv.id);
+  const allSelected = selectedIds.length > 0 && selectedIds.length === allVisibleIds.length;
+  const toggleSelectAll = (checked) => setSelectedIds(checked ? allVisibleIds : []);
+  const toggleSelectOne = (id, checked) => setSelectedIds(prev => checked ? Array.from(new Set([...prev, id])) : prev.filter(x => x !== id));
+  const handleBulkDelete = () => {
+    if (selectedIds.length === 0) return;
+    setInvoices(prev => prev.filter(inv => !selectedIds.includes(inv.id)));
+    setSelectedIds([]);
+    setShowConfirmDelete(false);
+  };
 
   const handleChangeStatus = (id, next) => {
     setInvoices(prev => prev.map(inv => inv.id === id ? { ...inv, status: next } : inv));
@@ -183,6 +196,9 @@ function Invoices() {
         const selectedClient = clients.find(c => c.id === parseInt(prev.clientId));
         const selectedWorkplace = selectedClient?.workplaces.find(w => w.id === parseInt(value));
         updated.workplaceAddress = selectedWorkplace?.address || '';
+        if (!updated.project && selectedWorkplace?.description) {
+          updated.project = selectedWorkplace.description;
+        }
       }
       
       return updated;
@@ -776,6 +792,15 @@ function Invoices() {
           <p className="text-gray-600">작업 완료 후 청구서를 생성하고 관리하세요</p>
         </div>
         <div className="flex space-x-2">
+          {selectedIds.length > 0 && (
+            <button
+              onClick={() => setShowConfirmDelete(true)}
+              className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded flex items-center"
+              title="선택된 청구서 일괄 삭제"
+            >
+              🗑️ 선택 삭제({selectedIds.length})
+            </button>
+          )}
           <button
             onClick={handleDownloadTemplate}
             className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
@@ -815,24 +840,33 @@ function Invoices() {
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <input
+                  type="checkbox"
+                  className="rounded border-gray-300"
+                  checked={allSelected}
+                  onChange={(e) => toggleSelectAll(e.target.checked)}
+                  title="전체 선택"
+                />
+              </th>
+              <th className="px-6 py-3 text-left text-base font-medium text-gray-500 uppercase tracking-wider">
                 청구서 번호
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-base font-medium text-gray-500 uppercase tracking-wider">
                 건축주
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-base font-medium text-gray-500 uppercase tracking-wider">
                 프로젝트
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-base font-medium text-gray-500 uppercase tracking-wider">
                 금액
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-base font-medium text-gray-500 uppercase tracking-wider">
                 상태
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-base font-medium text-gray-500 uppercase tracking-wider">
                 발행일
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-base font-medium text-gray-500 uppercase tracking-wider">
                 작업
               </th>
             </tr>
@@ -840,6 +874,15 @@ function Invoices() {
           <tbody className="bg-white divide-y divide-gray-200">
             {invoices.map((invoice) => (
               <tr key={invoice.id} className="hover:bg-gray-50">
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <input
+                    type="checkbox"
+                    className="rounded border-gray-300"
+                    checked={selectedIds.includes(invoice.id)}
+                    onChange={(e) => toggleSelectOne(invoice.id, e.target.checked)}
+                    title="항목 선택"
+                  />
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm font-medium text-gray-900">{invoice.id}</div>
                 </td>
@@ -900,6 +943,20 @@ function Invoices() {
           </tbody>
         </table>
       </div>
+
+      {/* 선택 삭제 확인 모달 */}
+      {showConfirmDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">선택 삭제</h3>
+            <p className="text-sm text-gray-600 mb-4">선택된 {selectedIds.length}개의 청구서를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.</p>
+            <div className="flex justify-end gap-2">
+              <button className="btn-secondary" onClick={() => setShowConfirmDelete(false)}>취소</button>
+              <button className="btn-primary bg-red-600 hover:bg-red-700" onClick={handleBulkDelete}>삭제</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 새 청구서 모달 */}
       {showModal && (

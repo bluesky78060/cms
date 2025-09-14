@@ -5,6 +5,7 @@ import { exportToExcel, importFromExcel, createTemplate } from '../utils/excelUt
 
 function Clients() {
   const { clients, setClients } = useApp();
+  const [selectedIds, setSelectedIds] = useState([]);
 
   const [showModal, setShowModal] = useState(false);
   const [selectedClient, setSelectedClient] = useState(null);
@@ -21,6 +22,19 @@ function Clients() {
   });
 
   const fileInputRef = useRef(null);
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+
+  // 일괄 선택/삭제 상태 및 핸들러
+  const allVisibleIds = clients.map(c => c.id);
+  const allSelected = selectedIds.length > 0 && selectedIds.length === allVisibleIds.length;
+  const toggleSelectAll = (checked) => setSelectedIds(checked ? allVisibleIds : []);
+  const toggleSelectOne = (id, checked) => setSelectedIds(prev => checked ? Array.from(new Set([...prev, id])) : prev.filter(x => x !== id));
+  const handleBulkDelete = () => {
+    if (selectedIds.length === 0) return;
+    setClients(prev => prev.filter(c => !selectedIds.includes(c.id)));
+    setSelectedIds([]);
+    setShowConfirmDelete(false);
+  };
 
   // Excel 관련 함수들
   const handleExportToExcel = () => {
@@ -91,11 +105,14 @@ function Clients() {
         workplaces: newClient.workplaces.map((wp, index) => ({
           ...wp,
           id: wp.id || index + 1
-        }))
+        })),
+        projects: Array.from(new Set((newClient.workplaces || [])
+          .map(wp => (wp.description || '').trim())
+          .filter(Boolean)))
       };
       setClients(prev => prev.map(client => 
         client.id === editingClientId 
-          ? { ...client, ...updatedClient, totalBilled: client.totalBilled, outstanding: client.outstanding, projects: client.projects }
+          ? { ...client, ...updatedClient, totalBilled: client.totalBilled, outstanding: client.outstanding }
           : client
       ));
     } else {
@@ -107,7 +124,9 @@ function Clients() {
           ...wp,
           id: index + 1
         })),
-        projects: [],
+        projects: Array.from(new Set((newClient.workplaces || [])
+          .map(wp => (wp.description || '').trim())
+          .filter(Boolean))),
         totalBilled: 0,
         outstanding: 0
       };
@@ -156,6 +175,15 @@ function Clients() {
           <p className="text-gray-600">건축주 정보를 관리하고 프로젝트 이력을 추적하세요</p>
         </div>
         <div className="flex space-x-2">
+          {selectedIds.length > 0 && (
+            <button
+              onClick={() => setShowConfirmDelete(true)}
+              className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded flex items-center"
+              title="선택된 건축주 일괄 삭제"
+            >
+              🗑️ 선택 삭제({selectedIds.length})
+            </button>
+          )}
           <button
             onClick={handleDownloadTemplate}
             className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded flex items-center"
@@ -255,24 +283,33 @@ function Clients() {
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <input
+                  type="checkbox"
+                  className="rounded border-gray-300"
+                  checked={allSelected}
+                  onChange={(e) => toggleSelectAll(e.target.checked)}
+                  title="전체 선택"
+                />
+              </th>
+              <th className="px-6 py-3 text-left text-base font-medium text-gray-500 uppercase tracking-wider">
                 이름
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-base font-medium text-gray-500 uppercase tracking-wider">
                 연락처
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-base font-medium text-gray-500 uppercase tracking-wider">
                 주소
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-base font-medium text-gray-500 uppercase tracking-wider">
                 프로젝트 수
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-base font-medium text-gray-500 uppercase tracking-wider">
                 총 청구액
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-base font-medium text-gray-500 uppercase tracking-wider">
                 미수금
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-base font-medium text-gray-500 uppercase tracking-wider">
                 작업
               </th>
             </tr>
@@ -280,6 +317,15 @@ function Clients() {
           <tbody className="bg-white divide-y divide-gray-200">
             {clients.map((client) => (
               <tr key={client.id} className="hover:bg-gray-50">
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <input
+                    type="checkbox"
+                    className="rounded border-gray-300"
+                    checked={selectedIds.includes(client.id)}
+                    onChange={(e) => toggleSelectOne(client.id, e.target.checked)}
+                    title="항목 선택"
+                  />
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
                     <div className="h-10 w-10 bg-gray-300 rounded-full flex items-center justify-center">
@@ -337,6 +383,20 @@ function Clients() {
           </tbody>
         </table>
       </div>
+
+      {/* 선택 삭제 확인 모달 */}
+      {showConfirmDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">선택 삭제</h3>
+            <p className="text-sm text-gray-600 mb-4">선택된 {selectedIds.length}명의 건축주를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.</p>
+            <div className="flex justify-end gap-2">
+              <button className="btn-secondary" onClick={() => setShowConfirmDelete(false)}>취소</button>
+              <button className="btn-primary bg-red-600 hover:bg-red-700" onClick={handleBulkDelete}>삭제</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 새 건축주 모달 */}
       {showModal && (
@@ -458,13 +518,16 @@ function Clients() {
                           className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
                           required
                         />
+                        <label className="block text-sm font-medium text-gray-700 mb-1">프로젝트</label>
                         <textarea
-                          placeholder="작업장 설명 (선택사항)"
+                          placeholder="프로젝트 (필수사항)"
                           value={workplace.description}
                           onChange={(e) => handleWorkplaceChange(index, 'description', e.target.value)}
                           className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
                           rows="2"
+                          required
                         />
+                        <p className="mt-1 text-xs text-red-600">필수사항: 프로젝트명을 입력해주세요.</p>
                       </div>
                     </div>
                   ))}
@@ -556,7 +619,7 @@ function Clients() {
                         </p>
                         {workplace.description && (
                           <p className="text-sm text-gray-600">
-                            <strong>설명:</strong> {workplace.description}
+                            <strong>프로젝트:</strong> {workplace.description}
                           </p>
                         )}
                       </div>

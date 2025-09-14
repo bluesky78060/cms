@@ -20,7 +20,8 @@ function Estimates() {
   const [showModal, setShowModal] = useState(false);
   const [editingEstimate, setEditingEstimate] = useState(null);
   const [printEstimate, setPrintEstimate] = useState(null);
-  
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const [selectedIds, setSelectedIds] = useState([]);
   const [newEstimate, setNewEstimate] = useState({
     clientId: '',
     workplaceId: '',
@@ -70,6 +71,11 @@ function Estimates() {
     return true;
   });
 
+  const allVisibleIds = filteredEstimates.map(e => e.id);
+  const allSelected = selectedIds.length > 0 && selectedIds.length === allVisibleIds.length;
+  const toggleSelectAll = (checked) => setSelectedIds(checked ? allVisibleIds : []);
+  const toggleSelectOne = (id, checked) => setSelectedIds(prev => checked ? Array.from(new Set([...prev, id])) : prev.filter(x => x !== id));
+
   // 숫자 포맷팅 함수
   const formatNumberWithCommas = (number) => {
     return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -91,6 +97,14 @@ function Estimates() {
       // 건축주가 변경되면 작업장 선택 초기화
       if (name === 'clientId') {
         updated.workplaceId = '';
+      }
+      // 작업장 변경 시 프로젝트명 자동 채움(비어있을 때)
+      if (name === 'workplaceId') {
+        const client = clients.find(c => c.id === (typeof prev.clientId === 'string' ? parseInt(prev.clientId) : prev.clientId));
+        const wp = client?.workplaces?.find(w => w.id === (typeof newValue === 'string' ? parseInt(newValue) : newValue));
+        if (!updated.projectName && wp?.description) {
+          updated.projectName = wp.description;
+        }
       }
       
       return updated;
@@ -226,6 +240,12 @@ function Estimates() {
     if (window.confirm('정말 삭제하시겠습니까?')) {
       setEstimates(prev => prev.filter(estimate => estimate.id !== id));
     }
+  };
+  const handleBulkDelete = () => {
+    if (selectedIds.length === 0) return;
+    setEstimates(prev => prev.filter(est => !selectedIds.includes(est.id)));
+    setSelectedIds([]);
+    setShowConfirmDelete(false);
   };
 
   const handleConvertToWorkItems = (estimateId) => {
@@ -550,31 +570,51 @@ function Estimates() {
 
       {/* 견적서 목록 */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-b">
+          <div className="text-sm text-gray-600">선택됨: {selectedIds.length}개</div>
+          {selectedIds.length > 0 && (
+            <button
+              onClick={() => setShowConfirmDelete(true)}
+              className="text-white text-sm font-medium px-3 py-1 rounded bg-red-600 hover:bg-red-700"
+            >
+              🗑️ 선택 삭제({selectedIds.length})
+            </button>
+          )}
+        </div>
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <input
+                  type="checkbox"
+                  className="rounded border-gray-300"
+                  checked={allSelected}
+                  onChange={(e) => toggleSelectAll(e.target.checked)}
+                  title="전체 선택"
+                />
+              </th>
+              <th className="px-6 py-3 text-left text-base font-medium text-gray-500 uppercase tracking-wider">
                 견적서 번호
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-base font-medium text-gray-500 uppercase tracking-wider">
                 건축주
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-base font-medium text-gray-500 uppercase tracking-wider">
                 프로젝트
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-base font-medium text-gray-500 uppercase tracking-wider">
                 작업장
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-base font-medium text-gray-500 uppercase tracking-wider">
                 견적 금액
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-base font-medium text-gray-500 uppercase tracking-wider">
                 상태
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-base font-medium text-gray-500 uppercase tracking-wider">
                 유효기한
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-base font-medium text-gray-500 uppercase tracking-wider">
                 작업
               </th>
             </tr>
@@ -582,6 +622,15 @@ function Estimates() {
           <tbody className="bg-white divide-y divide-gray-200">
             {filteredEstimates.map((estimate) => (
               <tr key={estimate.id} className="hover:bg-gray-50">
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <input
+                    type="checkbox"
+                    className="rounded border-gray-300"
+                    checked={selectedIds.includes(estimate.id)}
+                    onChange={(e) => toggleSelectOne(estimate.id, e.target.checked)}
+                    title="항목 선택"
+                  />
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm font-medium text-gray-900">{estimate.id}</div>
                   <div className="text-sm text-gray-500">{estimate.date}</div>
@@ -651,6 +700,18 @@ function Estimates() {
           </tbody>
         </table>
       </div>
+      {showConfirmDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">선택 삭제</h3>
+            <p className="text-sm text-gray-600 mb-4">선택된 {selectedIds.length}개의 견적서를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.</p>
+            <div className="flex justify-end gap-2">
+              <button className="btn-secondary" onClick={() => setShowConfirmDelete(false)}>취소</button>
+              <button className="btn-primary bg-red-600 hover:bg-red-700" onClick={handleBulkDelete}>삭제</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 견적서 추가/편집 모달 */}
       {showModal && (

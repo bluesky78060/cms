@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { 
   PlusIcon, 
   DocumentArrowDownIcon, 
@@ -9,6 +9,18 @@ import { useApp } from '../contexts/AppContext';
 
 export default function InvoiceList() {
   const { invoices, setInvoices } = useApp() as any;
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const allVisibleIds = useMemo(() => (invoices || []).map((i: any) => i.id), [invoices]);
+  const allSelected = selectedIds.length > 0 && selectedIds.length === allVisibleIds.length;
+  const toggleSelectAll = (checked: boolean) => setSelectedIds(checked ? allVisibleIds : []);
+  const toggleSelectOne = (id: string, checked: boolean) => setSelectedIds(prev => checked ? Array.from(new Set([...prev, id])) : prev.filter(x => x !== id));
+  const handleBulkDelete = () => {
+    if (selectedIds.length === 0) return;
+    setInvoices((prev: any[]) => prev.filter((inv: any) => !selectedIds.includes(inv.id)));
+    setSelectedIds([]);
+    setShowConfirmDelete(false);
+  };
 
   const formatCurrency = (amount: number) => {
     return `₩${amount.toLocaleString()}`;
@@ -37,17 +49,50 @@ export default function InvoiceList() {
             작업 내역을 기반으로 청구서를 생성하고 관리합니다.
           </p>
         </div>
-        <button className="btn-primary flex items-center">
+        <div className="flex items-center gap-2">
+          {selectedIds.length > 0 && (
+            <button
+              onClick={() => setShowConfirmDelete(true)}
+              className="btn-secondary"
+              title="선택된 청구서 일괄 삭제"
+            >
+              🗑️ 선택 삭제({selectedIds.length})
+            </button>
+          )}
+          <button className="btn-primary flex items-center">
           <PlusIcon className="h-4 w-4 mr-2" />
           청구서 생성
-        </button>
+          </button>
+        </div>
       </div>
+
+      {showConfirmDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">선택 삭제</h3>
+            <p className="text-sm text-gray-600 mb-4">선택된 {selectedIds.length}개의 청구서를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.</p>
+            <div className="flex justify-end gap-2">
+              <button className="btn-secondary" onClick={() => setShowConfirmDelete(false)}>취소</button>
+              <button className="btn-primary bg-red-600 hover:bg-red-700" onClick={handleBulkDelete}>삭제</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="card">
         <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
           <table className="min-w-full divide-y divide-gray-300">
             <thead className="bg-gray-50">
               <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <input
+                    type="checkbox"
+                    className="rounded border-gray-300"
+                    checked={allSelected}
+                    onChange={(e) => toggleSelectAll(e.target.checked)}
+                    title="전체 선택"
+                  />
+                </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   청구서 번호
                 </th>
@@ -66,6 +111,15 @@ export default function InvoiceList() {
             <tbody className="bg-white divide-y divide-gray-200">
               {(invoices || []).map((invoice: any) => (
                 <tr key={invoice.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <input
+                      type="checkbox"
+                      className="rounded border-gray-300"
+                      checked={selectedIds.includes(invoice.id)}
+                      onChange={(e) => toggleSelectOne(invoice.id, e.target.checked)}
+                      title="항목 선택"
+                    />
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">
                       {invoice.id}

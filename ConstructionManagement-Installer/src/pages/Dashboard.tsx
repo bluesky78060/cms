@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { 
   UsersIcon, 
   BuildingOfficeIcon, 
@@ -6,14 +6,29 @@ import {
   CurrencyDollarIcon 
 } from '@heroicons/react/24/outline';
 
-const stats = [
-  { name: '활성 거래처', value: '12', icon: UsersIcon, change: '+2', changeType: 'positive' },
-  { name: '진행 중인 현장', value: '8', icon: BuildingOfficeIcon, change: '+1', changeType: 'positive' },
-  { name: '이번 달 작업일지', value: '156', icon: DocumentTextIcon, change: '+23', changeType: 'positive' },
-  { name: '이번 달 청구액', value: '₩245,000,000', icon: CurrencyDollarIcon, change: '+12.5%', changeType: 'positive' },
-];
+import { useApp } from '../contexts/AppContext';
+
+const formatCurrency = (n: number) => `₩${(n || 0).toLocaleString()}`;
 
 export default function Dashboard() {
+  const { invoices } = useApp() as any;
+  const recentInvoices = useMemo(() => {
+    const list = (invoices || []).slice().sort((a: any, b: any) => (b.date || '').localeCompare(a.date || ''));
+    return list.slice(0, 5);
+  }, [invoices]);
+
+  const summary = useMemo(() => {
+    const total = (invoices || []).reduce((s: number, i: any) => s + (i.amount || 0), 0);
+    const paid = (invoices || []).filter((i: any) => i.status === '결제완료').reduce((s: number, i: any) => s + (i.amount || 0), 0);
+    const pending = total - paid;
+    return { total, paid, pending };
+  }, [invoices]);
+
+  const stats = [
+    { name: '전체 청구액', value: formatCurrency(summary.total), icon: CurrencyDollarIcon, change: '', changeType: 'positive' },
+    { name: '결제완료', value: formatCurrency(summary.paid), icon: DocumentTextIcon, change: '', changeType: 'positive' },
+    { name: '미수금(요약)', value: formatCurrency(summary.pending), icon: DocumentTextIcon, change: '', changeType: 'positive' },
+  ];
   return (
     <div>
       <div className="mb-8">
@@ -68,16 +83,16 @@ export default function Dashboard() {
         </div>
 
         <div className="card">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">청구 현황</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-4">최근 청구서</h3>
           <div className="space-y-3">
-            {[1, 2, 3].map((item) => (
-              <div key={item} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+            {recentInvoices.map((inv: any) => (
+              <div key={inv.id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
                 <div>
-                  <p className="text-sm font-medium text-gray-900">현대건설 1차 기성</p>
-                  <p className="text-sm text-gray-500">₩45,000,000 (VAT 포함)</p>
+                  <p className="text-sm font-medium text-gray-900">{inv.id} · {inv.client}</p>
+                  <p className="text-sm text-gray-500">{inv.project} · {formatCurrency(inv.amount)}</p>
                 </div>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                  발송완료
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${inv.status === '결제완료' ? 'bg-green-100 text-green-800' : inv.status === '발송됨' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                  {inv.status}
                 </span>
               </div>
             ))}

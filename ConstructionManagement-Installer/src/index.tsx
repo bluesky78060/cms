@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import { AppProvider } from './contexts/AppContext';
 import './index.css';
 import App from './App';
 
@@ -22,9 +23,11 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter basename={process.env.REACT_APP_BASE_PATH || '/cms'}>
-        <App />
-      </BrowserRouter>
+      <AppProvider>
+        <BrowserRouter basename={process.env.REACT_APP_BASE_PATH || '/cms'}>
+          <App />
+        </BrowserRouter>
+      </AppProvider>
     </QueryClientProvider>
   </React.StrictMode>
 );

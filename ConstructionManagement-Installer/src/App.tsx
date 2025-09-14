@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import WorkLogForm from './pages/WorkLogForm';
@@ -16,6 +16,7 @@ function App() {
         <Route path="/projects" element={<ProjectList />} />
         <Route path="/work-logs" element={<WorkLogForm />} />
         <Route path="/invoices" element={<InvoiceList />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Layout>
   );

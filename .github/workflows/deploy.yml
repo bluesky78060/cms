@@ -20,12 +20,17 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: '20'
           cache: 'npm'
           cache-dependency-path: ConstructionManagement-Installer/package-lock.json
           
+      - name: Set npm registry and clean cache
+        run: |
+          npm config set registry https://registry.npmjs.org/
+          npm cache clean --force
+          
       - name: Install dependencies
-        run: cd ConstructionManagement-Installer && npm ci --legacy-peer-deps
+        run: cd ConstructionManagement-Installer && npm ci --legacy-peer-deps --no-audit --no-fund
         
       - name: Build React app
         run: cd ConstructionManagement-Installer && npm run build

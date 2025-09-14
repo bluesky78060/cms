@@ -20,11 +20,17 @@ const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 
+const basePath = ((): string => {
+  const fromEnv = process.env.REACT_APP_BASE_PATH;
+  if (fromEnv && fromEnv.length > 0) return fromEnv;
+  return window.location.pathname.startsWith('/cms') ? '/cms' : '/';
+})();
+
 root.render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <AppProvider>
-        <BrowserRouter basename={process.env.REACT_APP_BASE_PATH || '/cms'}>
+        <BrowserRouter basename={basePath}>
           <App />
         </BrowserRouter>
       </AppProvider>

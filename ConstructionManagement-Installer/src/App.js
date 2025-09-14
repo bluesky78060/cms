@@ -13,7 +13,7 @@ import CompanyInfo from './components/CompanyInfo';
 function App() {
   return (
     <AppProvider>
-      <Router basename={process.env.REACT_APP_BASE_PATH || '/cms'}>
+      <Router basename={(process.env.REACT_APP_BASE_PATH && process.env.REACT_APP_BASE_PATH.length > 0) ? process.env.REACT_APP_BASE_PATH : (window.location.pathname.startsWith('/cms') ? '/cms' : '/') }>
         <div className="min-h-screen bg-gray-50">
           <Navbar />
           <main>

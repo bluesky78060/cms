@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, HashRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { AppProvider } from './contexts/AppContext';
 import './index.css';
@@ -26,13 +26,15 @@ const basePath = ((): string => {
   return window.location.pathname.startsWith('/cms') ? '/cms' : '/';
 })();
 
+const RouterImpl: any = (process.env.REACT_APP_USE_HASH_ROUTER === '1') ? HashRouter : BrowserRouter;
+
 root.render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <AppProvider>
-        <BrowserRouter basename={basePath}>
+        <RouterImpl basename={basePath}>
           <App />
-        </BrowserRouter>
+        </RouterImpl>
       </AppProvider>
     </QueryClientProvider>
   </React.StrictMode>

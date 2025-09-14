@@ -91,7 +91,13 @@ export default function Dashboard() {
                   <p className="text-sm font-medium text-gray-900">{inv.id} · {inv.client}</p>
                   <p className="text-sm text-gray-500">{inv.project} · {formatCurrency(inv.amount)}</p>
                 </div>
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${inv.status === '결제완료' ? 'bg-green-100 text-green-800' : inv.status === '발송됨' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                  inv.status === '결제완료' ? 'bg-green-100 text-green-800' :
+                  inv.status === '발송됨' ? 'bg-blue-100 text-blue-800' :
+                  inv.status === '발송대기' ? 'bg-yellow-100 text-yellow-800' :
+                  inv.status === '미결제' ? 'bg-orange-100 text-orange-800' :
+                  'bg-gray-100 text-gray-800'
+                }`}>
                   {inv.status}
                 </span>
               </div>

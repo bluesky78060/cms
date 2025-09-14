@@ -18,6 +18,7 @@ export default function InvoiceList() {
     switch (status) {
       case '발송대기': return 'bg-yellow-100 text-yellow-800';
       case '발송됨': return 'bg-blue-100 text-blue-800';
+      case '미결제': return 'bg-orange-100 text-orange-800';
       case '결제완료': return 'bg-green-100 text-green-800';
       default: return 'bg-gray-100 text-gray-800';
     }
@@ -93,6 +94,7 @@ export default function InvoiceList() {
                       >
                         <option value="발송대기">발송대기</option>
                         <option value="발송됨">발송됨</option>
+                        <option value="미결제">미결제</option>
                         <option value="결제완료">결제완료</option>
                       </select>
                     </div>

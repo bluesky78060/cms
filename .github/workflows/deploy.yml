@@ -1,4 +1,4 @@
-name: Deploy React App to GitHub Pages
+name: Deploy to GitHub Pages (Official)
 
 on:
   push:
@@ -11,7 +11,7 @@ permissions:
   id-token: write
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -30,6 +30,9 @@ jobs:
       - name: Build React app
         run: cd frontend && npm run build
         
+      - name: Add .nojekyll file
+        run: touch frontend/build/.nojekyll
+        
       - name: Verify build output
         run: |
           echo "=== Build directory contents ==="
@@ -41,11 +44,22 @@ jobs:
           echo "=== CSS files ==="
           ls -la frontend/build/static/css/
           echo "=== Index.html content preview ==="
-          head -5 frontend/build/index.html
+          head -3 frontend/build/index.html
+          echo "=== .nojekyll exists ==="
+          ls -la frontend/build/.nojekyll
         
-      - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4.5.0
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          branch: gh-pages
-          folder: frontend/build
-          clean: true
+          path: frontend/build
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

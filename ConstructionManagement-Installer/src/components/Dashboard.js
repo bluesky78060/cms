@@ -96,7 +96,12 @@ function Dashboard() {
       {/* 통계 카드 */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {stats.map((stat, index) => {
-          const valueSize = (stat.title === '전체 청구액' || stat.title === '결제완료') ? 'text-xl' : 'text-3xl';
+          const valueSize = (
+            stat.title === '전체 청구액' ||
+            stat.title === '결제완료' ||
+            stat.title === '미수금(요약)' ||
+            stat.title === '등록된 건축주'
+          ) ? 'text-xl' : 'text-3xl';
           const Card = (
             <div className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow">
               <div className="flex items-center justify-between">

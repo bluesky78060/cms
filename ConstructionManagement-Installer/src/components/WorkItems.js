@@ -679,7 +679,7 @@ const addBulkItem = () => {
               <p className="text-sm font-medium text-gray-600 mb-1">
                 {(selectedClient || selectedProject) ? '필터된 작업' : '총 작업 항목'}
               </p>
-              <p className="text-3xl font-bold text-gray-900">{filteredWorkItems.length}</p>
+              <p className="text-xl font-bold text-gray-900">{filteredWorkItems.length}</p>
             </div>
             <div className="bg-blue-500 rounded-full p-3 text-white text-2xl">
               🔧
@@ -691,7 +691,7 @@ const addBulkItem = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600 mb-1">완료된 작업</p>
-              <p className="text-3xl font-bold text-green-600">
+              <p className="text-xl font-bold text-green-600">
                 {filteredWorkItems.filter(item => item.status === '완료').length}
               </p>
             </div>
@@ -705,7 +705,7 @@ const addBulkItem = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600 mb-1">진행 중인 작업</p>
-              <p className="text-3xl font-bold text-purple-600">
+              <p className="text-xl font-bold text-purple-600">
                 {filteredWorkItems.filter(item => item.status === '진행중').length}
               </p>
             </div>
@@ -719,7 +719,7 @@ const addBulkItem = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600 mb-1">총 작업 금액</p>
-              <p className="text-3xl font-bold text-orange-600">
+              <p className="text-xl font-bold text-orange-600">
                 {filteredWorkItems.reduce((sum, item) => sum + ((item.defaultPrice || 0) * (item.quantity || 1)), 0).toLocaleString()}원
               </p>
             </div>

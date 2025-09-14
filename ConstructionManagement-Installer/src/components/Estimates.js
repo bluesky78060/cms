@@ -517,7 +517,7 @@ function Estimates() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600 mb-1">총 견적서</p>
-              <p className="text-3xl font-bold text-gray-900">{filteredEstimates.length}</p>
+              <p className="text-xl font-bold text-gray-900">{filteredEstimates.length}</p>
             </div>
             <div className="bg-green-500 rounded-full p-3 text-white text-2xl">
               📈
@@ -529,7 +529,7 @@ function Estimates() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600 mb-1">승인된 견적서</p>
-              <p className="text-3xl font-bold text-green-600">
+              <p className="text-xl font-bold text-green-600">
                 {filteredEstimates.filter(est => est.status === '승인됨').length}
               </p>
             </div>
@@ -543,7 +543,7 @@ function Estimates() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600 mb-1">검토 중인 견적서</p>
-              <p className="text-3xl font-bold text-yellow-600">
+              <p className="text-xl font-bold text-yellow-600">
                 {filteredEstimates.filter(est => est.status === '검토중').length}
               </p>
             </div>
@@ -557,7 +557,7 @@ function Estimates() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600 mb-1">총 견적 금액</p>
-              <p className="text-3xl font-bold text-blue-600">
+              <p className="text-xl font-bold text-blue-600">
                 {filteredEstimates.reduce((sum, est) => sum + est.totalAmount, 0).toLocaleString()}원
               </p>
             </div>

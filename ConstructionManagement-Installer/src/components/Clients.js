@@ -226,7 +226,7 @@ function Clients() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600 mb-1">총 건축주</p>
-              <p className="text-3xl font-bold text-gray-900">{clients.length}</p>
+              <p className="text-xl font-bold text-gray-900">{clients.length}</p>
             </div>
             <div className="bg-blue-500 rounded-full p-3 text-white text-2xl">
               👥
@@ -238,7 +238,7 @@ function Clients() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600 mb-1">총 청구금액 :</p>
-              <p className="text-3xl font-bold text-green-600">
+              <p className="text-xl font-bold text-green-600">
                 금 {numberToKorean(clients.reduce((sum, client) => sum + client.totalBilled, 0))} 원정
               </p>
             </div>
@@ -252,7 +252,7 @@ function Clients() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600 mb-1">미수금</p>
-              <p className="text-3xl font-bold text-red-600">
+              <p className="text-xl font-bold text-red-600">
                 {clients.reduce((sum, client) => sum + client.outstanding, 0).toLocaleString()}원
               </p>
             </div>
@@ -266,7 +266,7 @@ function Clients() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600 mb-1">미수금 건수</p>
-              <p className="text-3xl font-bold text-orange-600">
+              <p className="text-xl font-bold text-orange-600">
                 {clients.filter(client => client.outstanding > 0).length}
               </p>
             </div>

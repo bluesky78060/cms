@@ -173,19 +173,19 @@ export default function InvoiceList() {
       <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-3">
         <div className="card">
           <div className="text-center">
-            <div className="text-2xl font-bold text-gray-900">₩123,300,000</div>
+            <div className="text-lg font-bold text-gray-900">₩123,300,000</div>
             <div className="text-sm text-gray-500">이번 달 총 청구액</div>
           </div>
         </div>
         <div className="card">
           <div className="text-center">
-            <div className="text-2xl font-bold text-green-600">₩89,500,000</div>
+            <div className="text-lg font-bold text-green-600">₩89,500,000</div>
             <div className="text-sm text-gray-500">입금 완료</div>
           </div>
         </div>
         <div className="card">
           <div className="text-center">
-            <div className="text-2xl font-bold text-yellow-600">₩33,800,000</div>
+            <div className="text-lg font-bold text-yellow-600">₩33,800,000</div>
             <div className="text-sm text-gray-500">미수금</div>
           </div>
         </div>

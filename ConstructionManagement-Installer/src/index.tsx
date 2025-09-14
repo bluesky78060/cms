@@ -22,7 +22,7 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
+      <BrowserRouter basename={process.env.REACT_APP_BASE_PATH || '/cms'}>
         <App />
       </BrowserRouter>
     </QueryClientProvider>

@@ -22,36 +22,36 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
+          cache-dependency-path: ConstructionManagement-Installer/package-lock.json
           
       - name: Install dependencies
-        run: cd frontend && npm ci --legacy-peer-deps
+        run: cd ConstructionManagement-Installer && npm ci --legacy-peer-deps
         
       - name: Build React app
-        run: cd frontend && npm run build
+        run: cd ConstructionManagement-Installer && npm run build
         
       - name: Add .nojekyll file
-        run: touch frontend/build/.nojekyll
+        run: touch ConstructionManagement-Installer/build/.nojekyll
         
       - name: Verify build output
         run: |
           echo "=== Build directory contents ==="
-          ls -la frontend/build/
+          ls -la ConstructionManagement-Installer/build/
           echo "=== Static directory contents ==="
-          ls -la frontend/build/static/
+          ls -la ConstructionManagement-Installer/build/static/
           echo "=== JavaScript files ==="
-          ls -la frontend/build/static/js/
+          ls -la ConstructionManagement-Installer/build/static/js/
           echo "=== CSS files ==="
-          ls -la frontend/build/static/css/
+          ls -la ConstructionManagement-Installer/build/static/css/
           echo "=== Index.html content preview ==="
-          head -3 frontend/build/index.html
+          head -3 ConstructionManagement-Installer/build/index.html
           echo "=== .nojekyll exists ==="
-          ls -la frontend/build/.nojekyll
+          ls -la ConstructionManagement-Installer/build/.nojekyll
         
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: frontend/build
+          path: ConstructionManagement-Installer/build
 
   deploy:
     needs: build

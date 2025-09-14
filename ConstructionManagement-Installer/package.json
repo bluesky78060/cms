@@ -36,7 +36,7 @@
     "wait-on": "^8.0.4"
   },
   "main": "public/electron.js",
-  "homepage": "./",
+  "homepage": "/cms",
   "scripts": {
     "start": "craco start",
     "build": "craco build",

@@ -1,38 +1,24 @@
-import React from 'react';
+import React, { useMemo } from 'react';
+import { useApp } from '../contexts/AppContext';
 
 function Dashboard() {
-  const stats = [
-    {
-      title: '이번 달 청구서',
-      value: '8',
-      color: 'bg-blue-500',
-      icon: '📄'
-    },
-    {
-      title: '미수금',
-      value: '15,000,000원',
-      color: 'bg-orange-500',
-      icon: '💰'
-    },
-    {
-      title: '완료된 작업',
-      value: '23',
-      color: 'bg-green-500',
-      icon: '✅'
-    },
-    {
-      title: '등록된 건축주',
-      value: '12',
-      color: 'bg-purple-500',
-      icon: '👥'
-    }
-  ];
+  const { invoices } = useApp();
+  const formatCurrency = (n) => `₩${(n || 0).toLocaleString()}`;
 
-  const recentInvoices = [
-    { id: 1, client: '김철수', project: '단독주택 신축', amount: 8500000, status: '발송됨', date: '2024-09-01' },
-    { id: 2, client: '박영희', project: '아파트 리모델링', amount: 3200000, status: '결제완료', date: '2024-08-28' },
-    { id: 3, client: '이민호', project: '상가 내부공사', amount: 5800000, status: '미결제', date: '2024-08-25' },
-    { id: 4, client: '정수진', project: '화장실 리모델링', amount: 1500000, status: '발송대기', date: '2024-08-22' }
+  const recentInvoices = useMemo(() => {
+    const list = (invoices || []).slice().sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+    return list.slice(0, 5);
+  }, [invoices]);
+
+  const total = useMemo(() => (invoices || []).reduce((s, i) => s + (i.amount || 0), 0), [invoices]);
+  const paid = useMemo(() => (invoices || []).filter(i => i.status === '결제완료').reduce((s, i) => s + (i.amount || 0), 0), [invoices]);
+  const pending = total - paid;
+
+  const stats = [
+    { title: '전체 청구액', value: formatCurrency(total), color: 'bg-blue-500', icon: '📄' },
+    { title: '미수금(요약)', value: formatCurrency(pending), color: 'bg-orange-500', icon: '💰' },
+    { title: '결제완료', value: formatCurrency(paid), color: 'bg-green-500', icon: '✅' },
+    { title: '등록된 건축주', value: '—', color: 'bg-purple-500', icon: '👥' }
   ];
 
   return (
@@ -82,13 +68,13 @@ function Dashboard() {
                     <td className="py-3 text-sm text-gray-900">{invoice.client}</td>
                     <td className="py-3 text-sm text-gray-900">{invoice.project}</td>
                     <td className="py-3 text-sm font-medium text-gray-900">
-                      {invoice.amount.toLocaleString()}원
+                      {formatCurrency(invoice.amount)}
                     </td>
                     <td className="py-3">
                       <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
                         invoice.status === '결제완료' ? 'bg-green-100 text-green-800' :
                         invoice.status === '발송됨' ? 'bg-blue-100 text-blue-800' :
-                        invoice.status === '미결제' ? 'bg-red-100 text-red-800' :
+                        invoice.status === '미결제' ? 'bg-orange-100 text-orange-800' :
                         'bg-yellow-100 text-yellow-800'
                       }`}>
                         {invoice.status}

@@ -7,6 +7,10 @@ function Invoices() {
   // eslint-disable-next-line no-unused-vars
   const { clients, invoices, setInvoices, companyInfo, workItems, stampImage } = useApp();
 
+  const handleChangeStatus = (id, next) => {
+    setInvoices(prev => prev.map(inv => inv.id === id ? { ...inv, status: next } : inv));
+  };
+
   // 숫자에 콤마 포맷팅 함수
   const formatNumberWithCommas = (number) => {
     if (!number && number !== 0) return '';
@@ -851,14 +855,22 @@ function Invoices() {
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                    invoice.status === '결제완료' ? 'bg-green-100 text-green-800' :
-                    invoice.status === '발송됨' ? 'bg-blue-100 text-blue-800' :
-                    invoice.status === '미결제' ? 'bg-red-100 text-red-800' :
-                    'bg-yellow-100 text-yellow-800'
-                  }`}>
-                    {invoice.status}
-                  </span>
+                  <select
+                    className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                      invoice.status === '결제완료' ? 'bg-green-100 text-green-800' :
+                      invoice.status === '발송됨' ? 'bg-blue-100 text-blue-800' :
+                      invoice.status === '미결제' ? 'bg-orange-100 text-orange-800' :
+                      'bg-yellow-100 text-yellow-800'
+                    } focus:outline-none focus:ring-2 focus:ring-primary-500`}
+                    value={invoice.status}
+                    onChange={(e) => handleChangeStatus(invoice.id, e.target.value)}
+                    title="청구서 상태 변경"
+                  >
+                    <option value="발송대기">발송대기</option>
+                    <option value="발송됨">발송됨</option>
+                    <option value="미결제">미결제</option>
+                    <option value="결제완료">결제완료</option>
+                  </select>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-900">{invoice.date}</div>

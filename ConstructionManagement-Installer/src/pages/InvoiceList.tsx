@@ -83,21 +83,17 @@ export default function InvoiceList() {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center space-x-2">
-                      <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(invoice.status)}`}>
-                        {invoice.status}
-                      </span>
-                      <select
-                        className="input-field py-1 px-2 text-xs"
-                        value={invoice.status}
-                        onChange={(e) => handleChangeStatus(invoice.id, e.target.value)}
-                      >
-                        <option value="발송대기">발송대기</option>
-                        <option value="발송됨">발송됨</option>
-                        <option value="미결제">미결제</option>
-                        <option value="결제완료">결제완료</option>
-                      </select>
-                    </div>
+                    <select
+                      className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(invoice.status)} focus:outline-none focus:ring-2 focus:ring-primary-500`}
+                      value={invoice.status}
+                      onChange={(e) => handleChangeStatus(invoice.id, e.target.value)}
+                      title="청구서 상태 변경"
+                    >
+                      <option value="발송대기">발송대기</option>
+                      <option value="발송됨">발송됨</option>
+                      <option value="미결제">미결제</option>
+                      <option value="결제완료">결제완료</option>
+                    </select>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex justify-end space-x-2">

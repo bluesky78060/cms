@@ -141,7 +141,7 @@ function CompanyInfo() {
       </div>
 
       {/* 상단 레이아웃: 업체 정보와 시스템 설정 */}
-      <div className="flex flex-col lg:flex-row gap-8 mb-8">
+      <div className="flex flex-col lg:flex-row lg:flex-wrap gap-8 mb-8">
         
         {/* 환경설정 */}
         <div className="flex-1 bg-white rounded-lg shadow flex flex-col">
@@ -561,7 +561,7 @@ function CompanyInfo() {
         </div>
 
         {/* 데이터 저장 위치 (Electron) */}
-        <div className="w-full lg:w-96 bg-white rounded-lg shadow h-max">
+        <div className="w-full bg-white rounded-lg shadow h-max">
           <div className="px-6 py-4 border-b border-gray-200 bg-gray-100">
             <h2 className="text-xl font-semibold text-gray-900">데이터 저장 위치</h2>
           </div>

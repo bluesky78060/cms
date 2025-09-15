@@ -62,10 +62,10 @@ function Navbar() {
             {isAdmin() ? (
               <div className="ml-10" />
             ) : (
-              <div className="ml-10 flex items-baseline space-x-4">
+              <div className="ml-10 flex items-baseline space-x-6">
                 <Link
                   to="/"
-                  className={`px-3 py-2 rounded-md text-base font-medium flex items-center space-x-1 ${
+                  className={`px-3 py-2 rounded-md text-sm font-medium flex items-center space-x-1 ${
                     isActive('/') 
                       ? 'bg-blue-700 text-white' 
                       : 'text-blue-100 hover:bg-blue-500 hover:text-white'
@@ -76,7 +76,7 @@ function Navbar() {
                 </Link>
                 <Link
                   to="/estimates"
-                  className={`px-3 py-2 rounded-md text-base font-medium flex items-center space-x-1 ${
+                  className={`px-3 py-2 rounded-md text-sm font-medium flex items-center space-x-1 ${
                     isActive('/estimates') 
                       ? 'bg-blue-700 text-white' 
                       : 'text-blue-100 hover:bg-blue-500 hover:text-white'
@@ -87,7 +87,7 @@ function Navbar() {
                 </Link>
                 <Link
                   to="/invoices"
-                  className={`px-3 py-2 rounded-md text-base font-medium flex items-center space-x-1 ${
+                  className={`px-3 py-2 rounded-md text-sm font-medium flex items-center space-x-1 ${
                     isActive('/invoices') 
                       ? 'bg-blue-700 text-white' 
                       : 'text-blue-100 hover:bg-blue-500 hover:text-white'
@@ -98,7 +98,7 @@ function Navbar() {
                 </Link>
                 <Link
                   to="/clients"
-                  className={`px-3 py-2 rounded-md text-base font-medium flex items-center space-x-1 ${
+                  className={`px-3 py-2 rounded-md text-sm font-medium flex items-center space-x-1 ${
                     isActive('/clients') 
                       ? 'bg-blue-700 text-white' 
                       : 'text-blue-100 hover:bg-blue-500 hover:text-white'
@@ -107,28 +107,28 @@ function Navbar() {
                   <UsersIcon className="h-5 w-5" />
                   <span>건축주 관리</span>
                 </Link>
-              <Link
-                to="/work-items"
-                className={`px-3 py-2 rounded-md text-base font-medium flex items-center space-x-1 ${
-                  isActive('/work-items') 
-                    ? 'bg-blue-700 text-white' 
-                    : 'text-blue-100 hover:bg-blue-500 hover:text-white'
-                }`}
-              >
-                <WrenchScrewdriverIcon className="h-5 w-5" />
-                <span>작업 항목 관리</span>
-              </Link>
-              <Link
-                to="/company-info"
-                className={`px-3 py-2 rounded-md text-base font-medium flex items-center space-x-1 ${
+                <Link
+                  to="/work-items"
+                  className={`px-3 py-2 rounded-md text-sm font-medium flex items-center space-x-1 ${
+                    isActive('/work-items') 
+                      ? 'bg-blue-700 text-white' 
+                      : 'text-blue-100 hover:bg-blue-500 hover:text-white'
+                  }`}
+                >
+                  <WrenchScrewdriverIcon className="h-5 w-5" />
+                  <span>작업 항목 관리</span>
+                </Link>
+                <Link
+                  to="/company-info"
+                className={`px-3 py-2 rounded-md text-sm font-medium flex items-center space-x-1 ${
                   isActive('/company-info') 
                     ? 'bg-blue-700 text-white' 
                     : 'text-blue-100 hover:bg-blue-500 hover:text-white'
                 }`}
-              >
-                <CogIcon className="h-5 w-5" />
-                <span>환경설정</span>
-              </Link>
+                >
+                  <CogIcon className="h-5 w-5" />
+                  <span>환경설정</span>
+                </Link>
               </div>
             )}
           </div>

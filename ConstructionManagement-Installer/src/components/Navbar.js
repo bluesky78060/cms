@@ -44,7 +44,7 @@ function Navbar() {
     <nav className="bg-blue-600 text-white shadow-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <div className="flex items-center">
+          <div className="flex items-center ml-[2px]">
             {isAdmin() ? (
               <div className="text-xl font-bold flex items-center space-x-2 cursor-default select-none">
                 <BuildingOffice2Icon className="h-8 w-8" />
@@ -133,7 +133,7 @@ function Navbar() {
             )}
           </div>
 
-          <div className="relative" ref={menuRef}>
+          <div className="relative mr-[2px]" ref={menuRef}>
             <button
               onClick={() => setShowUserMenu(!showUserMenu)}
               className="flex items-center space-x-2 px-3 py-2 rounded-md text-blue-100 hover:bg-blue-500 hover:text-white"

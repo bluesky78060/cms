@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { storage } from '../services/storage';
 
 // Context 생성
 const AppContext = createContext();
@@ -25,23 +26,8 @@ const STORAGE_KEYS = {
 };
 
 // localStorage 유틸리티 함수
-const loadFromStorage = (key, defaultValue) => {
-  try {
-    const stored = localStorage.getItem(key);
-    return stored ? JSON.parse(stored) : defaultValue;
-  } catch (error) {
-    console.warn(`Failed to load ${key} from localStorage:`, error);
-    return defaultValue;
-  }
-};
-
-const saveToStorage = (key, data) => {
-  try {
-    localStorage.setItem(key, JSON.stringify(data));
-  } catch (error) {
-    console.warn(`Failed to save ${key} to localStorage:`, error);
-  }
-};
+const loadFromStorage = (key, defaultValue) => storage.getItem(key, defaultValue);
+const saveToStorage = (key, data) => storage.setItem(key, data);
 
 // Provider 컴포넌트
 export const AppProvider = ({ children }) => {

@@ -1,6 +1,42 @@
-const { app, BrowserWindow, Menu } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain, dialog } = require('electron');
 const path = require('path');
 const isDev = require('electron-is-dev');
+const fs = require('fs');
+
+// Base data directory (can be overridden later)
+let baseDataDir = path.join(app.getPath('userData'), 'cms-data');
+
+function ensureDir(dir) {
+  try {
+    fs.mkdirSync(dir, { recursive: true });
+  } catch (e) {}
+}
+
+function getStorePath() {
+  ensureDir(baseDataDir);
+  return path.join(baseDataDir, 'store.json');
+}
+
+function readStore() {
+  const p = getStorePath();
+  try {
+    if (!fs.existsSync(p)) return {};
+    const text = fs.readFileSync(p, 'utf-8');
+    return JSON.parse(text || '{}');
+  } catch (e) {
+    return {};
+  }
+}
+
+function writeStore(obj) {
+  const p = getStorePath();
+  try {
+    fs.writeFileSync(p, JSON.stringify(obj, null, 2), 'utf-8');
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
 
 function createWindow() {
   // 메인 윈도우 생성
@@ -12,7 +48,8 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      enableRemoteModule: false
+      enableRemoteModule: false,
+      preload: path.join(__dirname, 'preload.js')
     },
     icon: path.join(__dirname, 'favicon.ico'), // 아이콘 설정
     title: '건설 청구서 관리 시스템',
@@ -148,4 +185,24 @@ app.on('web-contents-created', (event, contents) => {
   contents.on('new-window', (navigationEvent, navigationUrl) => {
     navigationEvent.preventDefault();
   });
+});
+
+// IPC handlers for storage
+ipcMain.on('cms:storage-get-sync', (event, key) => {
+  const store = readStore();
+  event.returnValue = store[key] ?? null;
+});
+
+ipcMain.on('cms:storage-set', (event, key, value) => {
+  const store = readStore();
+  store[key] = value;
+  writeStore(store);
+});
+
+ipcMain.handle('cms:get-base-dir', async () => baseDataDir);
+ipcMain.handle('cms:choose-base-dir', async () => {
+  const res = await dialog.showOpenDialog({ properties: ['openDirectory', 'createDirectory'] });
+  if (res.canceled || !res.filePaths || res.filePaths.length === 0) return baseDataDir;
+  baseDataDir = res.filePaths[0];
+  return baseDataDir;
 });

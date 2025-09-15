@@ -11,6 +11,7 @@ function CompanyInfo() {
   const [newUnit, setNewUnit] = useState('');
   const [newCategory, setNewCategory] = useState('');
   const [storageInfo, setStorageInfo] = useState({ used: '0 KB', stampImageSize: '0 KB' });
+  const [dataDir, setDataDir] = useState('');
   const fileInputRef = useRef(null);
 
   // 컴포넌트 로드 시 저장소 정보 업데이트
@@ -18,6 +19,15 @@ function CompanyInfo() {
     if (checkStorageAvailable()) {
       setStorageInfo(getStorageInfo());
     }
+    // Load Electron data directory if available
+    (async () => {
+      try {
+        if (window.cms && typeof window.cms.getBaseDir === 'function') {
+          const dir = await window.cms.getBaseDir();
+          setDataDir(dir);
+        }
+      } catch (e) {}
+    })();
   }, [stampImage]);
 
   const handleInputChange = (e) => {
@@ -547,6 +557,40 @@ function CompanyInfo() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* 데이터 저장 위치 (Electron) */}
+        <div className="w-full lg:w-96 bg-white rounded-lg shadow h-max">
+          <div className="px-6 py-4 border-b border-gray-200 bg-gray-100">
+            <h2 className="text-xl font-semibold text-gray-900">데이터 저장 위치</h2>
+          </div>
+          <div className="p-6 space-y-3">
+            {dataDir ? (
+              <>
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">현재 디렉토리</p>
+                  <div className="text-sm font-mono break-all bg-gray-50 border rounded p-2">{dataDir}</div>
+                </div>
+                <button
+                  onClick={async () => {
+                    try {
+                      const dir = await window.cms.chooseBaseDir();
+                      setDataDir(dir);
+                      alert('데이터 저장 위치가 변경되었습니다.');
+                    } catch (e) {
+                      alert('디렉토리 선택 중 오류가 발생했습니다.');
+                    }
+                  }}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded text-sm"
+                >
+                  디렉토리 변경
+                </button>
+                <p className="text-xs text-gray-500">Electron 환경에서만 사용할 수 있습니다.</p>
+              </>
+            ) : (
+              <p className="text-sm text-gray-500">브라우저 환경에서는 기본 저장소(localStorage/IndexedDB)를 사용합니다.</p>
+            )}
           </div>
         </div>
       </div>

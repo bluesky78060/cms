@@ -25,10 +25,13 @@ export const UserProvider = ({ children }) => {
       localStorage.setItem('CMS_USERS', JSON.stringify(defaultUsers));
     }
 
-    const savedUser = localStorage.getItem('CURRENT_USER');
+    const savedUser = sessionStorage.getItem('CURRENT_USER');
     if (savedUser) {
       setCurrentUser(JSON.parse(savedUser));
       setIsLoggedIn(true);
+    } else {
+      // 과거 잔존 세션 제거
+      localStorage.removeItem('CURRENT_USER');
     }
   }, []);
 
@@ -39,7 +42,7 @@ export const UserProvider = ({ children }) => {
     if (user) {
       setCurrentUser(user);
       setIsLoggedIn(true);
-      localStorage.setItem('CURRENT_USER', JSON.stringify(user));
+      sessionStorage.setItem('CURRENT_USER', JSON.stringify(user));
       return { success: true, user };
     } else {
       return { success: false, error: '아이디 또는 비밀번호가 올바르지 않습니다.' };
@@ -49,7 +52,8 @@ export const UserProvider = ({ children }) => {
   const logout = () => {
     setCurrentUser(null);
     setIsLoggedIn(false);
-    localStorage.removeItem('CURRENT_USER');
+    try { sessionStorage.removeItem('CURRENT_USER'); } catch (e) {}
+    try { localStorage.removeItem('CURRENT_USER'); } catch (e) {}
   };
 
   const getUserStorageKey = (username, key) => {
@@ -135,6 +139,44 @@ export const UserProvider = ({ children }) => {
     isAdmin
   };
 
+  // 15분 무활동 자동 로그아웃
+  useEffect(() => {
+    if (!isLoggedIn) return;
+    let timerId;
+    const TIMEOUT = 15 * 60 * 1000;
+    const reset = () => {
+      clearTimeout(timerId);
+      timerId = setTimeout(() => {
+        logout();
+      }, TIMEOUT);
+    };
+    const events = ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart'];
+    events.forEach(ev => window.addEventListener(ev, reset, { passive: true }));
+    reset();
+    return () => {
+      clearTimeout(timerId);
+      events.forEach(ev => window.removeEventListener(ev, reset));
+    };
+  }, [isLoggedIn]);
+
+  // 창/탭 닫기 및 숨김 시 세션 제거
+  useEffect(() => {
+    const clearSession = () => {
+      try { sessionStorage.removeItem('CURRENT_USER'); } catch (e) {}
+      try { localStorage.removeItem('CURRENT_USER'); } catch (e) {}
+    };
+    window.addEventListener('beforeunload', clearSession);
+    window.addEventListener('pagehide', clearSession);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') clearSession();
+    });
+    return () => {
+      window.removeEventListener('beforeunload', clearSession);
+      window.removeEventListener('pagehide', clearSession);
+      document.removeEventListener('visibilitychange', () => {});
+    };
+  }, []);
+
   return (
     <UserContext.Provider value={value}>
       {children}
@@ -144,12 +186,6 @@ export const UserProvider = ({ children }) => {
 
 // 자동 로그아웃: 브라우저 창/탭을 닫거나 새로고침 시 세션 제거
 // (로컬스토리지의 CURRENT_USER 키를 제거하여 다음 방문 시 로그인 화면으로 유도)
-if (typeof window !== 'undefined') {
-  const clearSession = () => {
-    try { localStorage.removeItem('CURRENT_USER'); } catch (e) {}
-  };
-  window.addEventListener('beforeunload', clearSession);
-  window.addEventListener('pagehide', clearSession);
-}
+// 전역 리스너는 컴포넌트 내부로 이동
 
 export default UserProvider;

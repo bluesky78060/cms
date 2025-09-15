@@ -142,4 +142,14 @@ export const UserProvider = ({ children }) => {
   );
 };
 
+// 자동 로그아웃: 브라우저 창/탭을 닫거나 새로고침 시 세션 제거
+// (로컬스토리지의 CURRENT_USER 키를 제거하여 다음 방문 시 로그인 화면으로 유도)
+if (typeof window !== 'undefined') {
+  const clearSession = () => {
+    try { localStorage.removeItem('CURRENT_USER'); } catch (e) {}
+  };
+  window.addEventListener('beforeunload', clearSession);
+  window.addEventListener('pagehide', clearSession);
+}
+
 export default UserProvider;

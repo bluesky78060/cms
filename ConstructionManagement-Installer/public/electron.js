@@ -12,26 +12,45 @@ function ensureDir(dir) {
   } catch (e) {}
 }
 
-function getStorePath() {
+function getKeyPath(key) {
   ensureDir(baseDataDir);
-  return path.join(baseDataDir, 'store.json');
+  // Simple filename from key (expected safe)
+  return path.join(baseDataDir, `${key}.json`);
 }
 
-function readStore() {
-  const p = getStorePath();
+function readLegacyStore() {
+  const legacy = path.join(baseDataDir, 'store.json');
   try {
-    if (!fs.existsSync(p)) return {};
-    const text = fs.readFileSync(p, 'utf-8');
+    if (!fs.existsSync(legacy)) return null;
+    const text = fs.readFileSync(legacy, 'utf-8');
     return JSON.parse(text || '{}');
   } catch (e) {
-    return {};
+    return null;
   }
 }
 
-function writeStore(obj) {
-  const p = getStorePath();
+function readKeySync(key) {
   try {
-    fs.writeFileSync(p, JSON.stringify(obj, null, 2), 'utf-8');
+    const p = getKeyPath(key);
+    if (fs.existsSync(p)) {
+      const text = fs.readFileSync(p, 'utf-8');
+      return text ? JSON.parse(text) : null;
+    }
+    // Fallback: legacy store.json
+    const legacy = readLegacyStore();
+    if (legacy && Object.prototype.hasOwnProperty.call(legacy, key)) {
+      return legacy[key];
+    }
+    return null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function writeKeySync(key, value) {
+  try {
+    const p = getKeyPath(key);
+    fs.writeFileSync(p, JSON.stringify(value, null, 2), 'utf-8');
     return true;
   } catch (e) {
     return false;
@@ -189,14 +208,11 @@ app.on('web-contents-created', (event, contents) => {
 
 // IPC handlers for storage
 ipcMain.on('cms:storage-get-sync', (event, key) => {
-  const store = readStore();
-  event.returnValue = store[key] ?? null;
+  event.returnValue = readKeySync(key);
 });
 
 ipcMain.on('cms:storage-set', (event, key, value) => {
-  const store = readStore();
-  store[key] = value;
-  writeStore(store);
+  writeKeySync(key, value);
 });
 
 ipcMain.handle('cms:get-base-dir', async () => baseDataDir);

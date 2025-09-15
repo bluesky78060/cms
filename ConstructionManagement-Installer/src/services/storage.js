@@ -30,7 +30,7 @@ export const storage = {
     // Additionally mirror to chosen browser directory if supported
     if (browserFs.isSupported()) {
       // Fire and forget; on failure it silently falls back
-      browserFs.mergeAndWrite(key, data).catch(() => {});
+      browserFs.writeKeyDirect(key, data).catch(() => {});
     }
   },
   async chooseBrowserDirectory() {

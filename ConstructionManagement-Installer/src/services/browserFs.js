@@ -85,27 +85,27 @@ async function getFileHandle(dirHandle, name) {
   return await dirHandle.getFileHandle(name, { create: true });
 }
 
-async function readStore(dirHandle) {
+async function readKey(dirHandle, key) {
   try {
     if (!dirHandle) dirHandle = await getSavedDirectoryHandle();
     if (!dirHandle) return null;
     if (!(await verifyPermission(dirHandle, 'read'))) return null;
-    const fileHandle = await getFileHandle(dirHandle, 'store.json');
+    const fileHandle = await getFileHandle(dirHandle, `${key}.json`);
     const file = await fileHandle.getFile();
     const text = await file.text();
-    if (!text) return {};
+    if (!text) return null;
     return JSON.parse(text);
   } catch (e) {
     return null;
   }
 }
 
-async function writeStore(dirHandle, obj) {
+async function writeKey(dirHandle, key, obj) {
   try {
     if (!dirHandle) dirHandle = await getSavedDirectoryHandle();
     if (!dirHandle) return false;
     if (!(await verifyPermission(dirHandle, 'readwrite'))) return false;
-    const fileHandle = await getFileHandle(dirHandle, 'store.json');
+    const fileHandle = await getFileHandle(dirHandle, `${key}.json`);
     const writable = await fileHandle.createWritable();
     await writable.write(new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' }));
     await writable.close();
@@ -115,12 +115,10 @@ async function writeStore(dirHandle, obj) {
   }
 }
 
-async function mergeAndWrite(key, value) {
+async function writeKeyDirect(key, value) {
   const dir = await getSavedDirectoryHandle();
   if (!dir) return false;
-  const current = (await readStore(dir)) || {};
-  current[key] = value;
-  return await writeStore(dir, current);
+  return await writeKey(dir, key, value);
 }
 
 export const browserFs = {
@@ -128,8 +126,7 @@ export const browserFs = {
   getSavedDirectoryHandle,
   saveDirectoryHandle,
   chooseDirectory,
-  readStore,
-  writeStore,
-  mergeAndWrite,
+  readKey,
+  writeKey,
+  writeKeyDirect,
 };
-

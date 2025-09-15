@@ -62,10 +62,10 @@ function Navbar() {
             {isAdmin() ? (
               <div className="ml-10" />
             ) : (
-              <div className="ml-10 flex items-baseline space-x-6">
+              <div className="ml-6 md:ml-8 lg:ml-10 flex items-baseline space-x-3 md:space-x-4 lg:space-x-6">
                 <Link
                   to="/"
-                  className={`px-3 py-2 rounded-md text-sm font-medium flex items-center space-x-1 ${
+                  className={`px-2 md:px-3 py-2 rounded-md text-xs md:text-sm font-medium flex items-center space-x-1 ${
                     isActive('/') 
                       ? 'bg-blue-700 text-white' 
                       : 'text-blue-100 hover:bg-blue-500 hover:text-white'
@@ -76,7 +76,7 @@ function Navbar() {
                 </Link>
                 <Link
                   to="/estimates"
-                  className={`px-3 py-2 rounded-md text-sm font-medium flex items-center space-x-1 ${
+                  className={`px-2 md:px-3 py-2 rounded-md text-xs md:text-sm font-medium flex items-center space-x-1 ${
                     isActive('/estimates') 
                       ? 'bg-blue-700 text-white' 
                       : 'text-blue-100 hover:bg-blue-500 hover:text-white'
@@ -87,7 +87,7 @@ function Navbar() {
                 </Link>
                 <Link
                   to="/invoices"
-                  className={`px-3 py-2 rounded-md text-sm font-medium flex items-center space-x-1 ${
+                  className={`px-2 md:px-3 py-2 rounded-md text-xs md:text-sm font-medium flex items-center space-x-1 ${
                     isActive('/invoices') 
                       ? 'bg-blue-700 text-white' 
                       : 'text-blue-100 hover:bg-blue-500 hover:text-white'
@@ -98,7 +98,7 @@ function Navbar() {
                 </Link>
                 <Link
                   to="/clients"
-                  className={`px-3 py-2 rounded-md text-sm font-medium flex items-center space-x-1 ${
+                  className={`px-2 md:px-3 py-2 rounded-md text-xs md:text-sm font-medium flex items-center space-x-1 ${
                     isActive('/clients') 
                       ? 'bg-blue-700 text-white' 
                       : 'text-blue-100 hover:bg-blue-500 hover:text-white'
@@ -109,7 +109,7 @@ function Navbar() {
                 </Link>
                 <Link
                   to="/work-items"
-                  className={`px-3 py-2 rounded-md text-sm font-medium flex items-center space-x-1 ${
+                  className={`px-2 md:px-3 py-2 rounded-md text-xs md:text-sm font-medium flex items-center space-x-1 ${
                     isActive('/work-items') 
                       ? 'bg-blue-700 text-white' 
                       : 'text-blue-100 hover:bg-blue-500 hover:text-white'
@@ -120,7 +120,7 @@ function Navbar() {
                 </Link>
                 <Link
                   to="/company-info"
-                className={`px-3 py-2 rounded-md text-sm font-medium flex items-center space-x-1 ${
+                className={`px-2 md:px-3 py-2 rounded-md text-xs md:text-sm font-medium flex items-center space-x-1 ${
                   isActive('/company-info') 
                     ? 'bg-blue-700 text-white' 
                     : 'text-blue-100 hover:bg-blue-500 hover:text-white'

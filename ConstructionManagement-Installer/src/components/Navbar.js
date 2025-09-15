@@ -6,7 +6,6 @@ import {
   DocumentTextIcon,
   UsersIcon,
   WrenchScrewdriverIcon,
-  CogIcon,
   CalculatorIcon,
   BuildingOffice2Icon,
   UserIcon,

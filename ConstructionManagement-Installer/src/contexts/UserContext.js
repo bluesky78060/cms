@@ -14,13 +14,12 @@ export const UserProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  const defaultUsers = [
-    { id: 1, username: 'admin', password: 'admin123', name: '관리자', role: 'admin' },
-    { id: 2, username: 'manager', password: 'manager123', name: '매니저', role: 'manager' },
-    { id: 3, username: 'user', password: 'user123', name: '사용자', role: 'user' }
-  ];
-
   useEffect(() => {
+    const defaultUsers = [
+      { id: 1, username: 'admin', password: 'admin123', name: '관리자', role: 'admin' },
+      { id: 2, username: 'manager', password: 'manager123', name: '매니저', role: 'manager' },
+      { id: 3, username: 'user', password: 'user123', name: '사용자', role: 'user' }
+    ];
     const users = localStorage.getItem('CMS_USERS');
     if (!users) {
       localStorage.setItem('CMS_USERS', JSON.stringify(defaultUsers));
@@ -31,15 +30,11 @@ export const UserProvider = ({ children }) => {
       setCurrentUser(JSON.parse(savedUser));
       setIsLoggedIn(true);
     }
-  }, [defaultUsers]);
+  }, []);
 
   const login = (username, password) => {
     const users = JSON.parse(localStorage.getItem('CMS_USERS') || '[]');
-    console.log('Available users:', users);
-    console.log('Trying to login with:', username, password);
-    
     const user = users.find(u => u.username === username && u.password === password);
-    console.log('Found user:', user);
     
     if (user) {
       setCurrentUser(user);

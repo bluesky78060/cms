@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useUser } from '../contexts/UserContext';
 import { Navigate } from 'react-router-dom';
 import UserManagement from './UserManagement';
@@ -11,7 +11,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 const AdminPanel = () => {
-  const { isAdmin, getAllUsers, currentUser } = useUser();
+  const { isAdmin, getAllUsers } = useUser();
 
   if (!isAdmin()) {
     return <Navigate to="/" replace />;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useUser } from '../contexts/UserContext';
 import { 
   PlusIcon, 
@@ -22,13 +22,13 @@ const UserManagement = () => {
   const [error, setError] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
 
-  const loadUsers = () => {
+  const loadUsers = useCallback(() => {
     setUsers(getAllUsers());
-  };
+  }, [getAllUsers]);
 
   useEffect(() => {
     loadUsers();
-  }, []);
+  }, [loadUsers]);
 
   const resetForm = () => {
     setFormData({

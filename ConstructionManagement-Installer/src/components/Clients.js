@@ -1,7 +1,22 @@
 import React, { useState, useRef } from 'react';
 import { useApp } from '../contexts/AppContext';
-import { numberToKorean } from '../utils/numberToKorean';
 import { exportToExcel, importFromExcel, createTemplate } from '../utils/excelUtils';
+
+// 한국 전화번호 자동 하이픈 포매터
+function formatPhoneKR(input) {
+  const digits = String(input || '').replace(/\D/g, '');
+  if (digits.startsWith('02')) {
+    if (digits.length <= 2) return digits;
+    if (digits.length <= 5) return `${digits.slice(0, 2)}-${digits.slice(2)}`;
+    if (digits.length <= 9) return `${digits.slice(0, 2)}-${digits.slice(2, digits.length - 4)}-${digits.slice(digits.length - 4)}`;
+    return `${digits.slice(0, 2)}-${digits.slice(2, 6)}-${digits.slice(6, 10)}`; // 02-xxxx-xxxx
+  }
+  // 모바일(010 등) 및 기타 지역번호(3자리)
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 7) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+  if (digits.length <= 11) return `${digits.slice(0, 3)}-${digits.slice(3, digits.length - 4)}-${digits.slice(digits.length - 4)}`;
+  return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7, 11)}`; // 최대 11자리
+}
 
 function Clients() {
   const { clients, setClients } = useApp();
@@ -62,9 +77,10 @@ function Clients() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    const next = (name === 'phone' || name === 'mobile') ? formatPhoneKR(value) : value;
     setNewClient(prev => ({
       ...prev,
-      [name]: value
+      [name]: next
     }));
   };
 
@@ -239,7 +255,7 @@ function Clients() {
             <div>
               <p className="text-sm font-medium text-gray-600 mb-1">총 청구금액 :</p>
               <p className="text-xl font-bold text-green-600">
-                금 {numberToKorean(clients.reduce((sum, client) => sum + client.totalBilled, 0))} 원정
+                {clients.reduce((sum, client) => sum + client.totalBilled, 0).toLocaleString()}원
               </p>
             </div>
             <div className="bg-green-500 rounded-full p-3 text-white text-2xl">

@@ -1252,8 +1252,8 @@ function Invoices() {
           {printInvoice && (
             <>
               {/* 청구서 번호 및 제목 */}
-              <div style={{ marginBottom: '40px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
+              <div style={{ marginBottom: '24px', backgroundColor: '#f3f4f6', padding: '12px', borderRadius: '8px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                   <div style={{ fontSize: '14px', color: '#374151' }}>
                     <strong>청구서 번호:</strong> {printInvoice.id}
                   </div>
@@ -1261,19 +1261,19 @@ function Invoices() {
                     <strong>작성일:</strong> {printInvoice.date}
                   </div>
                 </div>
-                <div style={{ textAlign: 'center', borderBottom: '3px solid #1f2937', paddingBottom: '20px' }}>
+                <div style={{ textAlign: 'center', borderBottom: '2px solid #9ca3af', paddingBottom: '8px' }}>
                   <h1 style={{ fontSize: '36px', margin: '0', fontWeight: 'bold', color: '#1f2937', letterSpacing: '8px' }}>청   구   서</h1>
                 </div>
               </div>
 
               {/* 수신자 및 발신자 정보 */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', marginBottom: '40px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '24px' }}>
                 {/* 건축주 정보 (왼쪽) */}
                 <div>
                   <h3 style={{ margin: '0 0 15px 0', fontSize: '18px', fontWeight: 'bold', color: '#1f2937', borderLeft: '4px solid #4f46e5', paddingLeft: '12px' }}>
                     발주자 정보
                   </h3>
-                  <div style={{ backgroundColor: '#f9fafb', padding: '20px', borderRadius: '8px' }}>
+                  <div style={{ backgroundColor: '#f3f4f6', padding: '12px', borderRadius: '8px' }}>
                     <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>건축주명:</strong> {printInvoice.client}</p>
                     <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>프로젝트명:</strong> {printInvoice.project}</p>
                     <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>작업장 주소:</strong> {printInvoice.workplaceAddress}</p>
@@ -1285,7 +1285,7 @@ function Invoices() {
                   <h3 style={{ margin: '0 0 15px 0', fontSize: '18px', fontWeight: 'bold', color: '#1f2937', borderLeft: '4px solid #4f46e5', paddingLeft: '12px' }}>
                     시공업체 정보
                   </h3>
-                  <div style={{ backgroundColor: '#f9fafb', padding: '20px', borderRadius: '8px' }}>
+                  <div style={{ backgroundColor: '#f3f4f6', padding: '12px', borderRadius: '8px' }}>
                     <p style={{ margin: '8px 0', fontSize: '14px', fontWeight: 'bold' }}>{companyInfo.name}</p>
                     <p style={{ margin: '8px 0', fontSize: '12px' }}>사업자등록번호: {companyInfo.businessNumber}</p>
                     <p style={{ margin: '8px 0', fontSize: '12px' }}>대표자: {companyInfo.representative}</p>
@@ -1313,28 +1313,28 @@ function Invoices() {
                   <table style={{ width: '100%', minWidth: '600px', borderCollapse: 'collapse', backgroundColor: '#fff', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)' }}>
                     <thead>
                       <tr style={{ backgroundColor: '#f9fafb' }}>
-                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', width: '40px', fontSize: '12px' }}>
+                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', width: '40px', fontSize: '13px' }}>
                           연번
                         </th>
-                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', fontSize: '12px' }}>
+                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', fontSize: '13px' }}>
                           내용
                         </th>
-                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', fontSize: '12px' }}>
+                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', fontSize: '13px' }}>
                           규격
                         </th>
-                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', fontSize: '12px' }}>
+                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', fontSize: '13px' }}>
                           수량
                         </th>
-                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', fontSize: '12px' }}>
+                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', fontSize: '13px' }}>
                           단위
                         </th>
-                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', fontSize: '12px' }}>
+                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', fontSize: '13px' }}>
                           단가
                         </th>
-                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', fontSize: '12px' }}>
+                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', fontSize: '13px' }}>
                           공급가액
                         </th>
-                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', fontSize: '12px' }}>
+                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', fontSize: '13px' }}>
                           비고
                         </th>
                       </tr>
@@ -1342,23 +1342,23 @@ function Invoices() {
                     <tbody>
                       {printInvoice.workItems.map((item, index) => (
                         <tr key={index} style={{ ':hover': { backgroundColor: '#f1f5f9' } }}>
-                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontSize: '11px' }}>{index + 1}</td>
-                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'left', fontSize: '11px' }}>
+                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontSize: '12px' }}>{index + 1}</td>
+                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'left', fontSize: '13px' }}>
                             <div>
                               <strong>{item.name}</strong>
                               {item.description && (
-                                <div style={{ fontSize: '10px', color: '#6b7280', marginTop: '4px' }}>
+                                <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
                                   {item.description}
                                 </div>
                               )}
                             </div>
                           </td>
-                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontSize: '11px' }}>{item.category || '-'}</td>
-                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontSize: '11px' }}>{item.quantity}</td>
-                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontSize: '11px' }}>식</td>
-                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'right', fontSize: '11px' }}>{Math.floor(item.unitPrice / item.quantity).toLocaleString()}원</td>
-                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'right', fontSize: '11px' }}>{item.unitPrice.toLocaleString()}원</td>
-                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'left', fontSize: '11px', verticalAlign: 'top' }}>
+                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontSize: '12px' }}>{item.category || '-'}</td>
+                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontSize: '12px' }}>{item.quantity}</td>
+                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontSize: '12px' }}>식</td>
+                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'right', fontSize: '12px' }}>{Math.floor(item.unitPrice / item.quantity).toLocaleString()}원</td>
+                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'right', fontSize: '12px' }}>{item.unitPrice.toLocaleString()}원</td>
+                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'left', fontSize: '12px', verticalAlign: 'top' }}>
                             {item.notes || '-'}
                           </td>
                         </tr>
@@ -1366,10 +1366,10 @@ function Invoices() {
                     </tbody>
                     <tfoot>
                       <tr style={{ backgroundColor: '#f0f0f0', fontWeight: 'bold', color: '#1f2937' }}>
-                        <td colSpan="7" style={{ padding: '15px 16px', border: '1px solid #e5e7eb', textAlign: 'right', fontSize: '16px' }}>
+                        <td colSpan="7" style={{ padding: '15px 16px', border: '1px solid #e5e7eb', textAlign: 'right', fontSize: '17px' }}>
                           합계:
                         </td>
-                        <td style={{ padding: '15px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontSize: '16px', fontWeight: 'bold' }}>
+                        <td style={{ padding: '15px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontSize: '17px', fontWeight: 'bold' }}>
                           {printInvoice.amount.toLocaleString()}원
                         </td>
                       </tr>

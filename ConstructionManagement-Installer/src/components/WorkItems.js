@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { exportToExcel, importFromExcel, createTemplate } from '../utils/excelUtils';
 
 function WorkItems() {
-  const { clients, workItems, setWorkItems, invoices, setInvoices, getCompletedWorkItemsByClient, addWorkItemToInvoice, units, categories } = useApp();
+  const { clients, setClients, workItems, setWorkItems, invoices, setInvoices, getCompletedWorkItemsByClient, addWorkItemToInvoice, units, categories } = useApp();
   const navigate = useNavigate();
   
 
@@ -56,7 +56,7 @@ function WorkItems() {
 
   const statuses = ['예정', '진행중', '완료', '보류'];
 
-  // 선택된 건축주의 프로젝트 목록 가져오기 (작업항목 + 건축주 작업장 설명 기반)
+  // 선택된 건축주의 프로젝트 목록 가져오기 (작업항목 + 건축주.projects + 작업장 설명 기반)
   const getClientProjects = (clientId) => {
     if (!clientId) return [];
     const cid = parseInt(clientId);
@@ -64,10 +64,16 @@ function WorkItems() {
       .filter(item => item.clientId === cid)
       .map(item => item.projectName)
       .filter(Boolean);
-    const fromWorkplaces = (clients.find(c => c.id === cid)?.workplaces || [])
+    const client = clients.find(c => c.id === cid);
+    const fromClientProjects = (client?.projects || []).filter(Boolean);
+    const fromWorkplaces = (client?.workplaces || [])
       .map(wp => wp.description)
       .filter(Boolean);
-    return Array.from(new Set([...fromWorkItems, ...fromWorkplaces]));
+    return Array.from(new Set([
+      ...fromWorkItems,
+      ...fromClientProjects,
+      ...fromWorkplaces
+    ]));
   };
 
   // 모든 프로젝트 목록 가져오기
@@ -131,9 +137,11 @@ function WorkItems() {
           [name]: newValue
         };
     
-        // 건축주가 변경되면 작업장 선택 초기화
+        // 건축주가 변경되면 작업장/프로젝트 초기화
         if (name === 'clientId') {
           updated.workplaceId = '';
+          updated.projectName = '';
+          setShowCustomProject(false);
         }
 
         // 프로젝트명이 "custom"이면 커스텀 입력 모드로 변경
@@ -143,6 +151,15 @@ function WorkItems() {
             updated.projectName = '';
           } else {
             setShowCustomProject(false);
+          }
+        }
+
+        // 작업장 선택 시, 작업장 설명을 프로젝트명으로 자동 채움(있을 경우)
+        if (name === 'workplaceId') {
+          const wp = getClientWorkplaces(updated.clientId).find(w => w.id === parseInt(value));
+          const suggested = (wp?.description || '').trim();
+          if (suggested) {
+            updated.projectName = suggested;
           }
         }
         
@@ -169,6 +186,13 @@ function WorkItems() {
             }
           : item
       ));
+      // 클라이언트의 프로젝트 목록에 반영
+      if (newItem.projectName) {
+        setClients(prev => prev.map(c => c.id === newItem.clientId
+          ? { ...c, projects: Array.from(new Set([...(c.projects || []), newItem.projectName])) }
+          : c
+        ));
+      }
     } else {
       // 새 항목 추가
       const selectedWorkplaceData = getClientWorkplaces(newItem.clientId).find(wp => wp.id === newItem.workplaceId);
@@ -180,6 +204,13 @@ function WorkItems() {
         date: new Date().toISOString().split('T')[0]
       };
       setWorkItems(prev => [...prev, item]);
+      // 클라이언트의 프로젝트 목록에 반영
+      if (newItem.projectName) {
+        setClients(prev => prev.map(c => c.id === newItem.clientId
+          ? { ...c, projects: Array.from(new Set([...(c.projects || []), newItem.projectName])) }
+          : c
+        ));
+      }
     }
     
     resetForm();
@@ -286,6 +317,13 @@ const addBulkItem = () => {
     }));
     
     setWorkItems(prev => [...prev, ...newItems]);
+    // 클라이언트의 프로젝트 목록에 반영
+    if (bulkBaseInfo.projectName) {
+      setClients(prev => prev.map(c => c.id === bulkBaseInfo.clientId
+        ? { ...c, projects: Array.from(new Set([...(c.projects || []), bulkBaseInfo.projectName])) }
+        : c
+      ));
+    }
     
     // 폼 초기화
     setBulkItems([{
@@ -920,9 +958,10 @@ const addBulkItem = () => {
                         onChange={handleInputChange}
                         className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
                         required
+                        disabled={!newItem.clientId}
                       >
                         <option value="">프로젝트 선택</option>
-                        {getAllProjects().map(project => (
+                        {newItem.clientId && getClientProjects(newItem.clientId).map(project => (
                           <option key={project} value={project}>{project}</option>
                         ))}
                         <option value="custom">+ 새 프로젝트 입력</option>
@@ -1134,9 +1173,10 @@ const addBulkItem = () => {
                           onChange={handleBulkBaseInfoChange}
                           className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
                           required
+                          disabled={!bulkBaseInfo.clientId}
                         >
                           <option value="">프로젝트 선택</option>
-                          {getAllProjects().map(project => (
+                          {bulkBaseInfo.clientId && getClientProjects(bulkBaseInfo.clientId).map(project => (
                             <option key={project} value={project}>{project}</option>
                           ))}
                           <option value="custom">+ 새 프로젝트 입력</option>

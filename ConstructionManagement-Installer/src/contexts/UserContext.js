@@ -54,6 +54,11 @@ export const UserProvider = ({ children }) => {
     setIsLoggedIn(false);
     try { sessionStorage.removeItem('CURRENT_USER'); } catch (e) {}
     try { localStorage.removeItem('CURRENT_USER'); } catch (e) {}
+    // 다른 탭에도 로그아웃 브로드캐스트
+    try {
+      localStorage.setItem('CMS_LOGOUT', String(Date.now()));
+      localStorage.removeItem('CMS_LOGOUT');
+    } catch (e) {}
   };
 
   const getUserStorageKey = (username, key) => {
@@ -164,6 +169,11 @@ export const UserProvider = ({ children }) => {
     const clearSession = () => {
       try { sessionStorage.removeItem('CURRENT_USER'); } catch (e) {}
       try { localStorage.removeItem('CURRENT_USER'); } catch (e) {}
+      // 모든 탭에 로그아웃 브로드캐스트(닫힌 탭이더라도 남은 탭을 로그아웃)
+      try {
+        localStorage.setItem('CMS_LOGOUT', String(Date.now()));
+        localStorage.removeItem('CMS_LOGOUT');
+      } catch (e) {}
     };
     window.addEventListener('beforeunload', clearSession);
     window.addEventListener('pagehide', clearSession);
@@ -175,6 +185,20 @@ export const UserProvider = ({ children }) => {
       window.removeEventListener('pagehide', clearSession);
       document.removeEventListener('visibilitychange', () => {});
     };
+  }, []);
+
+  // 다른 탭에서의 로그아웃 신호를 수신하여 즉시 로그아웃
+  useEffect(() => {
+    const onStorage = (e) => {
+      if (e.key === 'CMS_LOGOUT') {
+        setCurrentUser(null);
+        setIsLoggedIn(false);
+        try { sessionStorage.removeItem('CURRENT_USER'); } catch (err) {}
+        try { localStorage.removeItem('CURRENT_USER'); } catch (err) {}
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
   }, []);
 
   return (

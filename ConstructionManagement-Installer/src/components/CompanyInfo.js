@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../contexts/AppContext';
 import { checkStorageAvailable, getStorageInfo, imageToBase64, saveStampImage, removeStampImage } from '../utils/imageStorage';
+import { storage } from '../services/storage';
 
 function CompanyInfo() {
   const { companyInfo, setCompanyInfo, units, setUnits, categories, setCategories, stampImage, setStampImage } = useApp();
@@ -12,6 +13,7 @@ function CompanyInfo() {
   const [newCategory, setNewCategory] = useState('');
   const [storageInfo, setStorageInfo] = useState({ used: '0 KB', stampImageSize: '0 KB' });
   const [dataDir, setDataDir] = useState('');
+  const [browserDirName, setBrowserDirName] = useState('');
   const fileInputRef = useRef(null);
 
   // 컴포넌트 로드 시 저장소 정보 업데이트
@@ -26,6 +28,10 @@ function CompanyInfo() {
           const dir = await window.cms.getBaseDir();
           setDataDir(dir);
         }
+      } catch (e) {}
+      try {
+        const info = await storage.getBrowserDirectoryInfo?.();
+        if (info?.name) setBrowserDirName(info.name);
       } catch (e) {}
     })();
   }, [stampImage]);
@@ -560,7 +566,7 @@ function CompanyInfo() {
           </div>
         </div>
 
-        {/* 데이터 저장 위치 (Electron) */}
+        {/* 데이터 저장 위치 (Electron/Browser) */}
         <div className="w-full bg-white rounded-lg shadow h-max">
           <div className="px-6 py-4 border-b border-gray-200 bg-gray-100">
             <h2 className="text-xl font-semibold text-gray-900">데이터 저장 위치</h2>
@@ -589,7 +595,33 @@ function CompanyInfo() {
                 <p className="text-xs text-gray-500">Electron 환경에서만 사용할 수 있습니다.</p>
               </>
             ) : (
-              <p className="text-sm text-gray-500">브라우저 환경에서는 기본 저장소(localStorage/IndexedDB)를 사용합니다.</p>
+              <div className="space-y-2">
+                <p className="text-sm text-gray-600">브라우저 저장 방식</p>
+                {browserDirName ? (
+                  <div className="text-sm">선택된 폴더: <span className="font-mono bg-gray-50 border rounded px-2 py-1">{browserDirName}</span></div>
+                ) : (
+                  <p className="text-sm text-gray-500">기본 저장소(localStorage)를 사용 중입니다.</p>
+                )}
+                {('showDirectoryPicker' in window) ? (
+                  <button
+                    onClick={async () => {
+                      const ok = await storage.chooseBrowserDirectory?.();
+                      if (ok) {
+                        const info = await storage.getBrowserDirectoryInfo?.();
+                        setBrowserDirName(info?.name || '');
+                        alert('브라우저에서 사용할 폴더가 설정되었습니다. 이후 변경 사항은 해당 폴더의 store.json에도 저장됩니다.');
+                      } else {
+                        alert('폴더 선택이 취소되었거나 권한이 없습니다.');
+                      }
+                    }}
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded text-sm"
+                  >
+                    브라우저 폴더 선택(Edge/Chrome)
+                  </button>
+                ) : (
+                  <p className="text-xs text-gray-500">이 브라우저는 폴더 선택을 지원하지 않습니다.</p>
+                )}
+              </div>
             )}
           </div>
         </div>

@@ -637,7 +637,7 @@ const addBulkItem = () => {
                 }}
                 className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
               >
-                <option value="">전체 건축주</option>
+                <option value="" style={{ fontSize: '15px' }}>전체 건축주</option>
                 {clients.map(client => (
                   <option key={client.id} value={client.id}>{client.name}</option>
                 ))}
@@ -649,7 +649,7 @@ const addBulkItem = () => {
                 className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
                 disabled={!selectedClient}
               >
-                <option value="">
+                <option value="" style={{ fontSize: '15px' }}>
                   {selectedClient ? '전체 프로젝트' : '먼저 건축주를 선택하세요'}
                 </option>
                 {selectedClient && getClientProjects(selectedClient).map(project => (

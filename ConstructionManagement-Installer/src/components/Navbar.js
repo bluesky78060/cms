@@ -42,9 +42,9 @@ function Navbar() {
 
   return (
     <nav className="bg-blue-600 text-white shadow-lg">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center ml-[2px]">
+      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-20">
+          <div className="flex items-center ml-0.5">
             {isAdmin() ? (
               <div className="text-xl font-bold flex items-center space-x-2 cursor-default select-none">
                 <BuildingOffice2Icon className="h-8 w-8" />
@@ -60,9 +60,9 @@ function Navbar() {
           
           <div className="hidden md:block">
             {isAdmin() ? (
-              <div className="ml-10" />
+              <div className="ml-6 md:ml-8 lg:ml-10" />
             ) : (
-              <div className="ml-6 md:ml-8 lg:ml-10 flex items-baseline space-x-3 md:space-x-4 lg:space-x-6">
+              <div className="ml-2 md:ml-4 lg:ml-6 flex items-baseline space-x-3 md:space-x-4 lg:space-x-6">
                 <Link
                   to="/"
                   className={`px-2 md:px-3 py-2 rounded-md text-xs md:text-sm font-medium flex items-center space-x-1 ${
@@ -133,7 +133,7 @@ function Navbar() {
             )}
           </div>
 
-          <div className="relative mr-[2px]" ref={menuRef}>
+          <div className="relative mr-0.5" ref={menuRef}>
             <button
               onClick={() => setShowUserMenu(!showUserMenu)}
               className="flex items-center space-x-2 px-3 py-2 rounded-md text-blue-100 hover:bg-blue-500 hover:text-white"

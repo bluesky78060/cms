@@ -95,7 +95,6 @@ function Estimates() {
     return rows.map((row, idx) => (
       <tr key={idx} className="text-center">
         {row.map((d, i2) => {
-          const weekend = i2 === 0 || i2 === 6;
           const color = i2 === 0 ? 'text-red-600' : i2 === 6 ? 'text-blue-600' : '';
           return (
             <td

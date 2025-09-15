@@ -55,6 +55,7 @@ function WorkItems() {
   const [showBulkCustomProject, setShowBulkCustomProject] = useState(false);
 
   const statuses = ['예정', '진행중', '완료', '보류'];
+  const [bulkStatus, setBulkStatus] = useState('');
 
   // 선택된 건축주의 프로젝트 목록 가져오기 (작업항목 + 건축주.projects + 작업장 설명 기반)
   const getClientProjects = (clientId) => {
@@ -636,6 +637,7 @@ const addBulkItem = () => {
                   setSelectedProject(''); // 건축주 변경시 프로젝트 필터 초기화
                 }}
                 className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                style={{ fontSize: '15px' }}
               >
                 <option value="" style={{ fontSize: '15px' }}>전체 건축주</option>
                 {clients.map(client => (
@@ -647,6 +649,7 @@ const addBulkItem = () => {
                 value={selectedProject}
                 onChange={(e) => setSelectedProject(e.target.value)}
                 className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                style={{ fontSize: '15px' }}
                 disabled={!selectedClient}
               >
                 <option value="" style={{ fontSize: '15px' }}>
@@ -681,6 +684,34 @@ const addBulkItem = () => {
             <div className="flex items-center space-x-2">
               {selectedItems.length > 0 && (
                 <>
+                  <div className="flex items-center space-x-2 mr-2">
+                    <label className="text-xs text-gray-600">상태 일괄 변경</label>
+                    <select
+                      value={bulkStatus}
+                      onChange={(e) => setBulkStatus(e.target.value)}
+                      className="border border-gray-300 rounded-md px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    >
+                      <option value="">상태 선택</option>
+                      {statuses.map(s => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={() => {
+                        if (!bulkStatus) {
+                          alert('변경할 상태를 선택하세요.');
+                          return;
+                        }
+                        setWorkItems(prev => prev.map(item =>
+                          selectedItems.includes(item.id) ? { ...item, status: bulkStatus } : item
+                        ));
+                        setBulkStatus('');
+                      }}
+                      className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-3 rounded flex items-center text-xs"
+                    >
+                      적용
+                    </button>
+                  </div>
                   <button
                     onClick={handleCreateBulkInvoice}
                     className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded flex items-center text-sm"

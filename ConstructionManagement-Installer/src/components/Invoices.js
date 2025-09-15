@@ -859,6 +859,7 @@ function Invoices() {
             value={selectedClientFilter}
             onChange={(e) => setSelectedClientFilter(e.target.value)}
             className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            style={{ fontSize: '15px' }}
           >
             <option value="">전체 건축주</option>
             {clients.map(c => (
@@ -870,6 +871,7 @@ function Invoices() {
             value={selectedStatusFilter}
             onChange={(e) => setSelectedStatusFilter(e.target.value)}
             className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            style={{ fontSize: '15px' }}
             disabled={!selectedClientFilter}
           >
             <option value="">전체 상태</option>

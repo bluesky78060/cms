@@ -28,4 +28,12 @@
   .card {
     @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6;
   }
+
+  /* Larger date input appearance */
+  .input-date-lg {
+    font-size: 16px; /* +1pt-ish from default */
+  }
+  .input-date-lg::-webkit-calendar-picker-indicator {
+    transform: scale(1.25);
+  }
 }

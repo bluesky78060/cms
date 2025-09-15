@@ -92,7 +92,7 @@ const Login = () => {
 
         <div className="mt-6 text-xs text-gray-500 text-center">
           <p>건설 관리 시스템 v1.0</p>
-          <p>© 2024 Construction Management System</p>
+          <p>© 2025 Construction Management System</p>
         </div>
       </div>
     </div>

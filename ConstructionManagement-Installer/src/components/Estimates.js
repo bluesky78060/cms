@@ -10,7 +10,9 @@ function Estimates() {
     estimates, 
     setEstimates, 
     convertEstimateToWorkItems,
-    companyInfo 
+    companyInfo,
+    units,
+    categories
   } = useApp();
   const navigate = useNavigate();
   const componentRef = useRef();
@@ -28,6 +30,7 @@ function Estimates() {
     projectName: '',
     title: '',
     validUntil: '',
+    category: '',
     status: '검토중',
     notes: '',
     items: [
@@ -42,8 +45,73 @@ function Estimates() {
       }
     ]
   });
+  const [noDueDate, setNoDueDate] = useState(false);
 
-  const categories = ['토목공사', '구조공사', '철거공사', '마감공사', '설비공사', '내부공사', '기타'];
+  // Custom calendar overlay state (for 유효기한)
+  const calContainerRef = useRef(null);
+  const calendarRef = useRef(null);
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const [calendarMonth, setCalendarMonth] = useState(() => new Date());
+
+  // Initialize calendar month to current selected value
+  useEffect(() => {
+    if (newEstimate.validUntil) {
+      const [y, m] = newEstimate.validUntil.split('-').map(Number);
+      if (y && m) setCalendarMonth(new Date(y, m - 1, 1));
+    }
+  }, [newEstimate.validUntil]);
+
+  // Close calendar when clicking outside
+  useEffect(() => {
+    const onDocClick = (e) => {
+      if (calContainerRef.current && !calContainerRef.current.contains(e.target)) {
+        setCalendarOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', onDocClick);
+    return () => document.removeEventListener('mousedown', onDocClick);
+  }, []);
+
+  const prevMonth = () => setCalendarMonth((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1));
+  const nextMonth = () => setCalendarMonth((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1));
+  const pad2 = (n) => String(n).padStart(2, '0');
+  const pickDate = (day) => {
+    if (!day) return;
+    const y = calendarMonth.getFullYear();
+    const m = calendarMonth.getMonth() + 1;
+    const value = `${y}-${pad2(m)}-${pad2(day)}`;
+    setNewEstimate((prev) => ({ ...prev, validUntil: value }));
+    setCalendarOpen(false);
+  };
+  const renderCalendarRows = () => {
+    const first = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), 1);
+    const startDay = first.getDay();
+    const days = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 0).getDate();
+    const cells = [];
+    for (let i = 0; i < startDay; i++) cells.push(null);
+    for (let d = 1; d <= days; d++) cells.push(d);
+    const rows = [];
+    for (let i = 0; i < cells.length; i += 7) rows.push(cells.slice(i, i + 7));
+    return rows.map((row, idx) => (
+      <tr key={idx} className="text-center">
+        {row.map((d, i2) => {
+          const weekend = i2 === 0 || i2 === 6;
+          const color = i2 === 0 ? 'text-red-600' : i2 === 6 ? 'text-blue-600' : '';
+          return (
+            <td
+              key={i2}
+              className={`px-2 py-1 ${color} ${d ? 'cursor-pointer hover:bg-gray-100 rounded' : ''}`}
+              onClick={() => pickDate(d)}
+            >
+              {d || ''}
+            </td>
+          );
+        })}
+      </tr>
+    ));
+  };
+
+  // (removed) custom calendar overlay
   const statuses = ['검토중', '승인됨', '거부됨', '수정 요청', '작업 전환됨'];
 
   // Auto-reset printEstimate state to prevent UI issues
@@ -195,6 +263,7 @@ function Estimates() {
       projectName: '',
       title: '',
       validUntil: '',
+      category: '',
       status: '검토중',
       notes: '',
       items: [
@@ -211,6 +280,7 @@ function Estimates() {
     });
     setEditingEstimate(null);
     setShowModal(false);
+    setNoDueDate(false);
   };
 
   const handleEdit = (estimate) => {
@@ -220,6 +290,7 @@ function Estimates() {
       projectName: estimate.projectName,
       title: estimate.title,
       validUntil: estimate.validUntil,
+      category: estimate.category || '',
       status: estimate.status,
       notes: estimate.notes || '',
       items: estimate.items.map(item => ({
@@ -234,6 +305,7 @@ function Estimates() {
     });
     setEditingEstimate(estimate);
     setShowModal(true);
+    setNoDueDate(!estimate.validUntil);
   };
 
   const handleDelete = (id) => {
@@ -301,11 +373,8 @@ function Estimates() {
                 body { margin: 0; padding: 15px; }
                 .no-print { display: none; }
               }
+              .toolbar { position: fixed; top: 10px; right: 10px; z-index: 1000; display: flex; gap: 10px; }
               .print-header {
-                position: fixed;
-                top: 10px;
-                right: 10px;
-                z-index: 1000;
                 background: #3498db;
                 color: white;
                 padding: 10px 15px;
@@ -316,14 +385,26 @@ function Estimates() {
               .print-header:hover {
                 background: #2980b9;
               }
+              .close-header {
+                background: #e11d48; /* rose-600 */
+                color: white;
+                padding: 10px 15px;
+                border-radius: 5px;
+                font-size: 14px;
+                cursor: pointer;
+              }
+              .close-header:hover {
+                background: #be123c; /* rose-700 */
+              }
               @media print {
-                .print-header { display: none; }
+                .toolbar { display: none; }
               }
             </style>
           </head>
           <body>
-            <div class="print-header no-print" onclick="window.print()">
-              🖨️ 인쇄하기 (Ctrl+P)
+            <div class="toolbar no-print">
+              <div class="close-header" onclick="window.close()">✕ 닫기</div>
+              <div class="print-header" onclick="window.print()">🖨️ 인쇄하기 (Ctrl+P)</div>
             </div>
             ${printContent.innerHTML}
             <script>
@@ -471,6 +552,7 @@ function Estimates() {
               value={selectedClient}
               onChange={(e) => setSelectedClient(e.target.value)}
               className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+              style={{ fontSize: '15px' }}
             >
               <option value="">전체 건축주</option>
               {clients.map(client => (
@@ -482,6 +564,7 @@ function Estimates() {
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
               className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+              style={{ fontSize: '15px' }}
             >
               <option value="">전체 상태</option>
               {statuses.map(status => (
@@ -784,14 +867,73 @@ function Estimates() {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700">유효기한</label>
-                      <input
-                        type="date"
-                        name="validUntil"
-                        value={newEstimate.validUntil}
-                        onChange={handleInputChange}
-                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                        required
-                      />
+                      <div className="mt-1 relative inline-block" ref={calContainerRef}>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            name="validUntil"
+                            value={newEstimate.validUntil}
+                            onChange={handleInputChange}
+                            placeholder="YYYY-MM-DD"
+                            inputMode="numeric"
+                            className="block w-full border border-gray-300 rounded-md px-3 py-2"
+                            onFocus={() => !noDueDate && setCalendarOpen(true)}
+                            disabled={noDueDate}
+                            required={!noDueDate}
+                          />
+                          <button
+                            type="button"
+                            className="px-2 py-2 text-gray-600 hover:text-gray-800"
+                            onClick={() => !noDueDate && setCalendarOpen((v) => !v)}
+                            title="달력 열기"
+                            disabled={noDueDate}
+                          >
+                            📅
+                          </button>
+                          <label className="flex items-center gap-1 text-xs text-gray-600 select-none">
+                            <input
+                              type="checkbox"
+                              checked={noDueDate}
+                              onChange={(e) => {
+                                const checked = e.target.checked;
+                                setNoDueDate(checked);
+                                if (checked) {
+                                  setCalendarOpen(false);
+                                  setNewEstimate(prev => ({ ...prev, validUntil: '' }));
+                                }
+                              }}
+                            />
+                            유효기간 선택 안함
+                          </label>
+                        </div>
+                        {calendarOpen && (
+                          <div
+                            ref={calendarRef}
+                            className="absolute z-50 bg-white border border-gray-300 rounded-md shadow-lg mt-2 p-3"
+                            style={{ transform: 'scale(2)', transformOrigin: 'top left' }}
+                          >
+                            <div className="flex items-center justify-between mb-2">
+                              <button type="button" className="px-2 py-1 text-sm border rounded" onClick={prevMonth}>◀</button>
+                              <div className="text-sm font-medium">
+                                {calendarMonth.getFullYear()}년 {calendarMonth.getMonth() + 1}월
+                              </div>
+                              <button type="button" className="px-2 py-1 text-sm border rounded" onClick={nextMonth}>▶</button>
+                            </div>
+                            <table className="text-xs select-none">
+                              <thead>
+                                <tr className="text-center text-gray-600">
+                                  {['일','월','화','수','목','금','토'].map((d, idx) => (
+                                    <th key={d} className={`px-2 py-1 ${idx === 0 ? 'text-red-600' : idx === 6 ? 'text-blue-600' : ''}`}>{d}</th>
+                                  ))}
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {renderCalendarRows()}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
+                      </div>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700">상태</label>
@@ -899,14 +1041,17 @@ function Estimates() {
                           </div>
                           <div>
                             <label className="block text-xs font-medium text-gray-600 mb-1">단위</label>
-                            <input
-                              type="text"
+                            <select
                               value={item.unit}
                               onChange={(e) => handleItemChange(index, 'unit', e.target.value)}
-                              placeholder="식, ㎡, 개"
                               className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
                               required
-                            />
+                            >
+                              <option value="">단위 선택</option>
+                              {units.map(u => (
+                                <option key={u} value={u}>{u}</option>
+                              ))}
+                            </select>
                           </div>
                           <div>
                             <label className="block text-xs font-medium text-gray-600 mb-1">합계</label>

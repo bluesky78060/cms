@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useApp } from '../contexts/AppContext';
 import { numberToKorean } from '../utils/numberToKorean';
 import { exportToExcel, importFromExcel, createTemplate } from '../utils/excelUtils';
@@ -9,7 +9,19 @@ function Invoices() {
   const [selectedIds, setSelectedIds] = useState([]);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
 
-  const allVisibleIds = invoices.map(inv => inv.id);
+  const [selectedClientFilter, setSelectedClientFilter] = useState('');
+  const filteredInvoices = useMemo(() => {
+    if (!selectedClientFilter) return invoices;
+    const cid = parseInt(selectedClientFilter);
+    const clientName = clients.find(c => c.id === cid)?.name;
+    return invoices.filter(inv => {
+      if (inv.clientId && inv.clientId === cid) return true;
+      if (clientName && inv.client === clientName) return true;
+      return false;
+    });
+  }, [invoices, selectedClientFilter, clients]);
+
+  const allVisibleIds = filteredInvoices.map(inv => inv.id);
   const allSelected = selectedIds.length > 0 && selectedIds.length === allVisibleIds.length;
   const toggleSelectAll = (checked) => setSelectedIds(checked ? allVisibleIds : []);
   const toggleSelectOne = (id, checked) => setSelectedIds(prev => checked ? Array.from(new Set([...prev, id])) : prev.filter(x => x !== id));
@@ -834,6 +846,34 @@ function Invoices() {
         </div>
       </div>
 
+      {/* 필터 */}
+      <div className="bg-white rounded-lg shadow p-4 mb-4">
+        <div className="flex items-center space-x-3">
+          <label className="text-sm font-medium text-gray-700">건축주</label>
+          <select
+            value={selectedClientFilter}
+            onChange={(e) => setSelectedClientFilter(e.target.value)}
+            className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">전체 건축주</option>
+            {clients.map(c => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
+          {(selectedClientFilter) && (
+            <button
+              onClick={() => setSelectedClientFilter('')}
+              className="text-xs text-blue-600 hover:text-blue-800"
+            >
+              필터 초기화
+            </button>
+          )}
+          <div className="text-sm text-gray-500 ml-auto">
+            {filteredInvoices.length}개 청구서
+          </div>
+        </div>
+      </div>
+
       {/* 청구서 목록 */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
@@ -872,7 +912,7 @@ function Invoices() {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {invoices.map((invoice) => (
+            {filteredInvoices.map((invoice) => (
               <tr key={invoice.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <input

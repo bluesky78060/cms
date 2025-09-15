@@ -10,16 +10,21 @@ function Invoices() {
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
 
   const [selectedClientFilter, setSelectedClientFilter] = useState('');
+  const [selectedStatusFilter, setSelectedStatusFilter] = useState('');
   const filteredInvoices = useMemo(() => {
-    if (!selectedClientFilter) return invoices;
-    const cid = parseInt(selectedClientFilter);
-    const clientName = clients.find(c => c.id === cid)?.name;
-    return invoices.filter(inv => {
-      if (inv.clientId && inv.clientId === cid) return true;
-      if (clientName && inv.client === clientName) return true;
-      return false;
-    });
-  }, [invoices, selectedClientFilter, clients]);
+    const base = (() => {
+      if (!selectedClientFilter) return invoices;
+      const cid = parseInt(selectedClientFilter);
+      const clientName = clients.find(c => c.id === cid)?.name;
+      return invoices.filter(inv => {
+        if (inv.clientId && inv.clientId === cid) return true;
+        if (clientName && inv.client === clientName) return true;
+        return false;
+      });
+    })();
+    if (!selectedStatusFilter) return base;
+    return base.filter(inv => inv.status === selectedStatusFilter);
+  }, [invoices, selectedClientFilter, selectedStatusFilter, clients]);
 
   const allVisibleIds = filteredInvoices.map(inv => inv.id);
   const allSelected = selectedIds.length > 0 && selectedIds.length === allVisibleIds.length;
@@ -860,9 +865,22 @@ function Invoices() {
               <option key={c.id} value={c.id}>{c.name}</option>
             ))}
           </select>
-          {(selectedClientFilter) && (
+          <label className="text-sm font-medium text-gray-700 ml-4">상태</label>
+          <select
+            value={selectedStatusFilter}
+            onChange={(e) => setSelectedStatusFilter(e.target.value)}
+            className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={!selectedClientFilter}
+          >
+            <option value="">전체 상태</option>
+            <option value="발송대기">발송대기</option>
+            <option value="발송됨">발송됨</option>
+            <option value="미결제">미결제</option>
+            <option value="결제완료">결제완료</option>
+          </select>
+          {(selectedClientFilter || selectedStatusFilter) && (
             <button
-              onClick={() => setSelectedClientFilter('')}
+              onClick={() => { setSelectedClientFilter(''); setSelectedStatusFilter(''); }}
               className="text-xs text-blue-600 hover:text-blue-800"
             >
               필터 초기화

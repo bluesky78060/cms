@@ -222,3 +222,20 @@ ipcMain.handle('cms:choose-base-dir', async () => {
   baseDataDir = res.filePaths[0];
   return baseDataDir;
 });
+
+// Write XLSX (Uint8Array) to base dir as filename, using atomic replace
+ipcMain.handle('cms:xlsx-write', async (_evt, filename, uint8) => {
+  try {
+    ensureDir(baseDataDir);
+    const safeName = typeof filename === 'string' && filename.trim() ? filename.trim() : 'latest.xlsx';
+    const target = path.join(baseDataDir, safeName);
+    const tmp = target + '.tmp';
+    const buf = Buffer.from(uint8);
+    fs.writeFileSync(tmp, buf);
+    fs.renameSync(tmp, target);
+    return true;
+  } catch (e) {
+    try { /* cleanup tmp if exists */ } catch (_) {}
+    return false;
+  }
+});

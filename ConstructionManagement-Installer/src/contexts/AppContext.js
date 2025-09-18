@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { storage } from '../services/storage';
+import { scheduleMirror } from '../services/xlsxMirror';
 
 // Context 생성
 const AppContext = createContext();
@@ -525,6 +526,21 @@ export const AppProvider = ({ children }) => {
   useEffect(() => {
     saveToStorage(STORAGE_KEYS.STAMP_IMAGE, stampImage);
   }, [stampImage]);
+
+  // Auto XLSX mirror: debounce and write a read-only workbook for human readability
+  useEffect(() => {
+    const snapshot = {
+      companyInfo,
+      clients,
+      workItems,
+      invoices,
+      estimates,
+      units,
+      categories,
+    };
+    // Debounced mirror to minimize IO
+    scheduleMirror(snapshot, 1000);
+  }, [companyInfo, clients, workItems, invoices, estimates, units, categories]);
 
   // 견적서를 작업 항목으로 변환하는 함수
   const convertEstimateToWorkItems = (estimateId) => {

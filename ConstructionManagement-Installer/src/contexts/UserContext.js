@@ -164,28 +164,8 @@ export const UserProvider = ({ children }) => {
     };
   }, [isLoggedIn]);
 
-  // 창/탭 닫기 및 숨김 시 세션 제거
-  useEffect(() => {
-    const clearSession = () => {
-      try { sessionStorage.removeItem('CURRENT_USER'); } catch (e) {}
-      try { localStorage.removeItem('CURRENT_USER'); } catch (e) {}
-      // 모든 탭에 로그아웃 브로드캐스트(닫힌 탭이더라도 남은 탭을 로그아웃)
-      try {
-        localStorage.setItem('CMS_LOGOUT', String(Date.now()));
-        localStorage.removeItem('CMS_LOGOUT');
-      } catch (e) {}
-    };
-    window.addEventListener('beforeunload', clearSession);
-    window.addEventListener('pagehide', clearSession);
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'hidden') clearSession();
-    });
-    return () => {
-      window.removeEventListener('beforeunload', clearSession);
-      window.removeEventListener('pagehide', clearSession);
-      document.removeEventListener('visibilitychange', () => {});
-    };
-  }, []);
+  // 새로고침 시에는 세션 유지, 탭/창을 완전히 닫으면 세션Storage가 자연 소멸됩니다.
+  // 따라서 beforeunload/pagehide 등에서 세션을 강제로 제거하지 않습니다.
 
   // 다른 탭에서의 로그아웃 신호를 수신하여 즉시 로그아웃
   useEffect(() => {

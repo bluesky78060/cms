@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import { useApp } from '../contexts/AppContext';
 import { exportToExcel, importFromExcel, createTemplate } from '../utils/excelUtils';
 
@@ -19,7 +19,7 @@ function formatPhoneKR(input) {
 }
 
 function Clients() {
-  const { clients, setClients } = useApp();
+  const { clients, setClients, invoices } = useApp();
   const [selectedIds, setSelectedIds] = useState([]);
 
   const [showModal, setShowModal] = useState(false);
@@ -298,6 +298,37 @@ function Clients() {
         style={{ display: 'none' }}
       />
 
+      // invoices 기반 합계/미수금 계산
+      const totalsByClientId = useMemo(() => {
+        const map = new Map();
+        clients.forEach(c => map.set(c.id, { total: 0, outstanding: 0 }));
+        (invoices || []).forEach(inv => {
+          const amount = Number(inv.amount) || 0;
+          let cid = inv.clientId != null && inv.clientId !== '' ? parseInt(inv.clientId) : null;
+          if (!cid) {
+            const match = clients.find(c => c.name === inv.client);
+            cid = match ? match.id : null;
+          }
+          if (!cid) return;
+          const agg = map.get(cid) || { total: 0, outstanding: 0 };
+          agg.total += amount;
+          if (inv.status !== '결제완료') agg.outstanding += amount;
+          map.set(cid, agg);
+        });
+        return map;
+      }, [clients, invoices]);
+
+      const grandTotals = useMemo(() => {
+        let total = 0;
+        let outstanding = 0;
+        (invoices || []).forEach(inv => {
+          const amount = Number(inv.amount) || 0;
+          total += amount;
+          if (inv.status !== '결제완료') outstanding += amount;
+        });
+        return { total, outstanding };
+      }, [invoices]);
+
       {/* 통계 카드 */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div className="bg-white rounded-lg shadow p-6">
@@ -317,7 +348,7 @@ function Clients() {
             <div>
               <p className="text-sm font-medium text-gray-600 mb-1">총 청구금액 :</p>
               <p className="text-xl font-bold text-green-600">
-                {clients.reduce((sum, client) => sum + client.totalBilled, 0).toLocaleString()}원
+                {grandTotals.total.toLocaleString()}원
               </p>
             </div>
             <div className="bg-green-500 rounded-full p-3 text-white text-2xl">
@@ -331,7 +362,7 @@ function Clients() {
             <div>
               <p className="text-sm font-medium text-gray-600 mb-1">미수금</p>
               <p className="text-xl font-bold text-red-600">
-                {clients.reduce((sum, client) => sum + client.outstanding, 0).toLocaleString()}원
+                {grandTotals.outstanding.toLocaleString()}원
               </p>
             </div>
             <div className="bg-red-500 rounded-full p-3 text-white text-2xl">
@@ -345,7 +376,7 @@ function Clients() {
             <div>
               <p className="text-sm font-medium text-gray-600 mb-1">미수금 건수</p>
               <p className="text-xl font-bold text-orange-600">
-                {clients.filter(client => client.outstanding > 0).length}
+                {clients.filter(c => (totalsByClientId.get(c.id)?.outstanding || 0) > 0).length}
               </p>
             </div>
             <div className="bg-orange-500 rounded-full p-3 text-white text-2xl">
@@ -441,14 +472,14 @@ function Clients() {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm font-medium text-gray-900">
-                    {client.totalBilled.toLocaleString()}원
+                    {(totalsByClientId.get(client.id)?.total || 0).toLocaleString()}원
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className={`text-sm font-medium ${
-                    client.outstanding > 0 ? 'text-red-600' : 'text-green-600'
+                    (totalsByClientId.get(client.id)?.outstanding || 0) > 0 ? 'text-red-600' : 'text-green-600'
                   }`}>
-                    {client.outstanding.toLocaleString()}원
+                    {(totalsByClientId.get(client.id)?.outstanding || 0).toLocaleString()}원
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">

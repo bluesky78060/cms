@@ -339,7 +339,6 @@ function Invoices() {
         if (resolvedClient.type === 'BUSINESS') {
           const b = resolvedClient.business || {};
           return `
-            <p><strong>구분:</strong> 사업자</p>
             <p><strong>상호:</strong> ${b.businessName || resolvedClient.name || '-'}</p>
             <p><strong>대표자:</strong> ${b.representative || '-'}</p>
             <p><strong>사업자등록번호:</strong> ${b.businessNumber || '-'}</p>
@@ -351,7 +350,6 @@ function Invoices() {
         }
         // PERSON
         return `
-          <p><strong>구분:</strong> 개인</p>
           <p><strong>성명:</strong> ${resolvedClient.name}</p>
           ${resolvedClient.phone ? `<p><strong>연락처:</strong> ${resolvedClient.phone}</p>` : ''}
           ${resolvedClient.email ? `<p><strong>이메일:</strong> ${resolvedClient.email}</p>` : ''}
@@ -466,7 +464,7 @@ function Invoices() {
                 padding: 20px;
                 border-radius: 12px;
                 border-left: 4px solid #3b82f6;
-                text-align: center;
+                text-align: left;
                 margin: 30px 0;
               }
               
@@ -491,7 +489,7 @@ function Invoices() {
                 padding: 15px 12px;
                 text-align: center;
                 font-weight: 700;
-                font-size: 12px;
+                font-size: 13px;
                 color: #1f2937;
                 border-bottom: 2px solid #e2e8f0;
               }
@@ -499,7 +497,7 @@ function Invoices() {
               .work-table td {
                 padding: 12px;
                 border-bottom: 1px solid #f1f5f9;
-                font-size: 11px;
+                font-size: 13px;
                 vertical-align: top;
               }
               
@@ -691,12 +689,12 @@ function Invoices() {
                   
                   <div class="info-box">
                     <h4>🏗️ 시공업체 정보</h4>
-                    <p style="font-weight: 700; font-size: 16px;">${companyInfo.name}</p>
-                    <p>사업자등록번호: ${companyInfo.businessNumber}</p>
-                    <p>대표자: ${companyInfo.representative}</p>
-                    <p>주소: ${companyInfo.address}</p>
-                    <p>연락처: ${companyInfo.phone}</p>
-                    ${companyInfo.email ? `<p>이메일: ${companyInfo.email}</p>` : ''}
+                    <p><strong>상호:</strong> ${companyInfo.name}</p>
+                    <p><strong>사업자등록번호:</strong> ${companyInfo.businessNumber}</p>
+                    <p><strong>대표자:</strong> ${companyInfo.representative}</p>
+                    <p><strong>주소:</strong> ${companyInfo.address}</p>
+                    <p><strong>연락처:</strong> ${companyInfo.phone}</p>
+                    ${companyInfo.email ? `<p><strong>이메일:</strong> ${companyInfo.email}</p>` : ''}
                   </div>
                 </div>
                 
@@ -725,7 +723,7 @@ function Invoices() {
                           <td style="text-align: center;">${index + 1}</td>
                           <td style="text-align: left;">
                             <strong>${item.name}</strong>
-                            ${item.description ? `<div style="font-size: 10px; color: #6b7280; margin-top: 4px;">${item.description}</div>` : ''}
+                            ${item.description ? `<div style="font-size: 12px; color: #6b7280; margin-top: 4px;">${item.description}</div>` : ''}
                           </td>
                           <td style="text-align: center;">${item.category || '-'}</td>
                           <td style="text-align: center;">${item.quantity}</td>
@@ -1387,7 +1385,6 @@ function Invoices() {
                         const b = c.business || {};
                         return (
                           <>
-                            <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>구분:</strong> 사업자</p>
                             <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>상호:</strong> {b.businessName || c.name || '-'}</p>
                             <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>대표자:</strong> {b.representative || '-'}</p>
                             <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>사업자등록번호:</strong> {b.businessNumber || '-'}</p>
@@ -1400,7 +1397,6 @@ function Invoices() {
                       }
                       return (
                         <>
-                          <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>구분:</strong> 개인</p>
                           <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>성명:</strong> {c.name}</p>
                           {c.phone && <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>연락처:</strong> {c.phone}</p>}
                           {c.email && <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>이메일:</strong> {c.email}</p>}
@@ -1419,12 +1415,12 @@ function Invoices() {
                     시공업체 정보
                   </h3>
                   <div style={{ backgroundColor: '#f3f4f6', padding: '12px', borderRadius: '8px' }}>
-                    <p style={{ margin: '8px 0', fontSize: '14px', fontWeight: 'bold' }}>{companyInfo.name}</p>
-                    <p style={{ margin: '8px 0', fontSize: '12px' }}>사업자등록번호: {companyInfo.businessNumber}</p>
-                    <p style={{ margin: '8px 0', fontSize: '12px' }}>대표자: {companyInfo.representative}</p>
-                    <p style={{ margin: '8px 0', fontSize: '12px' }}>주소: {companyInfo.address}</p>
-                    <p style={{ margin: '8px 0', fontSize: '12px' }}>연락처: {companyInfo.phone}</p>
-                    {companyInfo.email && <p style={{ margin: '8px 0', fontSize: '12px' }}>이메일: {companyInfo.email}</p>}
+                    <p style={{ margin: '8px 0', fontSize: '12px' }}><strong>상호:</strong> {companyInfo.name}</p>
+                    <p style={{ margin: '8px 0', fontSize: '12px' }}><strong>사업자등록번호:</strong> {companyInfo.businessNumber}</p>
+                    <p style={{ margin: '8px 0', fontSize: '12px' }}><strong>대표자:</strong> {companyInfo.representative}</p>
+                    <p style={{ margin: '8px 0', fontSize: '12px' }}><strong>주소:</strong> {companyInfo.address}</p>
+                    <p style={{ margin: '8px 0', fontSize: '12px' }}><strong>연락처:</strong> {companyInfo.phone}</p>
+                    {companyInfo.email && <p style={{ margin: '8px 0', fontSize: '12px' }}><strong>이메일:</strong> {companyInfo.email}</p>}
                   </div>
                 </div>
               </div>
@@ -1446,28 +1442,28 @@ function Invoices() {
                   <table style={{ width: '100%', minWidth: '600px', borderCollapse: 'collapse', backgroundColor: '#fff', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)' }}>
                     <thead>
                       <tr style={{ backgroundColor: '#f9fafb' }}>
-                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', width: '40px', fontSize: '13px' }}>
+                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', width: '40px', fontSize: '14px' }}>
                           연번
                         </th>
-                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', fontSize: '13px' }}>
+                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', fontSize: '14px' }}>
                           내용
                         </th>
-                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', fontSize: '13px' }}>
+                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', fontSize: '14px' }}>
                           규격
                         </th>
-                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', fontSize: '13px' }}>
+                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', fontSize: '14px' }}>
                           수량
                         </th>
-                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', fontSize: '13px' }}>
+                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', fontSize: '14px' }}>
                           단위
                         </th>
-                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', fontSize: '13px' }}>
+                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', fontSize: '14px' }}>
                           단가
                         </th>
-                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', fontSize: '13px' }}>
+                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', fontSize: '14px' }}>
                           공급가액
                         </th>
-                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', fontSize: '13px' }}>
+                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', fontSize: '14px' }}>
                           비고
                         </th>
                       </tr>
@@ -1475,23 +1471,23 @@ function Invoices() {
                     <tbody>
                       {printInvoice.workItems.map((item, index) => (
                         <tr key={index} style={{ ':hover': { backgroundColor: '#f1f5f9' } }}>
-                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontSize: '12px' }}>{index + 1}</td>
-                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'left', fontSize: '13px' }}>
+                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontSize: '14px' }}>{index + 1}</td>
+                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'left', fontSize: '15px' }}>
                             <div>
                               <strong>{item.name}</strong>
                               {item.description && (
-                                <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
+                                <div style={{ fontSize: '14px', color: '#6b7280', marginTop: '4px' }}>
                                   {item.description}
                                 </div>
                               )}
                             </div>
                           </td>
-                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontSize: '12px' }}>{item.category || '-'}</td>
-                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontSize: '12px' }}>{item.quantity}</td>
-                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontSize: '12px' }}>식</td>
-                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'right', fontSize: '12px' }}>{Math.floor(item.unitPrice / item.quantity).toLocaleString()}원</td>
-                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'right', fontSize: '12px' }}>{item.unitPrice.toLocaleString()}원</td>
-                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'left', fontSize: '12px', verticalAlign: 'top' }}>
+                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontSize: '14px' }}>{item.category || '-'}</td>
+                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontSize: '14px' }}>{item.quantity}</td>
+                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontSize: '14px' }}>식</td>
+                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'right', fontSize: '14px' }}>{Math.floor(item.unitPrice / item.quantity).toLocaleString()}원</td>
+                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'right', fontSize: '14px' }}>{item.unitPrice.toLocaleString()}원</td>
+                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'left', fontSize: '14px', verticalAlign: 'top' }}>
                             {item.notes || '-'}
                           </td>
                         </tr>

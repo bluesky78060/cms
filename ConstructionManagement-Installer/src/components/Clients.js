@@ -245,6 +245,37 @@ function Clients() {
     setShowModal(true);
   };
 
+  // 계산: 청구액/미수금 (invoices 기반, clientId 우선/이름 보조)
+  const totalsByClientId = useMemo(() => {
+    const map = new Map();
+    clients.forEach(c => map.set(c.id, { total: 0, outstanding: 0 }));
+    (invoices || []).forEach(inv => {
+      const amount = Number(inv.amount) || 0;
+      let cid = inv.clientId != null && inv.clientId !== '' ? parseInt(inv.clientId) : null;
+      if (!cid) {
+        const match = clients.find(c => c.name === inv.client);
+        cid = match ? match.id : null;
+      }
+      if (!cid) return;
+      const agg = map.get(cid) || { total: 0, outstanding: 0 };
+      agg.total += amount;
+      if (inv.status !== '결제완료') agg.outstanding += amount;
+      map.set(cid, agg);
+    });
+    return map;
+  }, [clients, invoices]);
+
+  const grandTotals = useMemo(() => {
+    let total = 0;
+    let outstanding = 0;
+    (invoices || []).forEach(inv => {
+      const amount = Number(inv.amount) || 0;
+      total += amount;
+      if (inv.status !== '결제완료') outstanding += amount;
+    });
+    return { total, outstanding };
+  }, [invoices]);
+
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-8">
@@ -297,37 +328,6 @@ function Clients() {
         accept=".xlsx,.xls"
         style={{ display: 'none' }}
       />
-
-      // invoices 기반 합계/미수금 계산
-      const totalsByClientId = useMemo(() => {
-        const map = new Map();
-        clients.forEach(c => map.set(c.id, { total: 0, outstanding: 0 }));
-        (invoices || []).forEach(inv => {
-          const amount = Number(inv.amount) || 0;
-          let cid = inv.clientId != null && inv.clientId !== '' ? parseInt(inv.clientId) : null;
-          if (!cid) {
-            const match = clients.find(c => c.name === inv.client);
-            cid = match ? match.id : null;
-          }
-          if (!cid) return;
-          const agg = map.get(cid) || { total: 0, outstanding: 0 };
-          agg.total += amount;
-          if (inv.status !== '결제완료') agg.outstanding += amount;
-          map.set(cid, agg);
-        });
-        return map;
-      }, [clients, invoices]);
-
-      const grandTotals = useMemo(() => {
-        let total = 0;
-        let outstanding = 0;
-        (invoices || []).forEach(inv => {
-          const amount = Number(inv.amount) || 0;
-          total += amount;
-          if (inv.status !== '결제완료') outstanding += amount;
-        });
-        return { total, outstanding };
-      }, [invoices]);
 
       {/* 통계 카드 */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">

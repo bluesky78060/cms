@@ -19,7 +19,7 @@ function formatPhoneKR(input) {
 }
 
 function Clients() {
-  const { clients, setClients, invoices } = useApp();
+  const { clients, setClients, invoices, workItems } = useApp();
   const [selectedIds, setSelectedIds] = useState([]);
 
   const [showModal, setShowModal] = useState(false);
@@ -276,6 +276,52 @@ function Clients() {
     return { total, outstanding };
   }, [invoices]);
 
+  // 프로젝트 수: clients.projects + workItems.projectName + invoices.project에서 고유값 집계
+  const projectCountsByClientId = useMemo(() => {
+    const sets = new Map();
+    const ensureSet = (id) => {
+      if (!sets.has(id)) sets.set(id, new Set());
+      return sets.get(id);
+    };
+
+    // 기존 client.projects 반영
+    clients.forEach(c => {
+      const s = ensureSet(c.id);
+      (c.projects || []).forEach(p => {
+        const v = (p || '').trim();
+        if (v) s.add(v);
+      });
+    });
+
+    // workItems.projectName 반영
+    (workItems || []).forEach(wi => {
+      if (!wi) return;
+      const cid = wi.clientId;
+      if (!cid) return;
+      const v = (wi.projectName || '').trim();
+      if (!v) return;
+      ensureSet(cid).add(v);
+    });
+
+    // invoices.project 반영 (clientId 우선, 없으면 이름 매칭)
+    (invoices || []).forEach(inv => {
+      const v = (inv.project || '').trim();
+      if (!v) return;
+      let cid = inv.clientId != null && inv.clientId !== '' ? parseInt(inv.clientId) : null;
+      if (!cid) {
+        const match = clients.find(c => c.name === inv.client);
+        cid = match ? match.id : null;
+      }
+      if (!cid) return;
+      ensureSet(cid).add(v);
+    });
+
+    // 크기 맵으로 변환
+    const counts = new Map();
+    for (const [id, set] of sets.entries()) counts.set(id, set.size);
+    return counts;
+  }, [clients, workItems, invoices]);
+
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-8">
@@ -468,7 +514,7 @@ function Clients() {
                   <div className="text-sm text-gray-900">{client.address}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{client.projects.length}개</div>
+                  <div className="text-sm text-gray-900">{(projectCountsByClientId.get(client.id) || 0)}개</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm font-medium text-gray-900">

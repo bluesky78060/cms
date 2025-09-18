@@ -27,12 +27,22 @@ function Clients() {
   const [isEditing, setIsEditing] = useState(false);
   const [editingClientId, setEditingClientId] = useState(null);
   const [newClient, setNewClient] = useState({
+    type: 'PERSON', // 'PERSON' | 'BUSINESS'
     name: '',
     phone: '',
     mobile: '',
     email: '',
     address: '',
     notes: '',
+    business: {
+      businessName: '', // 상호
+      representative: '', // 대표자
+      businessNumber: '', // 10자리
+      businessType: '', // 업태
+      businessItem: '', // 업종
+      businessAddress: '',
+      taxEmail: ''
+    },
     workplaces: [{ name: '', address: '', description: '' }]
   });
 
@@ -84,6 +94,25 @@ function Clients() {
     }));
   };
 
+  const formatBizNo = (val) => {
+    const d = String(val || '').replace(/\D/g, '').slice(0, 10);
+    if (d.length <= 3) return d;
+    if (d.length <= 5) return `${d.slice(0,3)}-${d.slice(3)}`;
+    return `${d.slice(0,3)}-${d.slice(3,5)}-${d.slice(5)}`;
+  };
+
+  const handleBusinessChange = (e) => {
+    const { name, value } = e.target;
+    const v = name === 'businessNumber' ? formatBizNo(value) : value;
+    setNewClient(prev => ({
+      ...prev,
+      business: {
+        ...prev.business,
+        [name]: v
+      }
+    }));
+  };
+
   const handleWorkplaceChange = (index, field, value) => {
     const updatedWorkplaces = [...newClient.workplaces];
     updatedWorkplaces[index][field] = value;
@@ -112,11 +141,24 @@ function Clients() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const payload = { ...newClient };
+    if (payload.type === 'BUSINESS') {
+      // 기본 표시 이름 보정: 상호를 이름으로 사용
+      if (!payload.name && payload.business?.businessName) {
+        payload.name = payload.business.businessName;
+      }
+      // 간단한 사업자번호 길이 검증(선택): 10자리 숫자
+      const digits = String(payload.business?.businessNumber || '').replace(/\D/g, '');
+      if (digits.length > 0 && digits.length !== 10) {
+        alert('사업자등록번호는 숫자 10자리여야 합니다.');
+        return;
+      }
+    }
     
     if (isEditing) {
       // 편집 모드
       const updatedClient = {
-        ...newClient,
+        ...payload,
         id: editingClientId,
         workplaces: newClient.workplaces.map((wp, index) => ({
           ...wp,
@@ -134,7 +176,7 @@ function Clients() {
     } else {
       // 새로 추가 모드
       const client = {
-        ...newClient,
+        ...payload,
         id: clients.length + 1,
         workplaces: newClient.workplaces.map((wp, index) => ({
           ...wp,
@@ -151,12 +193,22 @@ function Clients() {
     
     // 상태 초기화
     setNewClient({
+      type: 'PERSON',
       name: '',
       phone: '',
       mobile: '',
       email: '',
       address: '',
       notes: '',
+      business: {
+        businessName: '',
+        representative: '',
+        businessNumber: '',
+        businessType: '',
+        businessItem: '',
+        businessAddress: '',
+        taxEmail: ''
+      },
       workplaces: [{ name: '', address: '', description: '' }]
     });
     setShowModal(false);
@@ -172,12 +224,22 @@ function Clients() {
     setIsEditing(true);
     setEditingClientId(client.id);
     setNewClient({
+      type: client.type || 'PERSON',
       name: client.name,
       phone: client.phone,
       mobile: client.mobile || '',
       email: client.email,
       address: client.address,
       notes: client.notes,
+      business: client.business || {
+        businessName: '',
+        representative: '',
+        businessNumber: '',
+        businessType: '',
+        businessItem: '',
+        businessAddress: '',
+        taxEmail: ''
+      },
       workplaces: client.workplaces || [{ name: '', address: '', description: '' }]
     });
     setShowModal(true);
@@ -350,8 +412,18 @@ function Clients() {
                       </span>
                     </div>
                     <div className="ml-4">
-                      <div className="text-sm font-medium text-gray-900">{client.name}</div>
-                      <div className="text-sm text-gray-500">{client.email}</div>
+                      <div className="text-sm font-medium text-gray-900">
+                        {client.name}
+                        {client.type === 'BUSINESS' && (
+                          <span className="ml-2 text-xs px-2 py-0.5 rounded bg-yellow-100 text-yellow-800">사업자</span>
+                        )}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {client.email}
+                        {client.type === 'BUSINESS' && client.business?.businessNumber && (
+                          <span className="ml-2">사업자등록번호: {client.business.businessNumber}</span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </td>
@@ -423,6 +495,32 @@ function Clients() {
                 {isEditing ? '건축주 정보 수정' : '새 건축주 추가'}
               </h3>
               <form onSubmit={handleSubmit} className="space-y-4">
+                {/* 유형 선택 */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">유형</label>
+                  <div className="flex items-center gap-6">
+                    <label className="inline-flex items-center gap-2 text-sm">
+                      <input
+                        type="radio"
+                        name="type"
+                        value="PERSON"
+                        checked={newClient.type === 'PERSON'}
+                        onChange={() => setNewClient(prev => ({ ...prev, type: 'PERSON' }))}
+                      />
+                      개인
+                    </label>
+                    <label className="inline-flex items-center gap-2 text-sm">
+                      <input
+                        type="radio"
+                        name="type"
+                        value="BUSINESS"
+                        checked={newClient.type === 'BUSINESS'}
+                        onChange={() => setNewClient(prev => ({ ...prev, type: 'BUSINESS' }))}
+                      />
+                      사업자
+                    </label>
+                  </div>
+                </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">이름</label>
                   <input
@@ -434,6 +532,88 @@ function Clients() {
                     required
                   />
                 </div>
+                {/* 사업자 정보 */}
+                {newClient.type === 'BUSINESS' && (
+                  <div className="border rounded-md p-3 bg-yellow-50">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">상호</label>
+                        <input
+                          type="text"
+                          name="businessName"
+                          value={newClient.business.businessName}
+                          onChange={handleBusinessChange}
+                          className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                          required={newClient.type === 'BUSINESS'}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">대표자</label>
+                        <input
+                          type="text"
+                          name="representative"
+                          value={newClient.business.representative}
+                          onChange={handleBusinessChange}
+                          className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                          required={newClient.type === 'BUSINESS'}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">사업자등록번호</label>
+                        <input
+                          type="text"
+                          name="businessNumber"
+                          value={newClient.business.businessNumber}
+                          onChange={handleBusinessChange}
+                          placeholder="000-00-00000"
+                          className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                          required={newClient.type === 'BUSINESS'}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">발행 이메일</label>
+                        <input
+                          type="email"
+                          name="taxEmail"
+                          value={newClient.business.taxEmail}
+                          onChange={handleBusinessChange}
+                          className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                          required={newClient.type === 'BUSINESS'}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">업태</label>
+                        <input
+                          type="text"
+                          name="businessType"
+                          value={newClient.business.businessType}
+                          onChange={handleBusinessChange}
+                          className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">업종</label>
+                        <input
+                          type="text"
+                          name="businessItem"
+                          value={newClient.business.businessItem}
+                          onChange={handleBusinessChange}
+                          className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <label className="block text-sm font-medium text-gray-700">사업장 주소</label>
+                        <input
+                          type="text"
+                          name="businessAddress"
+                          value={newClient.business.businessAddress}
+                          onChange={handleBusinessChange}
+                          className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
                 <div>
                   <label className="block text-sm font-medium text-gray-700">전화번호</label>
                   <input
@@ -617,6 +797,21 @@ function Clients() {
                   <p><strong>완료 프로젝트:</strong> {selectedClient.projects.length}개</p>
                 </div>
               </div>
+
+              {selectedClient.type === 'BUSINESS' && (
+                <div className="border rounded-md p-4 bg-yellow-50 mb-6">
+                  <h4 className="font-medium mb-3">사업자 정보</h4>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <p><strong>상호:</strong> {selectedClient.business?.businessName || '-'}</p>
+                    <p><strong>대표자:</strong> {selectedClient.business?.representative || '-'}</p>
+                    <p><strong>사업자등록번호:</strong> {selectedClient.business?.businessNumber || '-'}</p>
+                    <p><strong>발행 이메일:</strong> {selectedClient.business?.taxEmail || '-'}</p>
+                    <p><strong>업태:</strong> {selectedClient.business?.businessType || '-'}</p>
+                    <p><strong>업종:</strong> {selectedClient.business?.businessItem || '-'}</p>
+                    <p className="col-span-2"><strong>사업장 주소:</strong> {selectedClient.business?.businessAddress || '-'}</p>
+                  </div>
+                </div>
+              )}
               
               <div className="mb-4">
                 <h4 className="font-medium mb-2">작업장 정보</h4>

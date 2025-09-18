@@ -321,6 +321,46 @@ function Invoices() {
         return;
       }
 
+      // Resolve client details (supports legacy invoices without clientId)
+      const resolvedClient = (() => {
+        const byId = clients.find(c => String(c.id) === String(invoice.clientId || ''));
+        if (byId) return byId;
+        return clients.find(c => c.name === invoice.client) || null;
+      })();
+
+      const clientInfoHTML = (() => {
+        if (!resolvedClient) {
+          return `
+            <p><strong>건축주명:</strong> ${invoice.client}</p>
+            <p><strong>프로젝트명:</strong> ${invoice.project}</p>
+            <p><strong>작업장 주소:</strong> ${invoice.workplaceAddress}</p>
+          `;
+        }
+        if (resolvedClient.type === 'BUSINESS') {
+          const b = resolvedClient.business || {};
+          return `
+            <p><strong>구분:</strong> 사업자</p>
+            <p><strong>상호:</strong> ${b.businessName || resolvedClient.name || '-'}</p>
+            <p><strong>대표자:</strong> ${b.representative || '-'}</p>
+            <p><strong>사업자등록번호:</strong> ${b.businessNumber || '-'}</p>
+            <p><strong>발행 이메일:</strong> ${b.taxEmail || resolvedClient.email || '-'}</p>
+            <p><strong>사업장 주소:</strong> ${b.businessAddress || resolvedClient.address || '-'}</p>
+            <p><strong>프로젝트명:</strong> ${invoice.project}</p>
+            <p><strong>작업장 주소:</strong> ${invoice.workplaceAddress}</p>
+          `;
+        }
+        // PERSON
+        return `
+          <p><strong>구분:</strong> 개인</p>
+          <p><strong>성명:</strong> ${resolvedClient.name}</p>
+          ${resolvedClient.phone ? `<p><strong>연락처:</strong> ${resolvedClient.phone}</p>` : ''}
+          ${resolvedClient.email ? `<p><strong>이메일:</strong> ${resolvedClient.email}</p>` : ''}
+          <p><strong>주소:</strong> ${resolvedClient.address || '-'}</p>
+          <p><strong>프로젝트명:</strong> ${invoice.project}</p>
+          <p><strong>작업장 주소:</strong> ${invoice.workplaceAddress}</p>
+        `;
+      })();
+
       // Create comprehensive HTML content directly
       const htmlContent = `
         <!DOCTYPE html>
@@ -646,9 +686,7 @@ function Invoices() {
                 <div class="grid">
                   <div class="info-box">
                     <h4>🏢 발주자 정보</h4>
-                    <p><strong>건축주명:</strong> ${invoice.client}</p>
-                    <p><strong>프로젝트명:</strong> ${invoice.project}</p>
-                    <p><strong>작업장 주소:</strong> ${invoice.workplaceAddress}</p>
+                    ${clientInfoHTML}
                   </div>
                   
                   <div class="info-box">
@@ -1334,9 +1372,44 @@ function Invoices() {
                     발주자 정보
                   </h3>
                   <div style={{ backgroundColor: '#f3f4f6', padding: '12px', borderRadius: '8px' }}>
-                    <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>건축주명:</strong> {printInvoice.client}</p>
-                    <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>프로젝트명:</strong> {printInvoice.project}</p>
-                    <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>작업장 주소:</strong> {printInvoice.workplaceAddress}</p>
+                    {(() => {
+                      const c = clients.find(c => String(c.id) === String(printInvoice.clientId || '')) || clients.find(c => c.name === printInvoice.client);
+                      if (!c) {
+                        return (
+                          <>
+                            <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>건축주명:</strong> {printInvoice.client}</p>
+                            <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>프로젝트명:</strong> {printInvoice.project}</p>
+                            <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>작업장 주소:</strong> {printInvoice.workplaceAddress}</p>
+                          </>
+                        );
+                      }
+                      if (c.type === 'BUSINESS') {
+                        const b = c.business || {};
+                        return (
+                          <>
+                            <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>구분:</strong> 사업자</p>
+                            <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>상호:</strong> {b.businessName || c.name || '-'}</p>
+                            <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>대표자:</strong> {b.representative || '-'}</p>
+                            <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>사업자등록번호:</strong> {b.businessNumber || '-'}</p>
+                            <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>발행 이메일:</strong> {b.taxEmail || c.email || '-'}</p>
+                            <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>사업장 주소:</strong> {b.businessAddress || c.address || '-'}</p>
+                            <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>프로젝트명:</strong> {printInvoice.project}</p>
+                            <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>작업장 주소:</strong> {printInvoice.workplaceAddress}</p>
+                          </>
+                        );
+                      }
+                      return (
+                        <>
+                          <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>구분:</strong> 개인</p>
+                          <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>성명:</strong> {c.name}</p>
+                          {c.phone && <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>연락처:</strong> {c.phone}</p>}
+                          {c.email && <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>이메일:</strong> {c.email}</p>}
+                          <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>주소:</strong> {c.address || '-'}</p>
+                          <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>프로젝트명:</strong> {printInvoice.project}</p>
+                          <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>작업장 주소:</strong> {printInvoice.workplaceAddress}</p>
+                        </>
+                      );
+                    })()}
                   </div>
                 </div>
                 

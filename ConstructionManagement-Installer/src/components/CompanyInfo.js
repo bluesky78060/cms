@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../contexts/AppContext';
 import { checkStorageAvailable, getStorageInfo, imageToBase64, saveStampImage, removeStampImage } from '../utils/imageStorage';
 import { storage } from '../services/storage';
+import { formatPhoneNumber } from '../utils/phoneFormatter';
 
 function CompanyInfo() {
   const { companyInfo, setCompanyInfo, units, setUnits, categories, setCategories, stampImage, setStampImage } = useApp();
@@ -38,9 +39,13 @@ function CompanyInfo() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    
+    // 전화번호 필드인 경우 자동 포맷팅 적용
+    const formattedValue = name === 'phone' ? formatPhoneNumber(value) : value;
+    
     setEditForm(prev => ({
       ...prev,
-      [name]: value
+      [name]: formattedValue
     }));
   };
 

@@ -492,6 +492,8 @@ export const AppProvider = ({ children }) => {
       unit: workItem.unit,
       unitPrice: finalUnitPrice,
       total: (finalQuantity * finalUnitPrice) + laborCost,
+      laborPersons,
+      laborUnitRate,
       description: workItem.description,
       category: workItem.category,
       date: workItem.date || '',

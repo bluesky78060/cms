@@ -727,6 +727,7 @@ function Invoices() {
                           <td style="text-align: left;">
                             <strong>${item.name}</strong>
                             ${item.description ? `<div style="font-size: 12px; color: #6b7280; margin-top: 4px;">${item.description}</div>` : ''}
+                            ${(item.laborPersons && item.laborUnitRate) ? `<div style="font-size: 12px; color: #374151; margin-top: 2px;">인부: ${item.laborPersons}명 × ${Number(item.laborUnitRate).toLocaleString()}원 = ${(Number(item.laborPersons) * Number(item.laborUnitRate)).toLocaleString()}원</div>` : ''}
                           </td>
                           <td style="text-align: center;">${item.category || '-'}</td>
                           <td style="text-align: center;">${item.quantity}</td>

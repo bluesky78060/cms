@@ -634,6 +634,8 @@ const addBulkItem = () => {
         unit: item.unit,
         unitPrice: item.defaultPrice,
         total: ((item.defaultPrice || 0) * (item.quantity || 1)) + laborCost,
+        laborPersons: parseInt(item.laborPersons || 0, 10) || 0,
+        laborUnitRate: parseInt(item.laborUnitRate || 0, 10) || 0,
         description: item.description,
         category: item.category,
         date: item.date || '',

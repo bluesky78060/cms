@@ -144,11 +144,11 @@ export const UserProvider = ({ children }) => {
     isAdmin
   };
 
-  // 15분 무활동 자동 로그아웃
+  // 1시간 무활동 자동 로그아웃
   useEffect(() => {
     if (!isLoggedIn) return;
     let timerId;
-    const TIMEOUT = 15 * 60 * 1000;
+    const TIMEOUT = 60 * 60 * 1000;
     const reset = () => {
       clearTimeout(timerId);
       timerId = setTimeout(() => {

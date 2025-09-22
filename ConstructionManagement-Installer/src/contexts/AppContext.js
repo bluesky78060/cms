@@ -491,6 +491,7 @@ export const AppProvider = ({ children }) => {
       total: finalQuantity * finalUnitPrice,
       description: workItem.description,
       category: workItem.category,
+      worker: workItem.worker || '',
       notes: workItem.notes || ''
     };
   };

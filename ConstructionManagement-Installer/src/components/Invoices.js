@@ -141,7 +141,7 @@ function Invoices() {
     workplaceId: '',
     project: '',
     workplaceAddress: '',
-    workItems: [{ name: '', quantity: 1, unit: '', unitPrice: 0, total: 0, templateId: '', notes: '' }]
+    workItems: [{ name: '', quantity: 1, unit: '', unitPrice: 0, total: 0, templateId: '', worker: '', notes: '' }]
   });
 
   const componentRef = useRef();
@@ -225,7 +225,7 @@ function Invoices() {
   const addWorkItem = () => {
     setNewInvoice(prev => ({
       ...prev,
-      workItems: [...prev.workItems, { name: '', quantity: 1, unit: '', unitPrice: 0, total: 0, templateId: '', notes: '' }]
+      workItems: [...prev.workItems, { name: '', quantity: 1, unit: '', unitPrice: 0, total: 0, templateId: '', worker: '', notes: '' }]
     }));
   };
 
@@ -709,6 +709,7 @@ function Invoices() {
                     <thead>
                       <tr>
                         <th style="width: 50px;">연번</th>
+                        <th style="width: 90px;">작업자</th>
                         <th>내용</th>
                         <th style="width: 100px;">규격</th>
                         <th style="width: 80px;">수량</th>
@@ -722,6 +723,7 @@ function Invoices() {
                       ${invoice.workItems.map((item, index) => `
                         <tr>
                           <td style="text-align: center;">${index + 1}</td>
+                          <td style="text-align: center;">${item.worker || '-'}</td>
                           <td style="text-align: left;">
                             <strong>${item.name}</strong>
                             ${item.description ? `<div style="font-size: 12px; color: #6b7280; margin-top: 4px;">${item.description}</div>` : ''}
@@ -737,7 +739,7 @@ function Invoices() {
                     </tbody>
                     <tfoot>
                       <tr>
-                        <td colspan="7" style="text-align: right; font-size: 16px;">합계:</td>
+                        <td colspan="8" style="text-align: right; font-size: 16px;">합계:</td>
                         <td style="text-align: center; font-size: 16px; font-weight: 700;">
                           ${invoice.amount.toLocaleString()}원
                         </td>
@@ -1135,7 +1137,7 @@ function Invoices() {
                   <div className="space-y-3">
                     {newInvoice.workItems.map((item, index) => (
                       <div key={index} className="border border-gray-200 rounded-lg p-3 bg-gray-50">
-                        <div className="grid grid-cols-2 gap-3 mb-3">
+                        <div className="grid grid-cols-3 gap-3 mb-3">
                           <div>
                             <label className="block text-xs font-medium text-gray-600 mb-1">작업 템플릿 선택</label>
                             <select
@@ -1160,6 +1162,16 @@ function Invoices() {
                               onChange={(e) => updateWorkItem(index, 'name', e.target.value)}
                               className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
                               disabled={!!item.templateId}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">작업자</label>
+                            <input
+                              type="text"
+                              placeholder="예: 홍길동"
+                              value={item.worker || ''}
+                              onChange={(e) => updateWorkItem(index, 'worker', e.target.value)}
+                              className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
                             />
                           </div>
                         </div>
@@ -1459,9 +1471,8 @@ function Invoices() {
                   <table style={{ width: '100%', minWidth: '600px', borderCollapse: 'collapse', backgroundColor: '#fff', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)' }}>
                     <thead>
                       <tr style={{ backgroundColor: '#f9fafb' }}>
-                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', width: '40px', fontSize: '14px' }}>
-                          연번
-                        </th>
+                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', width: '40px', fontSize: '14px' }}>연번</th>
+                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', width: '80px', fontSize: '14px' }}>작업자</th>
                         <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', fontSize: '14px' }}>
                           내용
                         </th>
@@ -1489,6 +1500,7 @@ function Invoices() {
                       {printInvoice.workItems.map((item, index) => (
                         <tr key={index} style={{ ':hover': { backgroundColor: '#f1f5f9' } }}>
                           <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontSize: '14px' }}>{index + 1}</td>
+                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontSize: '14px' }}>{item.worker || '-'}</td>
                           <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'left', fontSize: '15px' }}>
                             <div>
                               <strong>{item.name}</strong>
@@ -1512,7 +1524,7 @@ function Invoices() {
                     </tbody>
                     <tfoot>
                       <tr style={{ backgroundColor: '#f0f0f0', fontWeight: 'bold', color: '#1f2937' }}>
-                        <td colSpan="7" style={{ padding: '15px 16px', border: '1px solid #e5e7eb', textAlign: 'right', fontSize: '17px' }}>
+                        <td colSpan="8" style={{ padding: '15px 16px', border: '1px solid #e5e7eb', textAlign: 'right', fontSize: '17px' }}>
                           합계:
                         </td>
                         <td style={{ padding: '15px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontSize: '17px', fontWeight: 'bold' }}>

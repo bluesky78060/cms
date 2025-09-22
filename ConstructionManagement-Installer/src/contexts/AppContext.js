@@ -485,7 +485,9 @@ export const AppProvider = ({ children }) => {
     const finalUnitPrice = unitPrice || workItem.defaultPrice;
     const laborPersons = parseInt(workItem.laborPersons || 0, 10) || 0;
     const laborUnitRate = parseInt(workItem.laborUnitRate || 0, 10) || 0;
-    const laborCost = laborPersons * laborUnitRate;
+    const laborPersonsGeneral = parseInt(workItem.laborPersonsGeneral || 0, 10) || 0;
+    const laborUnitRateGeneral = parseInt(workItem.laborUnitRateGeneral || 0, 10) || 0;
+    const laborCost = (laborPersons * laborUnitRate) + (laborPersonsGeneral * laborUnitRateGeneral);
     return {
       name: workItem.name,
       quantity: finalQuantity,
@@ -494,6 +496,8 @@ export const AppProvider = ({ children }) => {
       total: (finalQuantity * finalUnitPrice) + laborCost,
       laborPersons,
       laborUnitRate,
+      laborPersonsGeneral,
+      laborUnitRateGeneral,
       description: workItem.description,
       category: workItem.category,
       date: workItem.date || '',

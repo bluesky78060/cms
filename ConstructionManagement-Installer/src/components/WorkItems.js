@@ -234,11 +234,13 @@ function WorkItems() {
     return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
-  // 인부비 계산: 인원 × 단가 (둘 다 존재할 때만)
+  // 인부비 계산: (기술자 + 일반) 각각 인원 × 단가 합산
   const getLaborCost = (item) => {
-    const persons = parseInt(item?.laborPersons ?? 0, 10) || 0;
-    const rate = parseInt(item?.laborUnitRate ?? 0, 10) || 0;
-    return persons * rate;
+    const skilledPersons = parseInt(item?.laborPersons ?? 0, 10) || 0;
+    const skilledRate = parseInt(item?.laborUnitRate ?? 0, 10) || 0;
+    const generalPersons = parseInt(item?.laborPersonsGeneral ?? 0, 10) || 0;
+    const generalRate = parseInt(item?.laborUnitRateGeneral ?? 0, 10) || 0;
+    return (skilledPersons * skilledRate) + (generalPersons * generalRate);
   };
 
   // 콤마 제거하고 숫자만 추출
@@ -464,12 +466,12 @@ const addBulkItem = () => {
       workplaceName: selectedWorkplaceData?.name || '',
       projectName: bulkBaseInfo.projectName,
       date: bulkBaseInfo.date || new Date().toISOString().split('T')[0],
-      laborPersons: (item.laborPersons !== '' && item.laborPersons != null)
-        ? item.laborPersons
-        : (bulkBaseInfo.bulkLaborPersons !== '' && bulkBaseInfo.bulkLaborPersons != null ? bulkBaseInfo.bulkLaborPersons : ''),
-      laborUnitRate: (item.laborUnitRate !== '' && item.laborUnitRate != null)
-        ? item.laborUnitRate
-        : (bulkBaseInfo.bulkLaborUnitRate !== '' && bulkBaseInfo.bulkLaborUnitRate != null ? bulkBaseInfo.bulkLaborUnitRate : '')
+      // 공통 인부(일반)는 별도 필드로 저장하여 합산
+      laborPersonsGeneral: (bulkBaseInfo.bulkLaborPersons !== '' && bulkBaseInfo.bulkLaborPersons != null) ? bulkBaseInfo.bulkLaborPersons : '',
+      laborUnitRateGeneral: (bulkBaseInfo.bulkLaborUnitRate !== '' && bulkBaseInfo.bulkLaborUnitRate != null) ? bulkBaseInfo.bulkLaborUnitRate : '',
+      // 항목별 인부(기술자)는 기존 필드 유지
+      laborPersons: (item.laborPersons !== '' && item.laborPersons != null) ? item.laborPersons : '',
+      laborUnitRate: (item.laborUnitRate !== '' && item.laborUnitRate != null) ? item.laborUnitRate : ''
     }));
     
     setWorkItems(prev => [...prev, ...newItems]);
@@ -626,22 +628,7 @@ const addBulkItem = () => {
 
     // 새로운 청구서 생성
     const newInvoiceId = `INV-${new Date().getFullYear()}-${String(invoices.length + 1).padStart(3, '0')}`;
-    const workItemsForInvoice = unbilledItems.map(item => {
-      const laborCost = getLaborCost(item);
-      return {
-        name: item.name,
-        quantity: item.quantity || 1,
-        unit: item.unit,
-        unitPrice: item.defaultPrice,
-        total: ((item.defaultPrice || 0) * (item.quantity || 1)) + laborCost,
-        laborPersons: parseInt(item.laborPersons || 0, 10) || 0,
-        laborUnitRate: parseInt(item.laborUnitRate || 0, 10) || 0,
-        description: item.description,
-        category: item.category,
-        date: item.date || '',
-        notes: item.notes || ''
-      };
-    });
+    const workItemsForInvoice = unbilledItems.map(item => addWorkItemToInvoice(item));
     const totalAmount = workItemsForInvoice.reduce((sum, item) => sum + item.total, 0);
 
     const newInvoice = {
@@ -1553,10 +1540,10 @@ const addBulkItem = () => {
                       </div>
                     </div>
                   </div>
-                  {/* 공통 인부(선택) */}
+                  {/* 공통 인부(선택) - 일반 작업자 */}
                   <div className="grid grid-cols-4 gap-4 mt-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">공통 인부 인원(선택)</label>
+                      <label className="block text-sm font-medium text-gray-700">공통 인부 인원(일반·선택)</label>
                       <input
                         type="text"
                         name="bulkLaborPersons"
@@ -1567,7 +1554,7 @@ const addBulkItem = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">공통 인부 단가(선택)</label>
+                      <label className="block text-sm font-medium text-gray-700">공통 인부 단가(일반·선택)</label>
                       <input
                         type="text"
                         name="bulkLaborUnitRate"
@@ -1687,10 +1674,10 @@ const addBulkItem = () => {
                           </div>
                         </div>
 
-                        {/* 인부(선택) */}
+                        {/* 인부(선택) - 기술자 */}
                         <div className="grid grid-cols-2 gap-3 mb-3">
                           <div>
-                            <label className="block text-xs font-medium text-gray-600 mb-1">인부 인원(선택)</label>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">인부 인원(기술자·선택)</label>
                             <input
                               type="text"
                               value={item.laborPersons || ''}
@@ -1700,7 +1687,7 @@ const addBulkItem = () => {
                             />
                           </div>
                           <div>
-                            <label className="block text-xs font-medium text-gray-600 mb-1">인부 단가(선택)</label>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">인부 단가(기술자·선택)</label>
                             <input
                               type="text"
                               value={item.laborUnitRate ? formatNumberWithCommas(item.laborUnitRate) : ''}
@@ -1711,13 +1698,14 @@ const addBulkItem = () => {
                           </div>
                         </div>
 
-                        {/* 인부 합계 미리보기 */}
-                        {(getLaborCost(item) > 0 || (bulkBaseInfo.bulkLaborPersons && bulkBaseInfo.bulkLaborUnitRate)) && (
+                        {/* 인부 합계 미리보기 (일반 + 기술자) */}
+                        {(getLaborCost(item) > 0) && (
                           <div className="text-xs text-gray-600">
-                            인부비 소계: {(
-                              getLaborCost(item) ||
-                              ((parseInt(bulkBaseInfo.bulkLaborPersons || 0, 10) || 0) * (parseInt(bulkBaseInfo.bulkLaborUnitRate || 0, 10) || 0))
-                            ).toLocaleString()}원
+                            인부비 소계: {getLaborCost({
+                              ...item,
+                              laborPersonsGeneral: item.laborPersonsGeneral ?? bulkBaseInfo.bulkLaborPersons,
+                              laborUnitRateGeneral: item.laborUnitRateGeneral ?? bulkBaseInfo.bulkLaborUnitRate,
+                            }).toLocaleString()}원
                           </div>
                         )}
 

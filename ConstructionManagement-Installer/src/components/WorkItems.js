@@ -594,6 +594,7 @@ const addBulkItem = () => {
     const workItemsForInvoice = unbilledItems.map(item => ({
       name: item.name,
       quantity: item.quantity || 1,
+      unit: item.unit,
       unitPrice: item.defaultPrice,
       total: (item.defaultPrice || 0) * (item.quantity || 1),
       description: item.description,

@@ -486,6 +486,7 @@ export const AppProvider = ({ children }) => {
     return {
       name: workItem.name,
       quantity: finalQuantity,
+      unit: workItem.unit,
       unitPrice: finalUnitPrice,
       total: finalQuantity * finalUnitPrice,
       description: workItem.description,

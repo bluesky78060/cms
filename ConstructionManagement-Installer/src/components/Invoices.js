@@ -5,7 +5,7 @@ import { exportToExcel, importFromExcel, createTemplate } from '../utils/excelUt
 
 function Invoices() {
   // eslint-disable-next-line no-unused-vars
-  const { clients, invoices, setInvoices, companyInfo, workItems, stampImage } = useApp();
+  const { clients, invoices, setInvoices, companyInfo, workItems, stampImage, units } = useApp();
   const [selectedIds, setSelectedIds] = useState([]);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
 
@@ -141,7 +141,7 @@ function Invoices() {
     workplaceId: '',
     project: '',
     workplaceAddress: '',
-    workItems: [{ name: '', quantity: 1, unitPrice: 0, total: 0, templateId: '', notes: '' }]
+    workItems: [{ name: '', quantity: 1, unit: '', unitPrice: 0, total: 0, templateId: '', notes: '' }]
   });
 
   const componentRef = useRef();
@@ -225,7 +225,7 @@ function Invoices() {
   const addWorkItem = () => {
     setNewInvoice(prev => ({
       ...prev,
-      workItems: [...prev.workItems, { name: '', quantity: 1, unitPrice: 0, total: 0, templateId: '', notes: '' }]
+      workItems: [...prev.workItems, { name: '', quantity: 1, unit: '', unitPrice: 0, total: 0, templateId: '', notes: '' }]
     }));
   };
 
@@ -238,6 +238,7 @@ function Invoices() {
       if (template) {
         updatedItems[index].name = template.name;
         updatedItems[index].templateId = parseInt(value);
+        updatedItems[index].unit = template.unit || updatedItems[index].unit || '';
         // 단가는 자동 설정하지 않음 - 사용자가 직접 입력
         
         // 실제 workItems에서 해당 내용과 일치하는 항목의 notes 찾기
@@ -292,7 +293,7 @@ function Invoices() {
       workplaceId: '',
       project: '',
       workplaceAddress: '',
-      workItems: [{ name: '', quantity: 1, unitPrice: 0, total: 0, templateId: '', notes: '' }]
+      workItems: [{ name: '', quantity: 1, unit: '', unitPrice: 0, total: 0, templateId: '', notes: '' }]
     });
     setShowModal(false);
   };
@@ -727,9 +728,9 @@ function Invoices() {
                           </td>
                           <td style="text-align: center;">${item.category || '-'}</td>
                           <td style="text-align: center;">${item.quantity}</td>
-                          <td style="text-align: center;">식</td>
-                          <td style="text-align: right;">${Math.floor(item.unitPrice / item.quantity).toLocaleString()}원</td>
+                          <td style="text-align: center;">${item.unit || '-'}</td>
                           <td style="text-align: right;">${item.unitPrice.toLocaleString()}원</td>
+                          <td style="text-align: right;">${item.total.toLocaleString()}원</td>
                           <td style="text-align: left;">${item.notes || '-'}</td>
                         </tr>
                       `).join('')}
@@ -1162,7 +1163,7 @@ function Invoices() {
                             />
                           </div>
                         </div>
-                        <div className="grid grid-cols-3 gap-3">
+                        <div className="grid grid-cols-4 gap-3">
                           <div>
                             <label className="block text-xs font-medium text-gray-600 mb-1">수량</label>
                             <input
@@ -1173,6 +1174,20 @@ function Invoices() {
                               className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
                               required
                             />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">단위</label>
+                            <select
+                              value={item.unit || ''}
+                              onChange={(e) => updateWorkItem(index, 'unit', e.target.value)}
+                              className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                              required
+                            >
+                              <option value="">단위 선택</option>
+                              {(units || []).map(u => (
+                                <option key={u} value={u}>{u}</option>
+                              ))}
+                            </select>
                           </div>
                           <div>
                             <label className="block text-xs font-medium text-gray-600 mb-1">단가 (직접입력)</label>
@@ -1291,6 +1306,7 @@ function Invoices() {
                     <tr>
                       <th className="border px-3 py-2 text-left">내용</th>
                       <th className="border px-3 py-2 text-center">수량</th>
+                      <th className="border px-3 py-2 text-center">단위</th>
                       <th className="border px-3 py-2 text-right">단가</th>
                       <th className="border px-3 py-2 text-right">합계</th>
                       <th className="border px-3 py-2 text-left">비고</th>
@@ -1319,6 +1335,7 @@ function Invoices() {
                           </div>
                         </td>
                         <td className="border px-3 py-2 text-center">{item.quantity}</td>
+                        <td className="border px-3 py-2 text-center">{item.unit || '-'}</td>
                         <td className="border px-3 py-2 text-right">{item.unitPrice.toLocaleString()}원</td>
                         <td className="border px-3 py-2 text-right font-medium">{item.total.toLocaleString()}원</td>
                         <td className="border px-3 py-2 text-left text-sm align-top">
@@ -1329,7 +1346,7 @@ function Invoices() {
                   </tbody>
                   <tfoot>
                     <tr className="bg-gray-100">
-                      <td colSpan="4" className="border px-3 py-2 text-right font-bold">총 금액:</td>
+                      <td colSpan="5" className="border px-3 py-2 text-right font-bold">총 금액:</td>
                       <td className="border px-3 py-2 text-right font-bold text-lg">
                         {selectedInvoice.amount.toLocaleString()}원
                       </td>
@@ -1484,9 +1501,9 @@ function Invoices() {
                           </td>
                           <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontSize: '14px' }}>{item.category || '-'}</td>
                           <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontSize: '14px' }}>{item.quantity}</td>
-                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontSize: '14px' }}>식</td>
-                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'right', fontSize: '14px' }}>{Math.floor(item.unitPrice / item.quantity).toLocaleString()}원</td>
+                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontSize: '14px' }}>{item.unit || '-'}</td>
                           <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'right', fontSize: '14px' }}>{item.unitPrice.toLocaleString()}원</td>
+                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'right', fontSize: '14px' }}>{item.total.toLocaleString()}원</td>
                           <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'left', fontSize: '14px', verticalAlign: 'top' }}>
                             {item.notes || '-'}
                           </td>

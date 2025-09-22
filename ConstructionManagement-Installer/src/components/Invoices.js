@@ -141,7 +141,7 @@ function Invoices() {
     workplaceId: '',
     project: '',
     workplaceAddress: '',
-    workItems: [{ name: '', quantity: 1, unit: '', unitPrice: 0, total: 0, templateId: '', worker: '', notes: '' }]
+    workItems: [{ name: '', quantity: 1, unit: '', unitPrice: 0, total: 0, templateId: '', date: '', notes: '' }]
   });
 
   const componentRef = useRef();
@@ -225,7 +225,7 @@ function Invoices() {
   const addWorkItem = () => {
     setNewInvoice(prev => ({
       ...prev,
-      workItems: [...prev.workItems, { name: '', quantity: 1, unit: '', unitPrice: 0, total: 0, templateId: '', worker: '', notes: '' }]
+      workItems: [...prev.workItems, { name: '', quantity: 1, unit: '', unitPrice: 0, total: 0, templateId: '', date: '', notes: '' }]
     }));
   };
 
@@ -709,7 +709,7 @@ function Invoices() {
                     <thead>
                       <tr>
                         <th style="width: 50px;">연번</th>
-                        <th style="width: 90px;">작업자</th>
+                        <th style="width: 110px;">작업일자</th>
                         <th>내용</th>
                         <th style="width: 100px;">규격</th>
                         <th style="width: 80px;">수량</th>
@@ -723,7 +723,7 @@ function Invoices() {
                       ${invoice.workItems.map((item, index) => `
                         <tr>
                           <td style="text-align: center;">${index + 1}</td>
-                          <td style="text-align: center;">${item.worker || '-'}</td>
+                          <td style="text-align: center;">${item.date || '-'}</td>
                           <td style="text-align: left;">
                             <strong>${item.name}</strong>
                             ${item.description ? `<div style="font-size: 12px; color: #6b7280; margin-top: 4px;">${item.description}</div>` : ''}
@@ -1165,12 +1165,12 @@ function Invoices() {
                             />
                           </div>
                           <div>
-                            <label className="block text-xs font-medium text-gray-600 mb-1">작업자</label>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">작업일자</label>
                             <input
-                              type="text"
-                              placeholder="예: 홍길동"
-                              value={item.worker || ''}
-                              onChange={(e) => updateWorkItem(index, 'worker', e.target.value)}
+                              type="date"
+                              placeholder="YYYY-MM-DD"
+                              value={item.date || ''}
+                              onChange={(e) => updateWorkItem(index, 'date', e.target.value)}
                               className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
                             />
                           </div>
@@ -1472,7 +1472,7 @@ function Invoices() {
                     <thead>
                       <tr style={{ backgroundColor: '#f9fafb' }}>
                         <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', width: '40px', fontSize: '14px' }}>연번</th>
-                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', width: '80px', fontSize: '14px' }}>작업자</th>
+                        <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', width: '110px', fontSize: '14px' }}>작업일자</th>
                         <th style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontWeight: 'bold', color: '#1f2937', fontSize: '14px' }}>
                           내용
                         </th>
@@ -1500,7 +1500,7 @@ function Invoices() {
                       {printInvoice.workItems.map((item, index) => (
                         <tr key={index} style={{ ':hover': { backgroundColor: '#f1f5f9' } }}>
                           <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontSize: '14px' }}>{index + 1}</td>
-                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontSize: '14px' }}>{item.worker || '-'}</td>
+                          <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontSize: '14px' }}>{item.date || '-'}</td>
                           <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'left', fontSize: '15px' }}>
                             <div>
                               <strong>{item.name}</strong>

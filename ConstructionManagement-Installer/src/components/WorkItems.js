@@ -599,7 +599,7 @@ const addBulkItem = () => {
       total: (item.defaultPrice || 0) * (item.quantity || 1),
       description: item.description,
       category: item.category,
-      worker: item.worker || '',
+      date: item.date || '',
       notes: item.notes || ''
     }));
     const totalAmount = workItemsForInvoice.reduce((sum, item) => sum + item.total, 0);

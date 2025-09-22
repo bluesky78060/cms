@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../contexts/AppContext';
 import { useNavigate } from 'react-router-dom';
 import { exportToExcel, importFromExcel, createTemplate } from '../utils/excelUtils';
@@ -27,7 +27,8 @@ function WorkItems() {
     description: '',
     projectName: '',
     status: '예정',
-    notes: ''
+    notes: '',
+    date: new Date().toISOString().split('T')[0]
   });
 
   const [showCustomProject, setShowCustomProject] = useState(false);
@@ -49,13 +50,137 @@ function WorkItems() {
   const [bulkBaseInfo, setBulkBaseInfo] = useState({
     clientId: '',
     workplaceId: '',
-    projectName: ''
+    projectName: '',
+    date: new Date().toISOString().split('T')[0]
   });
 
   const [showBulkCustomProject, setShowBulkCustomProject] = useState(false);
 
   const statuses = ['예정', '진행중', '완료', '보류'];
   const [bulkStatus, setBulkStatus] = useState('');
+
+  // Calendar (single new item)
+  const calContainerRefSingle = useRef(null);
+  const calendarRefSingle = useRef(null);
+  const [calendarOpenSingle, setCalendarOpenSingle] = useState(false);
+  const [calendarMonthSingle, setCalendarMonthSingle] = useState(() => new Date());
+
+  useEffect(() => {
+    // Initialize month to selected date
+    if (newItem.date) {
+      const [y, m] = newItem.date.split('-').map(Number);
+      if (y && m) setCalendarMonthSingle(new Date(y, m - 1, 1));
+    }
+  }, [newItem.date]);
+
+  // Close single calendar when clicking outside
+  useEffect(() => {
+    const onDocClick = (e) => {
+      if (calContainerRefSingle.current && !calContainerRefSingle.current.contains(e.target)) {
+        setCalendarOpenSingle(false);
+      }
+    };
+    document.addEventListener('mousedown', onDocClick);
+    return () => document.removeEventListener('mousedown', onDocClick);
+  }, []);
+
+  const prevMonthSingle = () => setCalendarMonthSingle((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1));
+  const nextMonthSingle = () => setCalendarMonthSingle((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1));
+  const pad2 = (n) => String(n).padStart(2, '0');
+  const pickDateSingle = (day) => {
+    if (!day) return;
+    const y = calendarMonthSingle.getFullYear();
+    const m = calendarMonthSingle.getMonth() + 1;
+    const value = `${y}-${pad2(m)}-${pad2(day)}`;
+    setNewItem((prev) => ({ ...prev, date: value }));
+    setCalendarOpenSingle(false);
+  };
+  const renderCalendarRowsSingle = () => {
+    const first = new Date(calendarMonthSingle.getFullYear(), calendarMonthSingle.getMonth(), 1);
+    const startDay = first.getDay();
+    const days = new Date(calendarMonthSingle.getFullYear(), calendarMonthSingle.getMonth() + 1, 0).getDate();
+    const cells = [];
+    for (let i = 0; i < startDay; i++) cells.push(null);
+    for (let d = 1; d <= days; d++) cells.push(d);
+    const rows = [];
+    for (let i = 0; i < cells.length; i += 7) rows.push(cells.slice(i, i + 7));
+    return rows.map((row, idx) => (
+      <tr key={idx} className="text-center">
+        {row.map((d, i2) => {
+          const color = i2 === 0 ? 'text-red-600' : i2 === 6 ? 'text-blue-600' : '';
+          return (
+            <td
+              key={i2}
+              className={`px-2 py-1 ${color} ${d ? 'cursor-pointer hover:bg-gray-100 rounded' : ''}`}
+              onClick={() => pickDateSingle(d)}
+            >
+              {d || ''}
+            </td>
+          );
+        })}
+      </tr>
+    ));
+  };
+
+  // Calendar (bulk base info)
+  const calContainerRefBulk = useRef(null);
+  const calendarRefBulk = useRef(null);
+  const [calendarOpenBulk, setCalendarOpenBulk] = useState(false);
+  const [calendarMonthBulk, setCalendarMonthBulk] = useState(() => new Date());
+
+  useEffect(() => {
+    if (bulkBaseInfo.date) {
+      const [y, m] = bulkBaseInfo.date.split('-').map(Number);
+      if (y && m) setCalendarMonthBulk(new Date(y, m - 1, 1));
+    }
+  }, [bulkBaseInfo.date]);
+
+  useEffect(() => {
+    const onDocClick = (e) => {
+      if (calContainerRefBulk.current && !calContainerRefBulk.current.contains(e.target)) {
+        setCalendarOpenBulk(false);
+      }
+    };
+    document.addEventListener('mousedown', onDocClick);
+    return () => document.removeEventListener('mousedown', onDocClick);
+  }, []);
+
+  const prevMonthBulk = () => setCalendarMonthBulk((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1));
+  const nextMonthBulk = () => setCalendarMonthBulk((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1));
+  const pickDateBulk = (day) => {
+    if (!day) return;
+    const y = calendarMonthBulk.getFullYear();
+    const m = calendarMonthBulk.getMonth() + 1;
+    const value = `${y}-${pad2(m)}-${pad2(day)}`;
+    setBulkBaseInfo((prev) => ({ ...prev, date: value }));
+    setCalendarOpenBulk(false);
+  };
+  const renderCalendarRowsBulk = () => {
+    const first = new Date(calendarMonthBulk.getFullYear(), calendarMonthBulk.getMonth(), 1);
+    const startDay = first.getDay();
+    const days = new Date(calendarMonthBulk.getFullYear(), calendarMonthBulk.getMonth() + 1, 0).getDate();
+    const cells = [];
+    for (let i = 0; i < startDay; i++) cells.push(null);
+    for (let d = 1; d <= days; d++) cells.push(d);
+    const rows = [];
+    for (let i = 0; i < cells.length; i += 7) rows.push(cells.slice(i, i + 7));
+    return rows.map((row, idx) => (
+      <tr key={idx} className="text-center">
+        {row.map((d, i2) => {
+          const color = i2 === 0 ? 'text-red-600' : i2 === 6 ? 'text-blue-600' : '';
+          return (
+            <td
+              key={i2}
+              className={`px-2 py-1 ${color} ${d ? 'cursor-pointer hover:bg-gray-100 rounded' : ''}`}
+              onClick={() => pickDateBulk(d)}
+            >
+              {d || ''}
+            </td>
+          );
+        })}
+      </tr>
+    ));
+  };
 
   // 선택된 건축주의 프로젝트 목록 가져오기 (작업항목 + 건축주.projects + 작업장 설명 기반)
   const getClientProjects = (clientId) => {
@@ -202,7 +327,7 @@ function WorkItems() {
         id: Math.max(...workItems.map(i => i.id)) + 1,
         clientName: selectedClientData?.name || '',
         workplaceName: selectedWorkplaceData?.name || '',
-        date: new Date().toISOString().split('T')[0]
+        date: newItem.date || new Date().toISOString().split('T')[0]
       };
       setWorkItems(prev => [...prev, item]);
       // 클라이언트의 프로젝트 목록에 반영
@@ -229,7 +354,8 @@ function WorkItems() {
       description: '',
       projectName: '',
       status: '예정',
-      notes: ''
+      notes: '',
+      date: new Date().toISOString().split('T')[0]
     });
     setEditingItem(null);
     setShowModal(false);
@@ -314,7 +440,7 @@ const addBulkItem = () => {
       workplaceId: bulkBaseInfo.workplaceId,
       workplaceName: selectedWorkplaceData?.name || '',
       projectName: bulkBaseInfo.projectName,
-      date: new Date().toISOString().split('T')[0]
+      date: bulkBaseInfo.date || new Date().toISOString().split('T')[0]
     }));
     
     setWorkItems(prev => [...prev, ...newItems]);
@@ -340,7 +466,8 @@ const addBulkItem = () => {
     setBulkBaseInfo({
       clientId: '',
       workplaceId: '',
-      projectName: ''
+      projectName: '',
+      date: new Date().toISOString().split('T')[0]
     });
     setShowBulkModal(false);
     setShowBulkCustomProject(false);
@@ -363,7 +490,8 @@ const addBulkItem = () => {
       description: item.description,
       projectName: item.projectName,
       status: item.status,
-      notes: item.notes || ''
+      notes: item.notes || '',
+      date: item.date || new Date().toISOString().split('T')[0]
     });
     setEditingItem(item);
     setShowCustomProject(!isExistingProject);
@@ -1038,6 +1166,60 @@ const addBulkItem = () => {
                     </select>
                   </div>
                 </div>
+                {/* 작업일자 */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">작업일자</label>
+                  <div className="mt-1 relative inline-block" ref={calContainerRefSingle}>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        name="date"
+                        value={newItem.date || ''}
+                        onChange={handleInputChange}
+                        placeholder="YYYY-MM-DD"
+                        inputMode="numeric"
+                        className="block w-full border border-gray-300 rounded-md px-3 py-2"
+                        onFocus={() => setCalendarOpenSingle(true)}
+                        required
+                      />
+                      <button
+                        type="button"
+                        className="px-2 py-2 text-gray-600 hover:text-gray-800"
+                        onClick={() => setCalendarOpenSingle((v) => !v)}
+                        title="달력 열기"
+                      >
+                        📅
+                      </button>
+                    </div>
+                    {calendarOpenSingle && (
+                      <div
+                        ref={calendarRefSingle}
+                        className="absolute z-50 bg-white border border-gray-300 rounded-md shadow-lg mt-2 p-3"
+                        style={{ transform: 'scale(2)', transformOrigin: 'top left' }}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <button type="button" className="px-2 py-1 text-sm border rounded" onClick={prevMonthSingle}>◀</button>
+                          <div className="text-sm font-medium">
+                            {calendarMonthSingle.getFullYear()}년 {calendarMonthSingle.getMonth() + 1}월
+                          </div>
+                          <button type="button" className="px-2 py-1 text-sm border rounded" onClick={nextMonthSingle}>▶</button>
+                        </div>
+                        <table className="text-xs select-none">
+                          <thead>
+                            <tr className="text-center text-gray-600">
+                              {['일','월','화','수','목','금','토'].map((d, idx) => (
+                                <th key={d} className={`px-2 py-1 ${idx === 0 ? 'text-red-600' : idx === 6 ? 'text-blue-600' : ''}`}>{d}</th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {renderCalendarRowsSingle()}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700">내용</label>
@@ -1161,7 +1343,7 @@ const addBulkItem = () => {
                 {/* 공통 정보 */}
                 <div className="bg-blue-50 p-4 rounded-lg">
                   <h4 className="text-md font-medium text-gray-800 mb-3">공통 정보</h4>
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-4 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700">건축주</label>
                       <select
@@ -1236,6 +1418,59 @@ const addBulkItem = () => {
                           </button>
                         </div>
                       )}
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">작업일자</label>
+                      <div className="mt-1 relative inline-block" ref={calContainerRefBulk}>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            name="date"
+                            value={bulkBaseInfo.date || ''}
+                            onChange={handleBulkBaseInfoChange}
+                            placeholder="YYYY-MM-DD"
+                            inputMode="numeric"
+                            className="block w-full border border-gray-300 rounded-md px-3 py-2"
+                            onFocus={() => setCalendarOpenBulk(true)}
+                            required
+                          />
+                          <button
+                            type="button"
+                            className="px-2 py-2 text-gray-600 hover:text-gray-800"
+                            onClick={() => setCalendarOpenBulk((v) => !v)}
+                            title="달력 열기"
+                          >
+                            📅
+                          </button>
+                        </div>
+                        {calendarOpenBulk && (
+                          <div
+                            ref={calendarRefBulk}
+                            className="absolute z-50 bg-white border border-gray-300 rounded-md shadow-lg mt-2 p-3"
+                            style={{ transform: 'scale(2)', transformOrigin: 'top left' }}
+                          >
+                            <div className="flex items-center justify-between mb-2">
+                              <button type="button" className="px-2 py-1 text-sm border rounded" onClick={prevMonthBulk}>◀</button>
+                              <div className="text-sm font-medium">
+                                {calendarMonthBulk.getFullYear()}년 {calendarMonthBulk.getMonth() + 1}월
+                              </div>
+                              <button type="button" className="px-2 py-1 text-sm border rounded" onClick={nextMonthBulk}>▶</button>
+                            </div>
+                            <table className="text-xs select-none">
+                              <thead>
+                                <tr className="text-center text-gray-600">
+                                  {['일','월','화','수','목','금','토'].map((d, idx) => (
+                                    <th key={d} className={`px-2 py-1 ${idx === 0 ? 'text-red-600' : idx === 6 ? 'text-blue-600' : ''}`}>{d}</th>
+                                  ))}
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {renderCalendarRowsBulk()}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>

@@ -27,6 +27,17 @@ interface LaborData {
   hours: number;
   rate_type: 'daily' | 'hourly';
   unit_rate: number;
+  _rec?: {
+    recommended_rate: number;
+    rate_type: 'daily' | 'hourly';
+    sample_size: number;
+    historical_median?: number | null;
+    p25?: number | null;
+    p75?: number | null;
+    standard_reference?: number | null;
+    confidence: number;
+    notes: string[];
+  };
 }
 
 interface EquipmentData {
@@ -114,6 +125,44 @@ export default function WorkLogForm() {
     } catch (error) {
       console.error('Error saving work log:', error);
       alert('작업일지 저장 중 오류가 발생했습니다.');
+    }
+  };
+
+  const fetchLaborRecommendation = async (index: number) => {
+    const labor = laborEntries[index];
+    if (!labor.trade) {
+      alert('먼저 직종을 선택하세요.');
+      return;
+    }
+    try {
+      const pidRaw = watch('project_id') as unknown as string | number | undefined;
+      const pid = pidRaw ? Number(pidRaw) : undefined;
+      const params: Record<string, any> = {
+        trade: labor.trade,
+        rate_type: labor.rate_type,
+      };
+      if (pid && !Number.isNaN(pid)) params.project_id = pid;
+
+      const res = await api.get('/recommendations/labor', { params });
+      const rec = res.data as LaborData['_rec'];
+
+      const newLabor = [...laborEntries];
+      newLabor[index].unit_rate = Number(rec?.recommended_rate ?? newLabor[index].unit_rate);
+      newLabor[index]._rec = {
+        recommended_rate: Number(rec?.recommended_rate ?? 0),
+        rate_type: labor.rate_type,
+        sample_size: Number(rec?.sample_size ?? 0),
+        historical_median: rec?.historical_median ?? null,
+        p25: rec?.p25 ?? null,
+        p75: rec?.p75 ?? null,
+        standard_reference: rec?.standard_reference ?? null,
+        confidence: Number(rec?.confidence ?? 0),
+        notes: Array.isArray(rec?.notes) ? rec!.notes : [],
+      };
+      setLaborEntries(newLabor);
+    } catch (e) {
+      console.error(e);
+      alert('추천 단가 조회 중 오류가 발생했습니다.');
     }
   };
 
@@ -389,18 +438,37 @@ export default function WorkLogForm() {
                   </select>
                 </div>
 
-                <div>
+                <div className="sm:col-span-2 lg:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-2">단가</label>
-                  <input 
-                    type="number" 
-                    value={labor.unit_rate}
-                    onChange={(e) => {
-                      const newLabor = [...laborEntries];
-                      newLabor[index].unit_rate = Number(e.target.value);
-                      setLaborEntries(newLabor);
-                    }}
-                    className="input-field"
-                  />
+                  <div className="flex gap-2 items-center">
+                    <input 
+                      type="number" 
+                      value={labor.unit_rate}
+                      onChange={(e) => {
+                        const newLabor = [...laborEntries];
+                        newLabor[index].unit_rate = Number(e.target.value);
+                        setLaborEntries(newLabor);
+                      }}
+                      className="input-field flex-1"
+                    />
+                    <button 
+                      type="button" 
+                      className="btn-secondary whitespace-nowrap"
+                      onClick={() => fetchLaborRecommendation(index)}
+                    >
+                      추천 단가
+                    </button>
+                  </div>
+                  {labor._rec && (
+                    <div className="mt-2 text-xs text-gray-600">
+                      추천: ₩{labor._rec.recommended_rate.toLocaleString()} ({labor._rec.rate_type === 'daily' ? '일당' : '시급'}) · 샘플 {labor._rec.sample_size}건 · 신뢰도 {(labor._rec.confidence * 100).toFixed(0)}%
+                      {typeof labor._rec.standard_reference === 'number' && (
+                        <>
+                          {' '}· 표준 ₩{Number(labor._rec.standard_reference).toLocaleString()}
+                        </>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
               

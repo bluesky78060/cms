@@ -360,6 +360,13 @@ function Invoices() {
         `;
       })();
 
+      // Labor total (general + skilled)
+      const laborTotal = (invoice.workItems || []).reduce((sum, item) => {
+        const gen = (Number(item.laborPersonsGeneral) || 0) * (Number(item.laborUnitRateGeneral) || 0);
+        const sk = (Number(item.laborPersons) || 0) * (Number(item.laborUnitRate) || 0);
+        return sum + gen + sk;
+      }, 0);
+
       // Create comprehensive HTML content directly
       const htmlContent = `
         <!DOCTYPE html>
@@ -704,6 +711,12 @@ function Invoices() {
                 </div>
                 
                 <div class="section">
+                  <div class="info-box">
+                    <p><strong>인부임:</strong> ${laborTotal.toLocaleString()}원</p>
+                  </div>
+                </div>
+                
+                <div class="section">
                   <h3 class="section-title">📋 세부 작업 내역</h3>
                   <table class="work-table">
                     <thead>
@@ -727,8 +740,6 @@ function Invoices() {
                           <td style="text-align: left;">
                             <strong>${item.name}</strong>
                             ${item.description ? `<div style="font-size: 12px; color: #6b7280; margin-top: 4px;">${item.description}</div>` : ''}
-                            ${(item.laborPersonsGeneral && item.laborUnitRateGeneral) ? `<div style="font-size: 12px; color: #374151; margin-top: 2px;">인부(일반): ${item.laborPersonsGeneral}명 × ${Number(item.laborUnitRateGeneral).toLocaleString()}원 = ${(Number(item.laborPersonsGeneral) * Number(item.laborUnitRateGeneral)).toLocaleString()}원</div>` : ''}
-                            ${(item.laborPersons && item.laborUnitRate) ? `<div style="font-size: 12px; color: #374151; margin-top: 2px;">인부(기술자): ${item.laborPersons}명 × ${Number(item.laborUnitRate).toLocaleString()}원 = ${(Number(item.laborPersons) * Number(item.laborUnitRate)).toLocaleString()}원</div>` : ''}
                           </td>
                           <td style="text-align: center;">${item.category || '-'}</td>
                           <td style="text-align: center;">${item.quantity}</td>

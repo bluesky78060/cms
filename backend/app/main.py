@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .routers import clients, projects, work_logs, invoices
+from .routers import recommendations
 from .database import engine
 
 # 테이블은 이미 Supabase에서 생성되었으므로 create_all 제거
@@ -20,11 +21,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include routers (temporarily disabled due to model complexity)
+"""
+Note: some legacy routers are disabled below. The recommendations router is enabled
+to support labor-rate suggestions without affecting other endpoints.
+"""
+
 # app.include_router(clients.router, prefix="/api/clients", tags=["clients"])
 # app.include_router(projects.router, prefix="/api/projects", tags=["projects"])
 # app.include_router(work_logs.router, prefix="/api/work-logs", tags=["work-logs"])
 # app.include_router(invoices.router, prefix="/api/invoices", tags=["invoices"])
+
+# Enable the new recommendation endpoints
+app.include_router(recommendations.router, prefix="/api/recommendations", tags=["recommendations"])
 
 # Import additional routers (temporarily disabled due to missing dependencies)
 # from .routers import aggregation, pdf_export, reference

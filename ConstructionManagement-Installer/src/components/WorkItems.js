@@ -28,7 +28,10 @@ function WorkItems() {
     projectName: '',
     status: '예정',
     notes: '',
-    date: new Date().toISOString().split('T')[0]
+    date: new Date().toISOString().split('T')[0],
+    // 간단 인부: 인원 × 단가 (선택)
+    laborPersons: '',
+    laborUnitRate: ''
   });
 
   const [showCustomProject, setShowCustomProject] = useState(false);
@@ -43,7 +46,9 @@ function WorkItems() {
       unit: '',
       description: '',
       status: '예정',
-      notes: ''
+      notes: '',
+      laborPersons: '',
+      laborUnitRate: ''
     }
   ]);
 
@@ -51,7 +56,10 @@ function WorkItems() {
     clientId: '',
     workplaceId: '',
     projectName: '',
-    date: new Date().toISOString().split('T')[0]
+    date: new Date().toISOString().split('T')[0],
+    // 공통 인부(선택)
+    bulkLaborPersons: '',
+    bulkLaborUnitRate: ''
   });
 
   const [showBulkCustomProject, setShowBulkCustomProject] = useState(false);
@@ -226,6 +234,13 @@ function WorkItems() {
     return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
+  // 인부비 계산: 인원 × 단가 (둘 다 존재할 때만)
+  const getLaborCost = (item) => {
+    const persons = parseInt(item?.laborPersons ?? 0, 10) || 0;
+    const rate = parseInt(item?.laborUnitRate ?? 0, 10) || 0;
+    return persons * rate;
+  };
+
   // 콤마 제거하고 숫자만 추출
   // eslint-disable-next-line no-unused-vars
   const removeCommas = (str) => {
@@ -235,7 +250,7 @@ function WorkItems() {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     
-    if (name === 'defaultPrice' || name === 'quantity') {
+    if (name === 'defaultPrice' || name === 'quantity' || name === 'laborPersons' || name === 'laborUnitRate') {
       // 숫자만 추출하고 포맷팅
       const numbersOnly = value.replace(/[^\d]/g, '');
        // 입력값이 비어있으면 상태도 비워줍니다.
@@ -355,7 +370,9 @@ function WorkItems() {
       projectName: '',
       status: '예정',
       notes: '',
-      date: new Date().toISOString().split('T')[0]
+      date: new Date().toISOString().split('T')[0],
+      laborPersons: '',
+      laborUnitRate: ''
     });
     setEditingItem(null);
     setShowModal(false);
@@ -367,7 +384,11 @@ function WorkItems() {
     const { name, value } = e.target;
     setBulkBaseInfo(prev => ({
       ...prev,
-      [name]: name === 'clientId' || name === 'workplaceId' ? parseInt(value) || '' : value
+      [name]: (name === 'clientId' || name === 'workplaceId')
+        ? (parseInt(value) || '')
+        : (name === 'bulkLaborPersons' || name === 'bulkLaborUnitRate')
+          ? (value.replace(/[^\d]/g, '') === '' ? '' : parseInt(value.replace(/[^\d]/g, ''), 10))
+          : value
     }));
     
     if (name === 'clientId') {
@@ -388,8 +409,8 @@ function WorkItems() {
   const handleBulkItemChange = (index, field, value) => {
      const updatedItems = [...bulkItems];
    
-     // 'defaultPrice' 또는 'quantity' 필드를 처리하는 부분
-     if (field === 'defaultPrice' || field === 'quantity') {
+     // 숫자 필드 처리
+     if (field === 'defaultPrice' || field === 'quantity' || field === 'laborPersons' || field === 'laborUnitRate') {
        const numbersOnly = String(value).replace(/[^\d]/g,'');
       
        // 입력값이 비어있으면 상태도 비워줍니다.
@@ -422,7 +443,9 @@ const addBulkItem = () => {
           unit: '',
           description: '',
           status: '예정',
-          notes: ''
+          notes: '',
+          laborPersons: '',
+          laborUnitRate: ''
         }]);
       };
 
@@ -440,7 +463,13 @@ const addBulkItem = () => {
       workplaceId: bulkBaseInfo.workplaceId,
       workplaceName: selectedWorkplaceData?.name || '',
       projectName: bulkBaseInfo.projectName,
-      date: bulkBaseInfo.date || new Date().toISOString().split('T')[0]
+      date: bulkBaseInfo.date || new Date().toISOString().split('T')[0],
+      laborPersons: (item.laborPersons !== '' && item.laborPersons != null)
+        ? item.laborPersons
+        : (bulkBaseInfo.bulkLaborPersons !== '' && bulkBaseInfo.bulkLaborPersons != null ? bulkBaseInfo.bulkLaborPersons : ''),
+      laborUnitRate: (item.laborUnitRate !== '' && item.laborUnitRate != null)
+        ? item.laborUnitRate
+        : (bulkBaseInfo.bulkLaborUnitRate !== '' && bulkBaseInfo.bulkLaborUnitRate != null ? bulkBaseInfo.bulkLaborUnitRate : '')
     }));
     
     setWorkItems(prev => [...prev, ...newItems]);
@@ -461,13 +490,17 @@ const addBulkItem = () => {
       unit: '',
       description: '',
       status: '예정',
-      notes: ''
+      notes: '',
+      laborPersons: '',
+      laborUnitRate: ''
     }]);
     setBulkBaseInfo({
       clientId: '',
       workplaceId: '',
       projectName: '',
-      date: new Date().toISOString().split('T')[0]
+      date: new Date().toISOString().split('T')[0],
+      bulkLaborPersons: '',
+      bulkLaborUnitRate: ''
     });
     setShowBulkModal(false);
     setShowBulkCustomProject(false);
@@ -491,7 +524,9 @@ const addBulkItem = () => {
       projectName: item.projectName,
       status: item.status,
       notes: item.notes || '',
-      date: item.date || new Date().toISOString().split('T')[0]
+      date: item.date || new Date().toISOString().split('T')[0],
+      laborPersons: item.laborPersons || '',
+      laborUnitRate: item.laborUnitRate || ''
     });
     setEditingItem(item);
     setShowCustomProject(!isExistingProject);
@@ -919,7 +954,7 @@ const addBulkItem = () => {
             <div>
               <p className="text-sm font-medium text-gray-600 mb-1">총 작업 금액</p>
               <p className="text-xl font-bold text-orange-600">
-                {filteredWorkItems.reduce((sum, item) => sum + ((item.defaultPrice || 0) * (item.quantity || 1)), 0).toLocaleString()}원
+                {filteredWorkItems.reduce((sum, item) => sum + ((item.defaultPrice || 0) * (item.quantity || 1)) + getLaborCost(item), 0).toLocaleString()}원
               </p>
             </div>
             <div className="bg-orange-500 rounded-full p-3 text-white text-2xl">
@@ -1020,6 +1055,11 @@ const addBulkItem = () => {
                   <div className="text-xs text-gray-500">
                     = {((item.defaultPrice || 0) * (item.quantity || 1)).toLocaleString()}원 / {item.unit}
                   </div>
+                  {getLaborCost(item) > 0 && (
+                    <div className="text-xs text-gray-500">
+                      + 인부 {getLaborCost(item).toLocaleString()}원
+                    </div>
+                  )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
@@ -1299,6 +1339,36 @@ const addBulkItem = () => {
                     />
                   </div>
                 </div>
+                {/* 인부(선택) */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">인부 인원(선택)</label>
+                    <input
+                      type="text"
+                      name="laborPersons"
+                      value={newItem.laborPersons || ''}
+                      onChange={handleInputChange}
+                      placeholder="예: 2"
+                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">인부 단가(선택)</label>
+                    <input
+                      type="text"
+                      name="laborUnitRate"
+                      value={newItem.laborUnitRate ? formatNumberWithCommas(newItem.laborUnitRate) : ''}
+                      onChange={handleInputChange}
+                      placeholder="예: 200,000"
+                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                    />
+                  </div>
+                </div>
+                {(getLaborCost(newItem) > 0) && (
+                  <div className="text-sm text-gray-600">
+                    인부비 소계: {getLaborCost(newItem).toLocaleString()}원
+                  </div>
+                )}
                 <div>
                   <label className="block text-sm font-medium text-gray-700">상태</label>
                   <select
@@ -1475,6 +1545,31 @@ const addBulkItem = () => {
                       </div>
                     </div>
                   </div>
+                  {/* 공통 인부(선택) */}
+                  <div className="grid grid-cols-4 gap-4 mt-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">공통 인부 인원(선택)</label>
+                      <input
+                        type="text"
+                        name="bulkLaborPersons"
+                        value={bulkBaseInfo.bulkLaborPersons || ''}
+                        onChange={handleBulkBaseInfoChange}
+                        placeholder="예: 2"
+                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">공통 인부 단가(선택)</label>
+                      <input
+                        type="text"
+                        name="bulkLaborUnitRate"
+                        value={bulkBaseInfo.bulkLaborUnitRate ? formatNumberWithCommas(bulkBaseInfo.bulkLaborUnitRate) : ''}
+                        onChange={handleBulkBaseInfoChange}
+                        placeholder="예: 200,000"
+                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 {/* 작업 항목들 */}
@@ -1583,6 +1678,40 @@ const addBulkItem = () => {
                             </select>
                           </div>
                         </div>
+
+                        {/* 인부(선택) */}
+                        <div className="grid grid-cols-2 gap-3 mb-3">
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">인부 인원(선택)</label>
+                            <input
+                              type="text"
+                              value={item.laborPersons || ''}
+                              onChange={(e) => handleBulkItemChange(index, 'laborPersons', e.target.value)}
+                              placeholder="예: 2"
+                              className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">인부 단가(선택)</label>
+                            <input
+                              type="text"
+                              value={item.laborUnitRate ? formatNumberWithCommas(item.laborUnitRate) : ''}
+                              onChange={(e) => handleBulkItemChange(index, 'laborUnitRate', e.target.value)}
+                              placeholder="예: 200,000"
+                              className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+                            />
+                          </div>
+                        </div>
+
+                        {/* 인부 합계 미리보기 */}
+                        {(getLaborCost(item) > 0 || (bulkBaseInfo.bulkLaborPersons && bulkBaseInfo.bulkLaborUnitRate)) && (
+                          <div className="text-xs text-gray-600">
+                            인부비 소계: {(
+                              getLaborCost(item) ||
+                              ((parseInt(bulkBaseInfo.bulkLaborPersons || 0, 10) || 0) * (parseInt(bulkBaseInfo.bulkLaborUnitRate || 0, 10) || 0))
+                            ).toLocaleString()}원
+                          </div>
+                        )}
 
                         <div className="grid grid-cols-1 gap-3">
                           <div>

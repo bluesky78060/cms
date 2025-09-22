@@ -49,6 +49,10 @@ export const exportToExcel = {
       '수량': item.quantity || 1,
       '단위': item.unit,
       '총금액': (item.defaultPrice || 0) * (item.quantity || 1),
+      '인부인원': item.laborPersons || '',
+      '인부단가': item.laborUnitRate || '',
+      '인부비': ((parseInt(item.laborPersons || 0, 10) || 0) * (parseInt(item.laborUnitRate || 0, 10) || 0)),
+      '총금액(인부포함)': ((item.defaultPrice || 0) * (item.quantity || 1)) + ((parseInt(item.laborPersons || 0, 10) || 0) * (parseInt(item.laborUnitRate || 0, 10) || 0)),
       '세부작업': item.description,
       '상태': item.status,
       '날짜': item.date,
@@ -70,6 +74,10 @@ export const exportToExcel = {
       { width: 8 },   // 수량
       { width: 8 },   // 단위
       { width: 15 },  // 총금액
+      { width: 10 },  // 인부인원
+      { width: 15 },  // 인부단가
+      { width: 15 },  // 인부비
+      { width: 18 },  // 총금액(인부포함)
       { width: 30 },  // 세부작업
       { width: 10 },  // 상태
       { width: 12 },  // 날짜
@@ -305,7 +313,10 @@ export const importFromExcel = {
             description: row['세부작업'] || '',
             status: row['상태'] || '예정',
             date: row['날짜'] || new Date().toISOString().split('T')[0],
-            notes: row['비고'] || ''
+            notes: row['비고'] || '',
+            // 인부 필드: 한국어/영문 키 모두 허용
+            laborPersons: row['인부인원'] ?? row['LaborPersons'] ?? '',
+            laborUnitRate: row['인부단가'] ?? row['LaborUnitRate'] ?? ''
           }));
           
           resolve(workItems);
@@ -404,6 +415,10 @@ export const createTemplate = {
         '수량': 1,
         '단위': '식',
         '총금액': 3000000,
+        '인부인원': 2,
+        '인부단가': 200000,
+        '인부비': 400000, // (참고) 계산용, 가져오기시 무시됨
+        '총금액(인부포함)': 3400000, // (참고)
         '세부작업': '건물 기초 및 지반 작업',
         '상태': '완료',
         '날짜': '2024-09-01',
@@ -428,6 +443,10 @@ export const createTemplate = {
       { width: 8 },   // 수량
       { width: 8 },   // 단위
       { width: 15 },  // 총금액
+      { width: 10 },  // 인부인원
+      { width: 15 },  // 인부단가
+      { width: 15 },  // 인부비
+      { width: 18 },  // 총금액(인부포함)
       { width: 30 },  // 세부작업
       { width: 10 },  // 상태
       { width: 12 },  // 날짜

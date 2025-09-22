@@ -626,17 +626,20 @@ const addBulkItem = () => {
 
     // 새로운 청구서 생성
     const newInvoiceId = `INV-${new Date().getFullYear()}-${String(invoices.length + 1).padStart(3, '0')}`;
-    const workItemsForInvoice = unbilledItems.map(item => ({
-      name: item.name,
-      quantity: item.quantity || 1,
-      unit: item.unit,
-      unitPrice: item.defaultPrice,
-      total: (item.defaultPrice || 0) * (item.quantity || 1),
-      description: item.description,
-      category: item.category,
-      date: item.date || '',
-      notes: item.notes || ''
-    }));
+    const workItemsForInvoice = unbilledItems.map(item => {
+      const laborCost = getLaborCost(item);
+      return {
+        name: item.name,
+        quantity: item.quantity || 1,
+        unit: item.unit,
+        unitPrice: item.defaultPrice,
+        total: ((item.defaultPrice || 0) * (item.quantity || 1)) + laborCost,
+        description: item.description,
+        category: item.category,
+        date: item.date || '',
+        notes: item.notes || ''
+      };
+    });
     const totalAmount = workItemsForInvoice.reduce((sum, item) => sum + item.total, 0);
 
     const newInvoice = {
@@ -1060,6 +1063,9 @@ const addBulkItem = () => {
                       + 인부 {getLaborCost(item).toLocaleString()}원
                     </div>
                   )}
+                  <div className="text-xs text-gray-700 font-medium">
+                    합계(인부포함): {(((item.defaultPrice || 0) * (item.quantity || 1)) + getLaborCost(item)).toLocaleString()}원
+                  </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${

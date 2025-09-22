@@ -483,12 +483,15 @@ export const AppProvider = ({ children }) => {
   const addWorkItemToInvoice = (workItem, quantity = null, unitPrice = null) => {
     const finalQuantity = quantity !== null ? quantity : (workItem.quantity || 1);
     const finalUnitPrice = unitPrice || workItem.defaultPrice;
+    const laborPersons = parseInt(workItem.laborPersons || 0, 10) || 0;
+    const laborUnitRate = parseInt(workItem.laborUnitRate || 0, 10) || 0;
+    const laborCost = laborPersons * laborUnitRate;
     return {
       name: workItem.name,
       quantity: finalQuantity,
       unit: workItem.unit,
       unitPrice: finalUnitPrice,
-      total: finalQuantity * finalUnitPrice,
+      total: (finalQuantity * finalUnitPrice) + laborCost,
       description: workItem.description,
       category: workItem.category,
       date: workItem.date || '',

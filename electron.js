@@ -1,6 +1,61 @@
-const { app, BrowserWindow, Menu } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain, dialog } = require('electron');
 const path = require('path');
 const isDev = require('electron-is-dev');
+const fs = require('fs');
+
+// Base data directory (can be overridden later)
+let baseDataDir = path.join(app.getPath('userData'), 'cms-data');
+
+function ensureDir(dir) {
+  try {
+    fs.mkdirSync(dir, { recursive: true });
+  } catch (e) {}
+}
+
+function getKeyPath(key) {
+  ensureDir(baseDataDir);
+  // Simple filename from key (expected safe)
+  return path.join(baseDataDir, `${key}.json`);
+}
+
+function readLegacyStore() {
+  const legacy = path.join(baseDataDir, 'store.json');
+  try {
+    if (!fs.existsSync(legacy)) return null;
+    const text = fs.readFileSync(legacy, 'utf-8');
+    return JSON.parse(text || '{}');
+  } catch (e) {
+    return null;
+  }
+}
+
+function readKeySync(key) {
+  try {
+    const p = getKeyPath(key);
+    if (fs.existsSync(p)) {
+      const text = fs.readFileSync(p, 'utf-8');
+      return text ? JSON.parse(text) : null;
+    }
+    // Fallback: legacy store.json
+    const legacy = readLegacyStore();
+    if (legacy && Object.prototype.hasOwnProperty.call(legacy, key)) {
+      return legacy[key];
+    }
+    return null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function writeKeySync(key, value) {
+  try {
+    const p = getKeyPath(key);
+    fs.writeFileSync(p, JSON.stringify(value, null, 2), 'utf-8');
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
 
 function createWindow() {
   // 메인 윈도우 생성
@@ -12,7 +67,8 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      enableRemoteModule: false
+      enableRemoteModule: false,
+      preload: path.join(__dirname, 'preload.js')
     },
     icon: path.join(__dirname, 'favicon.ico'), // 아이콘 설정
     title: '건설 청구서 관리 시스템',
@@ -148,4 +204,38 @@ app.on('web-contents-created', (event, contents) => {
   contents.on('new-window', (navigationEvent, navigationUrl) => {
     navigationEvent.preventDefault();
   });
+});
+
+// IPC handlers for storage
+ipcMain.on('cms:storage-get-sync', (event, key) => {
+  event.returnValue = readKeySync(key);
+});
+
+ipcMain.on('cms:storage-set', (event, key, value) => {
+  writeKeySync(key, value);
+});
+
+ipcMain.handle('cms:get-base-dir', async () => baseDataDir);
+ipcMain.handle('cms:choose-base-dir', async () => {
+  const res = await dialog.showOpenDialog({ properties: ['openDirectory', 'createDirectory'] });
+  if (res.canceled || !res.filePaths || res.filePaths.length === 0) return baseDataDir;
+  baseDataDir = res.filePaths[0];
+  return baseDataDir;
+});
+
+// Write XLSX (Uint8Array) to base dir as filename, using atomic replace
+ipcMain.handle('cms:xlsx-write', async (_evt, filename, uint8) => {
+  try {
+    ensureDir(baseDataDir);
+    const safeName = typeof filename === 'string' && filename.trim() ? filename.trim() : 'latest.xlsx';
+    const target = path.join(baseDataDir, safeName);
+    const tmp = target + '.tmp';
+    const buf = Buffer.from(uint8);
+    fs.writeFileSync(tmp, buf);
+    fs.renameSync(tmp, target);
+    return true;
+  } catch (e) {
+    try { /* cleanup tmp if exists */ } catch (_) {}
+    return false;
+  }
 });

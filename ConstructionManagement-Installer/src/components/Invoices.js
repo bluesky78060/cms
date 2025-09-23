@@ -740,6 +740,20 @@ function Invoices() {
                           <td style="text-align: left;">
                             <strong>${item.name}</strong>
                             ${item.description ? `<div style="font-size: 12px; color: #6b7280; margin-top: 4px;">${item.description}</div>` : ''}
+                            ${(() => {
+                              const gen = (Number(item.laborPersonsGeneral) || 0) * (Number(item.laborUnitRateGeneral) || 0);
+                              const sk = (Number(item.laborPersons) || 0) * (Number(item.laborUnitRate) || 0);
+                              const laborTotal = gen + sk;
+                              
+                              if (laborTotal > 0) {
+                                const laborParts = [];
+                                if (gen > 0) laborParts.push(`일반: ${Number(item.laborPersonsGeneral)}명 × ${Number(item.laborUnitRateGeneral).toLocaleString()}원`);
+                                if (sk > 0) laborParts.push(`숙련: ${Number(item.laborPersons)}명 × ${Number(item.laborUnitRate).toLocaleString()}원`);
+                                
+                                return `<div style="font-size: 12px; color: #2563eb; margin-top: 4px; font-weight: 500;">인부임: ${laborParts.join(', ')} = ${laborTotal.toLocaleString()}원</div>`;
+                              }
+                              return '';
+                            })()}
                           </td>
                           <td style="text-align: center;">${item.category || '-'}</td>
                           <td style="text-align: center;">${item.quantity}</td>

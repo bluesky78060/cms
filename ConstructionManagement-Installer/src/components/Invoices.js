@@ -1370,6 +1370,25 @@ function Invoices() {
                     ))}
                   </tbody>
                   <tfoot>
+                    {(() => {
+                      const laborTotal = (selectedInvoice.workItems || []).reduce((sum, item) => {
+                        const gen = (Number(item.laborPersonsGeneral) || 0) * (Number(item.laborUnitRateGeneral) || 0);
+                        const sk = (Number(item.laborPersons) || 0) * (Number(item.laborUnitRate) || 0);
+                        return sum + gen + sk;
+                      }, 0);
+                      
+                      if (laborTotal > 0) {
+                        return (
+                          <tr className="bg-blue-50">
+                            <td colSpan="5" className="border px-3 py-2 text-right font-medium text-blue-800">인부임 소계:</td>
+                            <td className="border px-3 py-2 text-right font-medium text-blue-800">
+                              {laborTotal.toLocaleString()}원
+                            </td>
+                          </tr>
+                        );
+                      }
+                      return null;
+                    })()}
                     <tr className="bg-gray-100">
                       <td colSpan="5" className="border px-3 py-2 text-right font-bold">총 금액:</td>
                       <td className="border px-3 py-2 text-right font-bold text-lg">
@@ -1536,6 +1555,27 @@ function Invoices() {
                       ))}
                     </tbody>
                     <tfoot>
+                      {(() => {
+                        const laborTotal = (printInvoice.workItems || []).reduce((sum, item) => {
+                          const gen = (Number(item.laborPersonsGeneral) || 0) * (Number(item.laborUnitRateGeneral) || 0);
+                          const sk = (Number(item.laborPersons) || 0) * (Number(item.laborUnitRate) || 0);
+                          return sum + gen + sk;
+                        }, 0);
+                        
+                        if (laborTotal > 0) {
+                          return (
+                            <tr style={{ backgroundColor: '#dbeafe', color: '#1e3a8a' }}>
+                              <td colSpan="8" style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'right', fontSize: '16px', fontWeight: '600' }}>
+                                인부임 소계:
+                              </td>
+                              <td style={{ padding: '12px 16px', border: '1px solid #e5e7eb', textAlign: 'center', fontSize: '16px', fontWeight: '600' }}>
+                                {laborTotal.toLocaleString()}원
+                              </td>
+                            </tr>
+                          );
+                        }
+                        return null;
+                      })()}
                       <tr style={{ backgroundColor: '#f0f0f0', fontWeight: 'bold', color: '#1f2937' }}>
                         <td colSpan="8" style={{ padding: '15px 16px', border: '1px solid #e5e7eb', textAlign: 'right', fontSize: '17px' }}>
                           합계:

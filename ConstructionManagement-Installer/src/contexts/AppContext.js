@@ -543,7 +543,22 @@ export const AppProvider = ({ children }) => {
   }, [workItems]);
 
   useEffect(() => {
-    const cleanedInvoices = cleanInvoiceData(invoices);
+    // Inline clean to avoid extra hook dependencies
+    const cleanedInvoices = Array.isArray(invoices)
+      ? invoices.map((invoice) => ({
+          ...invoice,
+          workItems: (invoice.workItems || []).filter((item) => {
+            const name = (item?.name || '').toString();
+            return (
+              !name.includes('일반: 일반') &&
+              !name.includes('숙련: 숙련') &&
+              !name.includes('인부임:') &&
+              !name.includes('일반 인부') &&
+              !name.includes('숙련 인부')
+            );
+          }),
+        }))
+      : invoices;
     saveToStorage(STORAGE_KEYS.INVOICES, cleanedInvoices);
   }, [invoices]);
 

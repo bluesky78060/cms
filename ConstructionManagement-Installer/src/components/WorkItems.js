@@ -531,7 +531,9 @@ const addBulkItem = () => {
       notes: item.notes || '',
       date: item.date || new Date().toISOString().split('T')[0],
       laborPersons: item.laborPersons || '',
-      laborUnitRate: item.laborUnitRate || ''
+      laborUnitRate: item.laborUnitRate || '',
+      laborPersonsGeneral: item.laborPersonsGeneral || '',
+      laborUnitRateGeneral: item.laborUnitRateGeneral || ''
     });
     setEditingItem(item);
     setShowCustomProject(!isExistingProject);

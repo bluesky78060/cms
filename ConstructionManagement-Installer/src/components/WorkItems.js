@@ -31,7 +31,10 @@ function WorkItems() {
     date: new Date().toISOString().split('T')[0],
     // 간단 인부: 인원 × 단가 (선택)
     laborPersons: '',
-    laborUnitRate: ''
+    laborUnitRate: '',
+    // 일반 인부: 인원 × 단가 (선택)
+    laborPersonsGeneral: '',
+    laborUnitRateGeneral: ''
   });
 
   const [showCustomProject, setShowCustomProject] = useState(false);
@@ -252,7 +255,7 @@ function WorkItems() {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     
-    if (name === 'defaultPrice' || name === 'quantity' || name === 'laborPersons' || name === 'laborUnitRate') {
+    if (name === 'defaultPrice' || name === 'quantity' || name === 'laborPersons' || name === 'laborUnitRate' || name === 'laborPersonsGeneral' || name === 'laborUnitRateGeneral') {
       // 숫자만 추출하고 포맷팅
       const numbersOnly = value.replace(/[^\d]/g, '');
        // 입력값이 비어있으면 상태도 비워줍니다.
@@ -1335,26 +1338,50 @@ const addBulkItem = () => {
                   </div>
                 </div>
                 {/* 인부(선택) */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-4 mb-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">인부 인원(선택)</label>
+                    <label className="block text-sm font-medium text-gray-700">일반 인부 인원(선택)</label>
                     <input
                       type="text"
-                      name="laborPersons"
-                      value={newItem.laborPersons || ''}
+                      name="laborPersonsGeneral"
+                      value={newItem.laborPersonsGeneral || ''}
                       onChange={handleInputChange}
                       placeholder="예: 2"
                       className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">인부 단가(선택)</label>
+                    <label className="block text-sm font-medium text-gray-700">일반 인부 단가(선택)</label>
+                    <input
+                      type="text"
+                      name="laborUnitRateGeneral"
+                      value={newItem.laborUnitRateGeneral ? formatNumberWithCommas(newItem.laborUnitRateGeneral) : ''}
+                      onChange={handleInputChange}
+                      placeholder="예: 200,000"
+                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">숙련 인부 인원(선택)</label>
+                    <input
+                      type="text"
+                      name="laborPersons"
+                      value={newItem.laborPersons || ''}
+                      onChange={handleInputChange}
+                      placeholder="예: 1"
+                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">숙련 인부 단가(선택)</label>
                     <input
                       type="text"
                       name="laborUnitRate"
                       value={newItem.laborUnitRate ? formatNumberWithCommas(newItem.laborUnitRate) : ''}
                       onChange={handleInputChange}
-                      placeholder="예: 200,000"
+                      placeholder="예: 300,000"
                       className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
                     />
                   </div>

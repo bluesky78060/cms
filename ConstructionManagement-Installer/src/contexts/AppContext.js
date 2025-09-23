@@ -350,10 +350,34 @@ export const AppProvider = ({ children }) => {
     }
   ];
 
+  // 인부임 별도 항목을 필터링하는 함수
+  const filterLaborItems = (workItems) => {
+    if (!Array.isArray(workItems)) return workItems;
+    return workItems.filter(item => {
+      // 인부임 관련 별도 항목 제거
+      const name = item.name || '';
+      return !name.includes('일반: 일반') && 
+             !name.includes('숙련: 숙련') && 
+             !name.includes('인부임:') &&
+             !name.includes('일반 인부') &&
+             !name.includes('숙련 인부');
+    });
+  };
+
+  // 청구서 데이터 정리 함수
+  const cleanInvoiceData = (invoices) => {
+    if (!Array.isArray(invoices)) return invoices;
+    return invoices.map(invoice => ({
+      ...invoice,
+      workItems: filterLaborItems(invoice.workItems || [])
+    }));
+  };
+
   // 청구서 데이터
-  const [invoices, setInvoices] = useState(() => 
-    loadFromStorage(STORAGE_KEYS.INVOICES, defaultInvoices)
-  );
+  const [invoices, setInvoices] = useState(() => {
+    const loadedInvoices = loadFromStorage(STORAGE_KEYS.INVOICES, defaultInvoices);
+    return cleanInvoiceData(loadedInvoices);
+  });
 
   const defaultEstimates = [
     {
@@ -519,7 +543,8 @@ export const AppProvider = ({ children }) => {
   }, [workItems]);
 
   useEffect(() => {
-    saveToStorage(STORAGE_KEYS.INVOICES, invoices);
+    const cleanedInvoices = cleanInvoiceData(invoices);
+    saveToStorage(STORAGE_KEYS.INVOICES, cleanedInvoices);
   }, [invoices]);
 
   useEffect(() => {

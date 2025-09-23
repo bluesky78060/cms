@@ -360,13 +360,6 @@ function Invoices() {
         `;
       })();
 
-      // Labor total (general + skilled)
-      const laborTotal = (invoice.workItems || []).reduce((sum, item) => {
-        const gen = (Number(item.laborPersonsGeneral) || 0) * (Number(item.laborUnitRateGeneral) || 0);
-        const sk = (Number(item.laborPersons) || 0) * (Number(item.laborUnitRate) || 0);
-        return sum + gen + sk;
-      }, 0);
-
       // Create comprehensive HTML content directly
       const htmlContent = `
         <!DOCTYPE html>
@@ -710,11 +703,6 @@ function Invoices() {
                   <p>총 청구금액 : 금 ${numberToKorean(invoice.amount)} 원정</p>
                 </div>
                 
-                <div class="section">
-                  <div class="info-box">
-                    <p><strong>인부임:</strong> ${laborTotal.toLocaleString()}원</p>
-                  </div>
-                </div>
                 
                 <div class="section">
                   <h3 class="section-title">📋 세부 작업 내역</h3>
